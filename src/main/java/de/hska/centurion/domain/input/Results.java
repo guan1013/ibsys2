@@ -4,6 +4,12 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import de.hska.centurion.domain.input.categories.FutureInwardStockMovement;
+import de.hska.centurion.domain.input.categories.IdleTimeCosts;
+import de.hska.centurion.domain.input.categories.InwardStockMovement;
+import de.hska.centurion.domain.input.categories.WaitingListWorkstations;
+import de.hska.centurion.domain.input.categories.WarehouseStock;
+
 @XmlRootElement
 public class Results {
 
@@ -15,7 +21,32 @@ public class Results {
 
 	private WarehouseStock warehousestock;
 
-	private InwardStockMovement inwardstockmovement;
+	private InwardStockMovement inwardStockMovement;
+
+	private FutureInwardStockMovement futureInwardStockMovement;
+	
+	private IdleTimeCosts idleTimeCosts;
+	
+	private WaitingListWorkstations waitingListWorkstations;
+		
+	@XmlElement(name = "waitinglistworkstations")
+	public WaitingListWorkstations getWaitingListWorkstations() {
+		return waitingListWorkstations;
+	}
+
+	public void setWaitingListWorkstations(
+			WaitingListWorkstations waitingListWorkstations) {
+		this.waitingListWorkstations = waitingListWorkstations;
+	}
+
+	@XmlElement(name = "idletimecosts")
+	public IdleTimeCosts getIdleTimeCosts() {
+		return idleTimeCosts;
+	}
+
+	public void setIdleTimeCosts(IdleTimeCosts idleTimeCosts) {
+		this.idleTimeCosts = idleTimeCosts;
+	}
 
 	public WarehouseStock getWarehousestock() {
 		return warehousestock;
@@ -25,13 +56,23 @@ public class Results {
 		this.warehousestock = warehousestock;
 	}
 
-	@XmlElement
-	public InwardStockMovement getInwardstockmovement() {
-		return inwardstockmovement;
+	@XmlElement(name = "futureinwardstockmovement")
+	public FutureInwardStockMovement getFutureInwardStockMovement() {
+		return futureInwardStockMovement;
 	}
 
-	public void setInwardstockmovement(InwardStockMovement inwardstockmovement) {
-		this.inwardstockmovement = inwardstockmovement;
+	public void setFutureInwardStockMovement(
+			FutureInwardStockMovement futureInwardStockMovement) {
+		this.futureInwardStockMovement = futureInwardStockMovement;
+	}
+
+	@XmlElement(name = "inwardstockmovement")
+	public InwardStockMovement getInwardStockMovement() {
+		return inwardStockMovement;
+	}
+
+	public void setInwardStockMovement(InwardStockMovement inwardstockmovement) {
+		this.inwardStockMovement = inwardstockmovement;
 	}
 
 	@XmlElement
@@ -65,7 +106,7 @@ public class Results {
 	public String toString() {
 		return "Results [game=" + game + ", group=" + group + ", period="
 				+ period + ", warehousestock=" + warehousestock
-				+ ", inwardstockmovement=" + inwardstockmovement + "]";
+				+ ", inwardstockmovement=" + inwardStockMovement + "]";
 	}
 
 	@XmlAttribute
