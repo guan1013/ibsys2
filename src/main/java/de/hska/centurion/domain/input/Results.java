@@ -5,10 +5,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import de.hska.centurion.domain.input.categories.CompletedOrders;
+import de.hska.centurion.domain.input.categories.CycleTimes;
 import de.hska.centurion.domain.input.categories.FutureInwardStockMovement;
 import de.hska.centurion.domain.input.categories.IdleTimeCosts;
 import de.hska.centurion.domain.input.categories.InwardStockMovement;
 import de.hska.centurion.domain.input.categories.OrdersInWork;
+import de.hska.centurion.domain.input.categories.Result;
 import de.hska.centurion.domain.input.categories.WaitingListStock;
 import de.hska.centurion.domain.input.categories.WaitingListWorkstations;
 import de.hska.centurion.domain.input.categories.WarehouseStock;
@@ -37,6 +39,28 @@ public class Results {
 	private OrdersInWork ordersInWork;
 
 	private CompletedOrders completedOrders;
+	
+	private CycleTimes cycleTimes;
+	
+	private Result result;	
+	
+	@XmlElement
+	public Result getResult() {
+		return result;
+	}
+
+	public void setResult(Result result) {
+		this.result = result;
+	}
+
+	@XmlElement(name = "cycletimes")
+	public CycleTimes getCycleTimes() {
+		return cycleTimes;
+	}
+
+	public void setCycleTimes(CycleTimes cycleTimes) {
+		this.cycleTimes = cycleTimes;
+	}
 
 	@XmlElement(name = "completedorders")
 	public CompletedOrders getCompletedOrders() {
@@ -142,7 +166,13 @@ public class Results {
 	public String toString() {
 		return "Results [game=" + game + ", group=" + group + ", period="
 				+ period + ", warehousestock=" + warehousestock
-				+ ", inwardstockmovement=" + inwardStockMovement + "]";
+				+ ", inwardStockMovement=" + inwardStockMovement
+				+ ", futureInwardStockMovement=" + futureInwardStockMovement
+				+ ", idleTimeCosts=" + idleTimeCosts
+				+ ", waitingListWorkstations=" + waitingListWorkstations
+				+ ", waitingListStock=" + waitingListStock + ", ordersInWork="
+				+ ordersInWork + ", completedOrders=" + completedOrders
+				+ ", cycleTimes=" + cycleTimes + ", result=" + result + "]";
 	}
 
 	@XmlAttribute
