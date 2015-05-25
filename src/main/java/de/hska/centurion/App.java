@@ -9,9 +9,14 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import de.hska.centurion.domain.input.Results;
+import de.hska.centurion.domain.input.categories.CompletedOrders;
 import de.hska.centurion.domain.input.components.Article;
+import de.hska.centurion.domain.input.components.Batch;
+import de.hska.centurion.domain.input.components.CompletedOrder;
+import de.hska.centurion.domain.input.components.MissingPart;
 import de.hska.centurion.domain.input.components.Order;
 import de.hska.centurion.domain.input.components.WorkplaceCosts;
+import de.hska.centurion.domain.input.components.WorkplaceOrder;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
 
 /**
@@ -103,6 +108,44 @@ public class App {
 					.getWaitingListWorkstations().getWorkplaces();
 			for (WorkplaceWaiting w : workplacesWaiting) {
 				System.out.println(w);
+			}
+			System.out
+					.println("-----------------------------------------------------------------------");
+
+			System.out
+					.println("-----------------------------------------------------------------------");
+			System.out.println("WAITING LIST STOCK:");
+			List<MissingPart> missingParts = results.getWaitingListStock()
+					.getMissingParts();
+			for (MissingPart m : missingParts) {
+				System.out.println(m);
+			}
+			System.out
+					.println("-----------------------------------------------------------------------");
+
+			System.out
+					.println("-----------------------------------------------------------------------");
+			System.out.println("ORDERS IN WORK:");
+			List<WorkplaceOrder> workplaceOrders = results.getOrdersInWork()
+					.getWorkplaceOrders();
+
+			for (WorkplaceOrder wO : workplaceOrders) {
+				System.out.println(wO);
+			}
+			System.out
+					.println("-----------------------------------------------------------------------");
+
+			System.out
+					.println("-----------------------------------------------------------------------");
+			System.out.println("COMPLETED ORDERS:");
+			List<CompletedOrder> completedOrders = results.getCompletedOrders()
+					.getCompletedOrders();
+
+			for (CompletedOrder cO : completedOrders) {
+				System.out.println(cO);
+				for (Batch b : cO.getBatches()) {
+					System.out.println(b);
+				}
 			}
 			System.out
 					.println("-----------------------------------------------------------------------");

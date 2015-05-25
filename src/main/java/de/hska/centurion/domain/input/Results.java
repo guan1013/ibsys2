@@ -4,9 +4,12 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import de.hska.centurion.domain.input.categories.CompletedOrders;
 import de.hska.centurion.domain.input.categories.FutureInwardStockMovement;
 import de.hska.centurion.domain.input.categories.IdleTimeCosts;
 import de.hska.centurion.domain.input.categories.InwardStockMovement;
+import de.hska.centurion.domain.input.categories.OrdersInWork;
+import de.hska.centurion.domain.input.categories.WaitingListStock;
 import de.hska.centurion.domain.input.categories.WaitingListWorkstations;
 import de.hska.centurion.domain.input.categories.WarehouseStock;
 
@@ -24,11 +27,44 @@ public class Results {
 	private InwardStockMovement inwardStockMovement;
 
 	private FutureInwardStockMovement futureInwardStockMovement;
-	
+
 	private IdleTimeCosts idleTimeCosts;
-	
+
 	private WaitingListWorkstations waitingListWorkstations;
-		
+
+	private WaitingListStock waitingListStock;
+
+	private OrdersInWork ordersInWork;
+
+	private CompletedOrders completedOrders;
+
+	@XmlElement(name = "completedorders")
+	public CompletedOrders getCompletedOrders() {
+		return completedOrders;
+	}
+
+	public void setCompletedOrders(CompletedOrders completedOrders) {
+		this.completedOrders = completedOrders;
+	}
+
+	@XmlElement(name = "ordersinwork")
+	public OrdersInWork getOrdersInWork() {
+		return ordersInWork;
+	}
+
+	public void setOrdersInWork(OrdersInWork ordersInWork) {
+		this.ordersInWork = ordersInWork;
+	}
+
+	@XmlElement(name = "waitingliststock")
+	public WaitingListStock getWaitingListStock() {
+		return waitingListStock;
+	}
+
+	public void setWaitingListStock(WaitingListStock waitingListStock) {
+		this.waitingListStock = waitingListStock;
+	}
+
 	@XmlElement(name = "waitinglistworkstations")
 	public WaitingListWorkstations getWaitingListWorkstations() {
 		return waitingListWorkstations;
