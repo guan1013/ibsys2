@@ -18,16 +18,149 @@ public class KItem extends Item {
 	 * Standard Constructor
 	 * 
 	 * @param number
-	 *            Identification number of item in production plan
+	 *            Identification number of the item in production plan
 	 * @param name
 	 *            Actual identifier of the item
+	 * @param value
+	 *            Monetary value of this item
+	 * @param stock
+	 *            Current amount in stock
+	 * @param stag
+	 *            quantity per stag
+	 * @param orderCosts
+	 *            costs per order
+	 * @param deliveryTime
+	 *            average time (in Periods) for a delivery to get shipped
+	 * @param diviation
+	 *            to deliveryTime
 	 */
-	public KItem(Integer number, String name) {
-		this.type = ItemTypeEnum.K;
-		this.number = number;
-		this.name = name;
+	public KItem(Integer number, String name, Double value, Integer stock,
+			Integer stag, Double orderCosts, Double deliveryTime,
+			Double diviation) {
+		super(ItemTypeEnum.K, number, name, value, stock);
+		this.stag = stag;
+		this.orderCosts = orderCosts;
+		this.deliveryTime = deliveryTime;
+		this.diviation = diviation;
 	}
 
-	// @TODO Implement own functionality
+	/*
+	 * ======================== ATTRIBUTES ========================
+	 */
+
+	/**
+	 * quantity per stag
+	 */
+	private Integer stag;
+
+	/**
+	 * costs per order
+	 */
+	private Double orderCosts;
+
+	/**
+	 * average time (in Periods) for a delivery to get shipped
+	 */
+	private Double deliveryTime;
+
+	/**
+	 * to deliveryTime
+	 */
+	private Double diviation;
+
+	/*
+	 * ======================== OVERRIDES ========================
+	 */
+
+	@Override
+	public String toString() {
+		return "KItem [stag=" + stag + ", orderCosts=" + orderCosts
+				+ ", deliveryTime=" + deliveryTime + ", diviation=" + diviation
+				+ ", id=" + id + ", type=" + type + ", number=" + number
+				+ ", name=" + name + ", value=" + value + ", stock=" + stock
+				+ "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((deliveryTime == null) ? 0 : deliveryTime.hashCode());
+		result = prime * result
+				+ ((diviation == null) ? 0 : diviation.hashCode());
+		result = prime * result
+				+ ((orderCosts == null) ? 0 : orderCosts.hashCode());
+		result = prime * result + ((stag == null) ? 0 : stag.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		KItem other = (KItem) obj;
+		if (deliveryTime == null) {
+			if (other.deliveryTime != null)
+				return false;
+		} else if (!deliveryTime.equals(other.deliveryTime))
+			return false;
+		if (diviation == null) {
+			if (other.diviation != null)
+				return false;
+		} else if (!diviation.equals(other.diviation))
+			return false;
+		if (orderCosts == null) {
+			if (other.orderCosts != null)
+				return false;
+		} else if (!orderCosts.equals(other.orderCosts))
+			return false;
+		if (stag == null) {
+			if (other.stag != null)
+				return false;
+		} else if (!stag.equals(other.stag))
+			return false;
+		return true;
+	}
+
+	/*
+	 * ======================== GETS & SETS ========================
+	 */
+
+	public Integer getStag() {
+		return stag;
+	}
+
+	public void setStag(Integer stag) {
+		this.stag = stag;
+	}
+
+	public Double getOrderCosts() {
+		return orderCosts;
+	}
+
+	public void setOrderCosts(Double orderCosts) {
+		this.orderCosts = orderCosts;
+	}
+
+	public Double getDeliveryTime() {
+		return deliveryTime;
+	}
+
+	public void setDeliveryTime(Double deliveryTime) {
+		this.deliveryTime = deliveryTime;
+	}
+
+	public Double getDiviation() {
+		return diviation;
+	}
+
+	public void setDiviation(Double diviation) {
+		this.diviation = diviation;
+	}
 
 }

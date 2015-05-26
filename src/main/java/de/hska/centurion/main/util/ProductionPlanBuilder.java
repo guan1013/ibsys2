@@ -1,11 +1,10 @@
 package de.hska.centurion.main.util;
 
 import de.hska.centurion.domain.production.ProductionPlan;
-import de.hska.centurion.domain.production.resources.ProductionPlanEnum;
 
 public class ProductionPlanBuilder {
 
-	public ProductionPlan createProductionPlan(ProductionPlanEnum name) {
+	public ProductionPlan createProductionPlan(String name) {
 
 		return null;
 	}

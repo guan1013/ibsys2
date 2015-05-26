@@ -2,7 +2,6 @@ package de.hska.centurion.domain.production;
 
 import java.util.List;
 
-import de.hska.centurion.domain.production.resources.ProductionPlanEnum;
 import de.hska.centurion.domain.production.workplace.Workplace;
 
 /**
@@ -26,7 +25,7 @@ public class ProductionPlan {
 	 *            list of all workplaces that participate to this production
 	 *            plan
 	 */
-	public ProductionPlan(ProductionPlanEnum name, List<Workplace> workplaces) {
+	public ProductionPlan(String name, List<Workplace> workplaces) {
 		super();
 		this.name = name;
 		this.workplaces = workplaces;
@@ -44,11 +43,10 @@ public class ProductionPlan {
 	/**
 	 * name which describe a specific production plan
 	 */
-	private ProductionPlanEnum name;
+	private String name;
 
 	/**
-	 * workplaces list of all workplaces that participate to this production
-	 * plan
+	 * list of all workplaces that participate to this production plan
 	 */
 	private List<Workplace> workplaces;
 
@@ -84,7 +82,10 @@ public class ProductionPlan {
 		ProductionPlan other = (ProductionPlan) obj;
 		if (id != other.id)
 			return false;
-		if (name != other.name)
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
 			return false;
 		if (workplaces == null) {
 			if (other.workplaces != null)
@@ -106,11 +107,11 @@ public class ProductionPlan {
 		this.id = id;
 	}
 
-	public ProductionPlanEnum getName() {
+	public String getName() {
 		return name;
 	}
 
-	public void setName(ProductionPlanEnum name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 

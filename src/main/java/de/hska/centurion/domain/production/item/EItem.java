@@ -11,21 +11,22 @@ import de.hska.centurion.domain.production.resources.ItemTypeEnum;
 public class EItem extends Item {
 
 	/*
-	 * ======================== CONSTRUCTOR ========================*/
-	
-	
+	 * ======================== CONSTRUCTOR ========================
+	 */
 	/**
 	 * Standard Constructor
-	 * @param number Identification number of item in production plan
-	 * @param name Actual identifier of the item
+	 * 
+	 * @param number
+	 *            Identification number of the item in production plan
+	 * @param name
+	 *            Actual identifier of the item
+	 * @param value
+	 *            Monetary value of this item
+	 * @param stock
+	 *            Current amount in stock
 	 */
-	public EItem(Integer number, String name) {
-		this.type = ItemTypeEnum.E;
-		this.number = number;
-		this.name = name;
+	public EItem(Integer number, String name, Double value, Integer stock) {
+		super(ItemTypeEnum.E, number, name, value, stock);
 	}
-	
-	//@TODO Implement own functionality
-
 
 }

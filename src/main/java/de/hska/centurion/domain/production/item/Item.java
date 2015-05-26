@@ -15,12 +15,27 @@ public abstract class Item {
 	 */
 
 	/**
-	 * Default Constructor
+	 * Standard Constructor
+	 * 
+	 * @param type
+	 *            of the item in production plan
+	 * @param number
+	 *            Identification number of the item in production plan
+	 * @param name
+	 *            Actual identifier of the item
+	 * @param value
+	 *            Monetary value of this item
+	 * @param stock
+	 *            Current amount in stock
 	 */
-	public Item() {
-		type = null;
-		number = null;
-		name = null;
+	public Item(ItemTypeEnum type, Integer number, String name, Double value,
+			Integer stock) {
+		super();
+		this.type = type;
+		this.number = number;
+		this.name = name;
+		this.value = value;
+		this.stock = stock;
 	}
 
 	/*
@@ -47,14 +62,24 @@ public abstract class Item {
 	 */
 	protected String name;
 
+	/**
+	 * Monetary value of this item
+	 */
+	protected Double value;
+
+	/**
+	 * Current amount in stock
+	 */
+	protected Integer stock;
+
 	/*
 	 * ======================== OVERRIDES ========================
 	 */
-
 	@Override
 	public String toString() {
 		return "Item [id=" + id + ", type=" + type + ", number=" + number
-				+ ", name=" + name + "]";
+				+ ", name=" + name + ", value=" + value + ", stock=" + stock
+				+ "]";
 	}
 
 	@Override
@@ -64,7 +89,9 @@ public abstract class Item {
 		result = prime * result + id;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((number == null) ? 0 : number.hashCode());
+		result = prime * result + ((stock == null) ? 0 : stock.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		return result;
 	}
 
@@ -89,7 +116,17 @@ public abstract class Item {
 				return false;
 		} else if (!number.equals(other.number))
 			return false;
+		if (stock == null) {
+			if (other.stock != null)
+				return false;
+		} else if (!stock.equals(other.stock))
+			return false;
 		if (type != other.type)
+			return false;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
 			return false;
 		return true;
 	}
@@ -128,6 +165,22 @@ public abstract class Item {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Double getValue() {
+		return value;
+	}
+
+	public void setValue(Double value) {
+		this.value = value;
+	}
+
+	public Integer getStock() {
+		return stock;
+	}
+
+	public void setStock(Integer stock) {
+		this.stock = stock;
 	}
 
 }

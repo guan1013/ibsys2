@@ -18,16 +18,16 @@ public class PItem extends Item {
 	 * Standard Constructor
 	 * 
 	 * @param number
-	 *            Identification number of item in production plan
+	 *            Identification number of the item in production plan
 	 * @param name
 	 *            Actual identifier of the item
+	 * @param value
+	 *            Monetary value of this item
+	 * @param stock
+	 *            Current amount in stock
 	 */
-	public PItem(Integer number, String name) {
-		this.type = ItemTypeEnum.P;
-		this.number = number;
-		this.name = name;
+	public PItem(Integer number, String name, Double value, Integer stock) {
+		super(ItemTypeEnum.P, number, name, value, stock);
 	}
-
-	// @TODO Implement own functionality
 
 }
