@@ -25,8 +25,8 @@ public class KItem extends Item {
 	 *            Monetary value of this item
 	 * @param stock
 	 *            Current amount in stock
-	 * @param stag
-	 *            quantity per stag
+	 * @param stack
+	 *            quantity per stack
 	 * @param orderCosts
 	 *            costs per order
 	 * @param deliveryTime
@@ -35,10 +35,10 @@ public class KItem extends Item {
 	 *            to deliveryTime
 	 */
 	public KItem(Integer number, String name, Double value, Integer stock,
-			Integer stag, Double orderCosts, Double deliveryTime,
+			Integer stack, Double orderCosts, Double deliveryTime,
 			Double diviation) {
 		super(ItemTypeEnum.K, number, name, value, stock);
-		this.stag = stag;
+		this.stack = stack;
 		this.orderCosts = orderCosts;
 		this.deliveryTime = deliveryTime;
 		this.diviation = diviation;
@@ -49,9 +49,9 @@ public class KItem extends Item {
 	 */
 
 	/**
-	 * quantity per stag
+	 * quantity per stack
 	 */
-	private Integer stag;
+	private Integer stack;
 
 	/**
 	 * costs per order
@@ -74,7 +74,7 @@ public class KItem extends Item {
 
 	@Override
 	public String toString() {
-		return "KItem [stag=" + stag + ", orderCosts=" + orderCosts
+		return "KItem [stack=" + stack + ", orderCosts=" + orderCosts
 				+ ", deliveryTime=" + deliveryTime + ", diviation=" + diviation
 				+ ", id=" + id + ", type=" + type + ", number=" + number
 				+ ", name=" + name + ", value=" + value + ", stock=" + stock
@@ -91,7 +91,7 @@ public class KItem extends Item {
 				+ ((diviation == null) ? 0 : diviation.hashCode());
 		result = prime * result
 				+ ((orderCosts == null) ? 0 : orderCosts.hashCode());
-		result = prime * result + ((stag == null) ? 0 : stag.hashCode());
+		result = prime * result + ((stack == null) ? 0 : stack.hashCode());
 		return result;
 	}
 
@@ -119,10 +119,10 @@ public class KItem extends Item {
 				return false;
 		} else if (!orderCosts.equals(other.orderCosts))
 			return false;
-		if (stag == null) {
-			if (other.stag != null)
+		if (stack == null) {
+			if (other.stack != null)
 				return false;
-		} else if (!stag.equals(other.stag))
+		} else if (!stack.equals(other.stack))
 			return false;
 		return true;
 	}
@@ -131,12 +131,12 @@ public class KItem extends Item {
 	 * ======================== GETS & SETS ========================
 	 */
 
-	public Integer getStag() {
-		return stag;
+	public Integer getstack() {
+		return stack;
 	}
 
-	public void setStag(Integer stag) {
-		this.stag = stag;
+	public void setstack(Integer stack) {
+		this.stack = stack;
 	}
 
 	public Double getOrderCosts() {

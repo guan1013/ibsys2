@@ -22,9 +22,9 @@ public class Input {
 	 * @param quantity
 	 *            of required item
 	 * @param producer
-	 *            workplace for the requested item
+	 *            number of workplace which should produce requested item
 	 */
-	public Input(Item item, Integer quantity, Workplace producer) {
+	public Input(Item item, Integer quantity, Integer producer) {
 		super();
 		this.item = item;
 		this.quantity = quantity;
@@ -51,9 +51,9 @@ public class Input {
 	private Integer quantity;
 
 	/**
-	 * Producer workplace for the requested item
+	 * number of workplace which should produce requested item
 	 */
-	private Workplace producer;
+	private Integer producer;
 
 	/*
 	 * ======================== OVERRIDES ========================
@@ -135,11 +135,11 @@ public class Input {
 		this.quantity = quantity;
 	}
 
-	public Workplace getProducer() {
+	public Integer getProducer() {
 		return producer;
 	}
 
-	public void setProducer(Workplace producer) {
+	public void setProducer(Integer producer) {
 		this.producer = producer;
 	}
 
