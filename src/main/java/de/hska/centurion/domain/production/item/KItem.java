@@ -71,13 +71,12 @@ public class KItem extends Item {
 	/*
 	 * ======================== OVERRIDES ========================
 	 */
-
 	@Override
 	public String toString() {
-		return "KItem [stack=" + stack + ", orderCosts=" + orderCosts
-				+ ", deliveryTime=" + deliveryTime + ", diviation=" + diviation
-				+ ", id=" + id + ", type=" + type + ", number=" + number
+		return "KItem [id=" + id + ", type=" + type + ", number=" + number
 				+ ", name=" + name + ", value=" + value + ", stock=" + stock
+				+ ", stack=" + stack + ", orderCosts=" + orderCosts
+				+ ", deliveryTime=" + deliveryTime + ", diviation=" + diviation
 				+ "]";
 	}
 

@@ -1,5 +1,6 @@
 package de.hska.centurion.main.util;
 
+import java.awt.Container;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -74,33 +75,22 @@ public class ProductionPlanBuilder {
 		final int plansCount = Integer.parseInt(prop.getProperty(Constants
 				.getPlanInitKey() + Constants.getCountKey()));
 		int i = 0;
-		// Foreach productionplan build the associated objects
+		// Foreach Production Plan build the associated objects
 		while (i < plansCount) {
 			i++;
 
-			// Get productionplan identifier
-			String prodPlan = prop.getProperty(Constants.getPlanInitKey() + i);
+			// Get productionplan name
+			String planName = prop.getProperty(Constants.getPlanInitKey() + i
+					+ Constants.getNameKey());
 
-			// Create a new empty list of workplaces
-			List<Workplace> workplaces = new ArrayList<Workplace>();
+			// Get production plan producer
+			String planProducer = prop.getProperty(Constants.getPlanInitKey()
+					+ i + Constants.getInitKey());
 
-			// Get all known workplaces in current interval's production plan
-			final int workplacesCount = Integer.parseInt(prop
-					.getProperty(prodPlan + Constants.getWorkplaceKey()
-							+ Constants.getCountKey()));
-			int workplaceNumber = 0;
+			Workplace producer = getWorkspace(planProducer, planName);
 
-			while (workplaceNumber < workplacesCount) {
-				workplaceNumber++;
-
-				// Get current interval's workplace with all associated objects
-				// and add it to workplaces list
-				workplaces.add(getWorkplace(prodPlan, workplaceNumber));
-			}
-
-			// add current interval's production plan to productionplan list
-
-			productionPlans.add(new ProductionPlan(prodPlan, workplaces));
+			// Add current Production Plan to result list
+			productionPlans.add(new ProductionPlan(planName, producer));
 
 		}
 
@@ -108,52 +98,39 @@ public class ProductionPlanBuilder {
 	}
 
 	/**
-	 * Get the current index's workplace form the current interval's production
-	 * plan
+	 * Get a workspace for requested production plan
 	 * 
-	 * @param prodPlan
-	 *            current interval's production plan identifier
-	 * @param workplaceNumber
-	 *            index of the current workplace
-	 * @return current index's workplace with all associated objects
+	 * @param number
+	 *            of workplace in properties
+	 * @param outputString
+	 *            number of output item in properties
+	 * @return workspace for requested production plan
 	 */
-	private Workplace getWorkplace(String prodPlan, int workplaceNumber) {
+	private Workplace getWorkspace(String number, String outputString) {
 
-		// Build the commonly used string to access the key:value pairs in
+		// build the commonly used string to access the key:value pairs in
 		// properties
-		String propertyString = prodPlan + Constants.getWorkplaceKey()
-				+ workplaceNumber;
+		String propertyString = Constants.getWpInitKey() + "." + number + "."
+				+ outputString;
 
-		// Get workplace.number from properties
-		Integer number = Integer.parseInt(prop.getProperty(propertyString
-				+ Constants.getNumberKey()));
-
-		// Get item identifier form properties
-		String item = prop.getProperty(propertyString
-				+ Constants.getOutputKey());
-
-		// Get workplace.output from properties by comparing the item identfier
-		// to the item list
-		Item output = getItem(item);
-
-		// Create a new empty list of inputs
-		List<Input> inputs = new ArrayList<Input>();
+		Item output = getItem(outputString);
 
 		// Get all known inputs for this workplace from properties
+		List<Input> inputs = new ArrayList<Input>();
 		final int inputCount = Integer.parseInt(propertyString
 				+ Constants.getInputKey() + Constants.getCountKey());
-		int inputNumber = 0;
+		int inputIndex = 0;
 
-		while (inputNumber < inputCount) {
-			inputNumber++;
+		while (inputIndex < inputCount) {
+			inputIndex++;
 
 			// Get current interval's input for this workplace and add it to its
-			// input
-			// list
-			inputs.add(getInput(prodPlan, workplaceNumber, inputNumber));
+			// input list
+			inputs.add(getInput(propertyString, inputIndex));
 		}
 
 		// Create a new empty list of production orders
+		// TODO Get open orders from XML
 		List<ProductionOrder> orders = new ArrayList<ProductionOrder>();
 
 		// Get workplace.productionTime from properties
@@ -172,39 +149,33 @@ public class ProductionPlanBuilder {
 	}
 
 	/**
-	 * Get current index's input form current index's workplace of current
-	 * interval's production plan
+	 * Get Input for requested workplace
 	 * 
-	 * @param prodPlan
-	 *            current interval's production plan identifier
-	 * @param workplaceNumber
-	 *            index of the current workplace
-	 * @param inputNumber
-	 *            index of the current input
-	 * @return current index's input with all associated objects
+	 * @param workplaceProperty
+	 *            String of workplace in properties
+	 * @param index
+	 *            index of current input in properties
+	 * @return Input of requested workplace
 	 */
-	private Input getInput(String prodPlan, int workplaceNumber, int inputNumber) {
+	private Input getInput(String workplaceProperty, int index) {
+		String propertyString = workplaceProperty + index;
 
-		// build the commonly used string to access the key:value pairs in
-		// properties
-		String propertyString = prodPlan + Constants.getWorkplaceKey()
-				+ workplaceNumber + Constants.getInputKey() + inputNumber;
-
-		// Get item identifier form properties
-		String itemString = prop.getProperty(propertyString
-				+ Constants.getItemKey());
-
-		// Get input.item from properties by comparing the item identfier
-		// to the item list
-		Item item = getItem(itemString);
+		// Get item identifier from properties
+		String item = prop.getProperty(propertyString + Constants.getItemKey());
 
 		// Get input.quantity from properties
 		Integer quantity = Integer.parseInt(propertyString
 				+ Constants.getQuantityKey());
 
 		// Get input.producer from properties
-		Integer producer = Integer.parseInt(propertyString
-				+ Constants.getProducerKey());
+		String producerNumber = propertyString + Constants.getProducerKey();
+
+		Workplace producer;
+		if (Integer.parseInt(producerNumber) > 0) {
+			producer = getWorkspace(producerNumber, item);
+		} else {
+			producer = null;
+		}
 
 		// Create a new input with all associated objects
 		Input input = new Input(item, quantity, producer);
@@ -239,7 +210,7 @@ public class ProductionPlanBuilder {
 		Double value = Double.parseDouble(prop.getProperty(propertyString
 				+ Constants.getValueKey()));
 
-		// @TODO Get stock form XML
+		// TODO Get stock form XML
 		Integer stock = 0;
 
 		// Determine type of item
@@ -249,7 +220,10 @@ public class ProductionPlanBuilder {
 			// Create a new EItem
 			item = new EItem(number, name, value, stock);
 		} else if (type == ItemTypeEnum.P.toString()) {
-			item = new PItem(number, name, value, stock);
+			Double revenue = Double.parseDouble(prop.getProperty(propertyString
+					+ Constants.getRevenueKey()));
+
+			item = new PItem(number, name, value, stock, revenue);
 
 		} else if (type == ItemTypeEnum.K.toString()) {
 			Integer stack = Integer.parseInt(prop.getProperty(propertyString
@@ -268,4 +242,5 @@ public class ProductionPlanBuilder {
 
 		return item;
 	}
+
 }

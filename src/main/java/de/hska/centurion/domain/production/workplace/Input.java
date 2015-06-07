@@ -1,7 +1,5 @@
 package de.hska.centurion.domain.production.workplace;
 
-import de.hska.centurion.domain.production.item.Item;
-
 /**
  * Describes an input type for workspaces
  * 
@@ -18,13 +16,13 @@ public class Input {
 	 * Standard Constructor
 	 * 
 	 * @param item
-	 *            which is required by the workplace
+	 *            Identifier of Item which is required by the workplace
 	 * @param quantity
 	 *            of required item
 	 * @param producer
-	 *            number of workplace which should produce requested item
+	 *            workplace which should produce requested item
 	 */
-	public Input(Item item, Integer quantity, Integer producer) {
+	public Input(String item, Integer quantity, Workplace producer) {
 		super();
 		this.item = item;
 		this.quantity = quantity;
@@ -41,9 +39,9 @@ public class Input {
 	private int id;
 
 	/**
-	 * item which is required by the workplace
+	 * Identifier of Item which is required by the workplace
 	 */
-	private Item item;
+	private String item;
 
 	/**
 	 * quantity of required item
@@ -51,9 +49,9 @@ public class Input {
 	private Integer quantity;
 
 	/**
-	 * number of workplace which should produce requested item
+	 * workplace which should produce requested item
 	 */
-	private Integer producer;
+	private Workplace producer;
 
 	/*
 	 * ======================== OVERRIDES ========================
@@ -119,11 +117,11 @@ public class Input {
 		this.id = id;
 	}
 
-	public Item getItem() {
+	public String getItem() {
 		return item;
 	}
 
-	public void setItem(Item item) {
+	public void setItem(String item) {
 		this.item = item;
 	}
 
@@ -135,11 +133,11 @@ public class Input {
 		this.quantity = quantity;
 	}
 
-	public Integer getProducer() {
+	public Workplace getProducer() {
 		return producer;
 	}
 
-	public void setProducer(Integer producer) {
+	public void setProducer(Workplace producer) {
 		this.producer = producer;
 	}
 

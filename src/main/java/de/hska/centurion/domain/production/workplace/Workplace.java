@@ -37,8 +37,9 @@ public class Workplace {
 	 *            which is required to prepare this workspace for the production
 	 *            of this objects item
 	 */
-	public Workplace(Integer number, Item output, List<Input> inputs,
-			List<ProductionOrder> orders, int productionTime, int setupTime) {
+	public Workplace(String number, Item output, List<Input> inputs,
+			List<ProductionOrder> orders, Integer productionTime,
+			Integer setupTime) {
 		super();
 		this.number = number;
 		this.output = output;
@@ -60,7 +61,7 @@ public class Workplace {
 	/**
 	 * Workspace number in production plan
 	 */
-	private Integer number;
+	private String number;
 
 	/**
 	 * item which is produced
@@ -80,13 +81,13 @@ public class Workplace {
 	/**
 	 * time which is required to build 1 item
 	 */
-	private int productionTime;
+	private Integer productionTime;
 
 	/**
 	 * Time which is required to prepare this workspace for the production of
 	 * this objects item
 	 */
-	private int setupTime;
+	private Integer setupTime;
 
 	/*
 	 * ======================== METHODS ========================
@@ -181,7 +182,7 @@ public class Workplace {
 			return false;
 		return true;
 	}
-	
+
 	/*
 	 * ======================== GETS & SETS ========================
 	 */
@@ -194,11 +195,11 @@ public class Workplace {
 		this.id = id;
 	}
 
-	public Integer getNumber() {
+	public String getNumber() {
 		return number;
 	}
 
-	public void setNumber(Integer number) {
+	public void setNumber(String number) {
 		this.number = number;
 	}
 

@@ -21,14 +21,13 @@ public class ProductionPlan {
 	 * 
 	 * @param name
 	 *            which describe a specific production plan
-	 * @param workplaces
-	 *            list of all workplaces that participate to this production
-	 *            plan
+	 * @param producer
+	 *            Workplace which produces the final product of this production plan
 	 */
-	public ProductionPlan(String name, List<Workplace> workplaces) {
+	public ProductionPlan(String name, Workplace producer) {
 		super();
 		this.name = name;
-		this.workplaces = workplaces;
+		this.producer = producer;
 	}
 
 	/*
@@ -46,9 +45,9 @@ public class ProductionPlan {
 	private String name;
 
 	/**
-	 * list of all workplaces that participate to this production plan
+	 * Workplace which produces the final product of this production plan
 	 */
-	private List<Workplace> workplaces;
+	private Workplace producer;
 
 	/*
 	 * ======================== OVERRIDES ========================
@@ -56,8 +55,8 @@ public class ProductionPlan {
 
 	@Override
 	public String toString() {
-		return "ProductionPlan [id=" + id + ", name=" + name + ", workplaces="
-				+ workplaces + "]";
+		return "ProductionPlan [id=" + id + ", name=" + name + ", producer="
+				+ producer + "]";
 	}
 
 	@Override
@@ -67,7 +66,7 @@ public class ProductionPlan {
 		result = prime * result + id;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result
-				+ ((workplaces == null) ? 0 : workplaces.hashCode());
+				+ ((producer == null) ? 0 : producer.hashCode());
 		return result;
 	}
 
@@ -87,10 +86,10 @@ public class ProductionPlan {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (workplaces == null) {
-			if (other.workplaces != null)
+		if (producer == null) {
+			if (other.producer != null)
 				return false;
-		} else if (!workplaces.equals(other.workplaces))
+		} else if (!producer.equals(other.producer))
 			return false;
 		return true;
 	}
@@ -115,12 +114,12 @@ public class ProductionPlan {
 		this.name = name;
 	}
 
-	public List<Workplace> getWorkplaces() {
-		return workplaces;
+	public Workplace getProducer() {
+		return producer;
 	}
 
-	public void setWorkplaces(List<Workplace> workplaces) {
-		this.workplaces = workplaces;
+	public void setProducer(Workplace producer) {
+		this.producer = producer;
 	}
 
 }
