@@ -1,0 +1,69 @@
+package de.hska.centurion.domain.output;
+
+public class QualityControl {
+	private String type = "no";
+	private int loseQuantity = 0;
+	private int delay = 0;
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public int getLoseQuantity() {
+		return loseQuantity;
+	}
+
+	public void setLoseQuantity(int loseQuantity) {
+		this.loseQuantity = loseQuantity;
+	}
+
+	public int getDelay() {
+		return delay;
+	}
+
+	public void setDelay(int delay) {
+		this.delay = delay;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + delay;
+		result = prime * result + loseQuantity;
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		QualityControl other = (QualityControl) obj;
+		if (delay != other.delay)
+			return false;
+		if (loseQuantity != other.loseQuantity)
+			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "QualityControl [type=" + type + ", loseQuantity="
+				+ loseQuantity + ", delay=" + delay + "]";
+	}
+
+}
