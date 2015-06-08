@@ -3,7 +3,6 @@ package de.hska.centurion.domain.production.workplace;
 import java.util.List;
 
 import de.hska.centurion.domain.production.item.Item;
-import de.hska.centurion.domain.production.order.ProductionOrder;
 
 /**
  * Object describes a part of a workspace which produces a certain item
@@ -29,8 +28,8 @@ public class Workplace {
 	 * @param inputs
 	 *            list of items which are required for the production of the
 	 *            output item
-	 * @param orders
-	 *            list of unfinished orders
+	 * @param openOrders
+	 *            unfinished items on this workplace
 	 * @param productionTime
 	 *            which is required to build 1 item
 	 * @param setupTime
@@ -38,13 +37,12 @@ public class Workplace {
 	 *            of this objects item
 	 */
 	public Workplace(String number, Item output, List<Input> inputs,
-			List<ProductionOrder> orders, Integer productionTime,
-			Integer setupTime) {
+			Integer openOrders, Integer productionTime, Integer setupTime) {
 		super();
 		this.number = number;
 		this.output = output;
 		this.inputs = inputs;
-		this.orders = orders;
+		this.openOrders = openOrders;
 		this.productionTime = productionTime;
 		this.setupTime = setupTime;
 	}
@@ -74,9 +72,9 @@ public class Workplace {
 	private List<Input> inputs;
 
 	/**
-	 * list of unfinished orders
+	 * unfinished items on this workplace
 	 */
-	private List<ProductionOrder> orders;
+	private Integer openOrders;
 
 	/**
 	 * time which is required to build 1 item
@@ -106,19 +104,6 @@ public class Workplace {
 		return this.inputs;
 	}
 
-	/**
-	 * Method to add an Order to this workspace
-	 * 
-	 * @param order
-	 *            order which will be placed
-	 * @return updated List of orders
-	 */
-	public List<ProductionOrder> addOrder(ProductionOrder order) {
-		this.orders.add(order);
-
-		return this.orders;
-	}
-
 	/*
 	 * ======================== OVERRIDES ========================
 	 */
@@ -126,9 +111,9 @@ public class Workplace {
 	@Override
 	public String toString() {
 		return "Workplace [id=" + id + ", number=" + number + ", output="
-				+ output + ", inputs=" + inputs + ", orders=" + orders
-				+ ", productionTime=" + productionTime + ", setupTime="
-				+ setupTime + "]";
+				+ output + ", inputs=" + inputs + ", openOrders="
+				+ openOrders + ", productionTime=" + productionTime
+				+ ", setupTime=" + setupTime + "]";
 	}
 
 	@Override
@@ -138,10 +123,13 @@ public class Workplace {
 		result = prime * result + id;
 		result = prime * result + ((inputs == null) ? 0 : inputs.hashCode());
 		result = prime * result + ((number == null) ? 0 : number.hashCode());
-		result = prime * result + ((orders == null) ? 0 : orders.hashCode());
 		result = prime * result + ((output == null) ? 0 : output.hashCode());
-		result = prime * result + productionTime;
-		result = prime * result + setupTime;
+		result = prime * result
+				+ ((productionTime == null) ? 0 : productionTime.hashCode());
+		result = prime * result
+				+ ((setupTime == null) ? 0 : setupTime.hashCode());
+		result = prime * result
+				+ ((openOrders == null) ? 0 : openOrders.hashCode());
 		return result;
 	}
 
@@ -166,19 +154,25 @@ public class Workplace {
 				return false;
 		} else if (!number.equals(other.number))
 			return false;
-		if (orders == null) {
-			if (other.orders != null)
-				return false;
-		} else if (!orders.equals(other.orders))
-			return false;
 		if (output == null) {
 			if (other.output != null)
 				return false;
 		} else if (!output.equals(other.output))
 			return false;
-		if (productionTime != other.productionTime)
+		if (productionTime == null) {
+			if (other.productionTime != null)
+				return false;
+		} else if (!productionTime.equals(other.productionTime))
 			return false;
-		if (setupTime != other.setupTime)
+		if (setupTime == null) {
+			if (other.setupTime != null)
+				return false;
+		} else if (!setupTime.equals(other.setupTime))
+			return false;
+		if (openOrders == null) {
+			if (other.openOrders != null)
+				return false;
+		} else if (!openOrders.equals(other.openOrders))
 			return false;
 		return true;
 	}
@@ -219,12 +213,20 @@ public class Workplace {
 		this.inputs = inputs;
 	}
 
-	public List<ProductionOrder> getOrders() {
-		return orders;
+	public Integer getWaitingList() {
+		return openOrders;
 	}
 
-	public void setOrders(List<ProductionOrder> orders) {
-		this.orders = orders;
+	public void setWaitingList(Integer waitingList) {
+		this.openOrders = waitingList;
+	}
+
+	public void setProductionTime(Integer productionTime) {
+		this.productionTime = productionTime;
+	}
+
+	public void setSetupTime(Integer setupTime) {
+		this.setupTime = setupTime;
 	}
 
 	public int getProductionTime() {

@@ -1,4 +1,4 @@
-package de.hska.centurion.main.util;
+package de.hska.centurion.util;
 
 public class Constants {
 
