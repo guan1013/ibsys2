@@ -84,6 +84,33 @@ public class Input {
 		this.productionList.add(production);
 	}
 
+	public void changeProductionOrder(int index, int newIndex) {
+		if (this.productionList == null) {
+			this.productionList = new ArrayList<Production>();
+		}
+		Production production = this.productionList.get(index);
+		this.productionList.remove(index);
+		this.productionList.add(newIndex, production);
+	}
+	
+	public void splitProduction(int index, int amountA, int amountB) {
+		if (this.productionList == null) {
+			this.productionList = new ArrayList<Production>();
+		}
+		if (amountA == 0 || amountB == 0) {
+			return;
+		}
+		
+		Production production = this.productionList.get(index);
+		if (amountA + amountB != production.getQuantity()) {
+			return;
+		}
+		production.setQuantity(amountA);
+		Production productionB = new Production(production.getArticle(), amountB);
+		productionList.add(index + 1, productionB);
+		
+	}
+
 	public List<WorkingTime> getWorkingTimeList() {
 		return workingTimeList;
 	}
@@ -91,7 +118,7 @@ public class Input {
 	public void setWorkingTimeList(List<WorkingTime> workingTimeList) {
 		this.workingTimeList = workingTimeList;
 	}
-	
+
 	public void addWorkingTime(WorkingTime workingTime) {
 		if (this.workingTimeList == null) {
 			this.workingTimeList = new ArrayList<WorkingTime>();
@@ -101,13 +128,11 @@ public class Input {
 
 	@Override
 	public String toString() {
-		return "Input [qualityControl=" + qualityControl 
-				+ ", sellWishSize=" + sellWish.size()
-				+ ", sellDirectSize=" + sellDirect.size()
+		return "Input [qualityControl=" + qualityControl + ", sellWishSize="
+				+ sellWish.size() + ", sellDirectSize=" + sellDirect.size()
 				+ ", orderListSize=" + orderList.size()
 				+ ", productionListSize=" + productionList.size()
-				+ ", workingListSize=" + workingTimeList.size()
-				+ "]";
+				+ ", workingListSize=" + workingTimeList.size() + "]";
 	}
 
 }
