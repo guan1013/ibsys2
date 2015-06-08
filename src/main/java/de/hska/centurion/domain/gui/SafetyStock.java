@@ -4,16 +4,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * This class represents the safety stock of each article at the end of the
+ * simulated period.
+ * 
  * @author Simon
  *
  */
 public class SafetyStock {
 	// Schlüssel Exx oder Px, z. B. E26 setzt dann den Sicherheitsbestand.
+	/*
+	 * ======================== ATTRIBUTES ========================
+	 */
+	/**
+	 * The Map contains String-keys, with the identifiers of the items, and
+	 * Integer-values with the wished amount of this item at the end of the
+	 * period.
+	 * Example:
+	 * 			The key for the item E26 should be "E26".
+	 * 			The key for the item P1 should be "P1".
+	 */
 	private Map<String, Integer> safetyStocks = new HashMap<String, Integer>();
-	
-	
+
+	/*
+	 * ======================== CONSTRUCTORS ========================
+	 */
 	/**
 	 * This Constructor creates a standard stock for every item.
+	 * 
 	 * @param standardStock
 	 */
 	public SafetyStock(int standardStock) {
@@ -48,6 +65,10 @@ public class SafetyStock {
 		safetyStocks.put("E55", standardStock);
 		safetyStocks.put("E56", standardStock);
 	}
+	
+	/*
+	 * ======================== METHODS ========================
+	 */
 
 	public Map<String, Integer> getSafetyStocks() {
 		return safetyStocks;
@@ -56,16 +77,13 @@ public class SafetyStock {
 	public void setSafetyStocks(Map<String, Integer> safetyStocks) {
 		this.safetyStocks = safetyStocks;
 	}
-	
-	
+
 	public void changeStock(String item, int stock) {
 		safetyStocks.put(item, stock);
 	}
-	
+
 	public int getStock(String item) {
 		return safetyStocks.get(item).intValue();
 	}
-	
-	
-	
+
 }

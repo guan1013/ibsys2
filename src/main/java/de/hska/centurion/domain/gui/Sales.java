@@ -1,17 +1,49 @@
 package de.hska.centurion.domain.gui;
 
+/**
+ * This class contains the salees of children bikes, women bikes  and men bikes.
+ * @author Simon
+ *
+ */
 public class Sales {
+	/*
+	 * ======================== ATTRIBUTES ========================
+	 */
+	/**
+	 * The planned number of children bike sales.
+	 */
 	private int childrenSales;
+	/**
+	 * The planned number of women bike sales.
+	 */
 	private int womenSales;
+	/**
+	 * The planned number of men bike sales.
+	 */
 	private int menSales;
 
+	/*
+	 * ======================== CONSTRUCTORS ========================
+	 */
+	/**
+	 * This Constructors creates an Sales-object through the number of sales for each bike.
+	 * @param childrenSales
+	 * 				The number of children bike sales.
+	 * @param womenSales
+	 * 				The number of women bike sales.
+	 * @param menSales
+	 * 				The number of men bike sales.
+	 */
 	public Sales(int childrenSales, int womenSales, int menSales) {
 		super();
 		this.childrenSales = childrenSales;
 		this.womenSales = womenSales;
 		this.menSales = menSales;
 	}
-
+	
+	/*
+	 * ======================== METHODS ========================
+	 */
 	public int getChildrenSales() {
 		return childrenSales;
 	}
