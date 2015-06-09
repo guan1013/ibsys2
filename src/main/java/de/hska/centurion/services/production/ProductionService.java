@@ -7,11 +7,16 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
+import de.hska.centurion.domain.gui.Forecast;
 import de.hska.centurion.domain.gui.SafetyStock;
 import de.hska.centurion.domain.gui.Sales;
+import de.hska.centurion.domain.gui.UserInput;
 import de.hska.centurion.domain.input.Results;
+import de.hska.centurion.domain.output.Input;
 import de.hska.centurion.domain.production.ProductionPlan;
-import de.hska.centurion.domain.production.workplace.Input;
+import de.hska.centurion.domain.production.item.Item;
+import de.hska.centurion.domain.production.item.PItem;
+import de.hska.centurion.domain.production.workplace.ProductionInput;
 import de.hska.centurion.domain.production.workplace.Workplace;
 import de.hska.centurion.io.XmlInputParser;
 import de.hska.centurion.util.ProductionPlanBuilder;
@@ -37,6 +42,7 @@ public class ProductionService {
 		this.plans = ProductionPlanBuilder
 				.createProductionPlans(this.xmlResults);
 
+		this.userInput = new UserInput();
 	}
 
 	/**
@@ -49,35 +55,94 @@ public class ProductionService {
 	 */
 	private Results xmlResults;
 
-	public void calculateProduction() {
+	private UserInput userInput;
 
+	private Map<String, Integer> productions;
+
+	private Input suggestedOutput;
+
+	public Input calculateProductionOrder() {
+
+		for (ProductionPlan plan : plans) {
+
+			PItem output = (PItem) plan.getProducer().getOutput();
+
+			if (output.getFixCostsCoverage() > 0) {
+
+				// TODO: Order isn't cost efficient exception
+
+			}
+
+			Map<String, Integer> roundTripTimes = new HashMap<String, Integer>();
+			
+			
+			roundTripTimes = calculateRoundTripTime(plan.getProducer(), 0, roundTripTimes);
+
+		}
+
+		return null;
 	}
 
-	public SafetyStock calculateSaftyStock(Sales sales, Sales directSales,
+	private Map<String, Integer> calculateRoundTripTime(Workplace workplace,
+			Integer quantity, Map<String, Integer> roundTripTimes) {
+
+		String workplaceNumber = workplace.getNumber();
+		if (roundTripTimes.get(workplaceNumber) == null) {
+
+			roundTripTimes.put(
+					workplaceNumber,
+					(quantity * workplace.getProductionTime())
+							+ workplace.getSetupTime());
+
+		} else {
+			Integer currentValue = roundTripTimes.get(workplaceNumber);
+
+			roundTripTimes.put(workplaceNumber,
+					(quantity * workplace.getProductionTime()) + currentValue
+							+ workplace.getSetupTime());
+		}
+		
+		for (ProductionInput prodInput : workplace.getInputs()) {
+
+			if (prodInput.getProducer() != null) {
+				roundTripTimes = calculateRoundTripTime(prodInput.getProducer(), prodInput.getQuantity(), roundTripTimes);
+			}
+				
+		}
+
+		return null;
+	}
+
+	public Map<String, Integer> calculateSafetyStock(
 			SafetyStock safetyStockInput) {
 
-		Map<String, Integer> salesMap = new HashMap<String, Integer>();
-		salesMap.put("P1",
-				sales.getChildrenSales() + directSales.getChildrenSales());
-		salesMap.put("P2", sales.getWomenSales() + directSales.getWomenSales());
-		salesMap.put("P3", sales.getMenSales() + directSales.getMenSales());
+		userInput.setSafetyStock(safetyStockInput);
 
-		SafetyStock safetyStockOutput = new SafetyStock(0);
+		Map<String, Integer> salesMap = new HashMap<String, Integer>();
+		salesMap.put("P1", userInput.getSales().getChildrenSales()
+				+ userInput.getDirectSales().getChildrenSales());
+		salesMap.put("P2", userInput.getSales().getWomenSales()
+				+ userInput.getDirectSales().getWomenSales());
+		salesMap.put("P3", userInput.getSales().getMenSales()
+				+ userInput.getDirectSales().getMenSales());
+
+		Map<String, Integer> productions = new SafetyStock(0).getSafetyStocks();
 
 		for (ProductionPlan plan : plans) {
 			String planName = plan.getName().toUpperCase();
 
-			safetyStockOutput = putWorkplaceToStock(plan.getProducer(),
-					safetyStockInput, safetyStockOutput, salesMap.get(planName));
+			productions = putWorkplaceToProductions(plan.getProducer(),
+					productions, salesMap.get(planName));
 		}
 
-		return safetyStockOutput;
+		this.productions = productions;
+
+		return productions;
 
 	}
-	
 
-	private SafetyStock putWorkplaceToStock(Workplace workplace,
-			SafetyStock input, SafetyStock output, Integer quantity) {
+	private Map<String, Integer> putWorkplaceToProductions(Workplace workplace,
+			Map<String, Integer> productions, Integer quantity) {
 
 		String itemName = workplace.getOutput().getType().toString()
 				+ workplace.getOutput().getNumber().toString();
@@ -86,23 +151,32 @@ public class ProductionService {
 
 		int waitingList = workplace.getWaitingList();
 
-		int value = quantity + input.getStock(itemName) - currentStock
-				- waitingList;
+		int value = quantity + userInput.getSafetyStock().getStock(itemName)
+				- currentStock - waitingList;
 
-		output.getSafetyStocks().put(itemName, value);
+		int currentValue = productions.get(itemName);
+		productions.put(itemName, currentValue + value);
 
-		for (Input itemInput : workplace.getInputs()) {
+		for (ProductionInput prodInput : workplace.getInputs()) {
 
-			if (itemInput.getProducer() != null) {
-				output = putWorkplaceToStock(itemInput.getProducer(), input,
-						output, itemInput.getQuantity() * value);
+			if (prodInput.getProducer() != null) {
+				productions = putWorkplaceToProductions(
+						prodInput.getProducer(), productions,
+						prodInput.getQuantity() * value);
 
 			}
 		}
 
-		return output;
+		return productions;
 	}
-	
-	
+
+	public void setForecast(Forecast forecast) {
+		userInput.setForecast(forecast);
+	}
+
+	public void setSales(Sales sales, Sales directSales) {
+		userInput.setSales(sales);
+		userInput.setDirectSales(directSales);
+	}
 
 }

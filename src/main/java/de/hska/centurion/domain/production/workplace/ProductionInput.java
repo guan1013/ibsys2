@@ -6,7 +6,7 @@ package de.hska.centurion.domain.production.workplace;
  * @author Matthias Schnell
  *
  */
-public class Input {
+public class ProductionInput {
 
 	/*
 	 * ======================== CONSTRUCTOR ========================
@@ -22,7 +22,7 @@ public class Input {
 	 * @param producer
 	 *            workplace which should produce requested item
 	 */
-	public Input(String item, Integer quantity, Workplace producer) {
+	public ProductionInput(String item, Integer quantity, Workplace producer) {
 		super();
 		this.item = item;
 		this.quantity = quantity;
@@ -84,7 +84,7 @@ public class Input {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Input other = (Input) obj;
+		ProductionInput other = (ProductionInput) obj;
 		if (id != other.id)
 			return false;
 		if (item == null) {

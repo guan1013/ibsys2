@@ -36,7 +36,7 @@ public class Workplace {
 	 *            which is required to prepare this workspace for the production
 	 *            of this objects item
 	 */
-	public Workplace(String number, Item output, List<Input> inputs,
+	public Workplace(String number, Item output, List<ProductionInput> inputs,
 			Integer openOrders, Integer productionTime, Integer setupTime) {
 		super();
 		this.number = number;
@@ -69,7 +69,7 @@ public class Workplace {
 	/**
 	 * list of items which are required for the production of the output item
 	 */
-	private List<Input> inputs;
+	private List<ProductionInput> inputs;
 
 	/**
 	 * unfinished items on this workplace
@@ -98,7 +98,7 @@ public class Workplace {
 	 *            new required input
 	 * @return updated List of input items
 	 */
-	public List<Input> addInput(Input input) {
+	public List<ProductionInput> addInput(ProductionInput input) {
 		this.inputs.add(input);
 
 		return this.inputs;
@@ -205,11 +205,11 @@ public class Workplace {
 		this.output = output;
 	}
 
-	public List<Input> getInputs() {
+	public List<ProductionInput> getInputs() {
 		return inputs;
 	}
 
-	public void setInputs(List<Input> inputs) {
+	public void setInputs(List<ProductionInput> inputs) {
 		this.inputs = inputs;
 	}
 

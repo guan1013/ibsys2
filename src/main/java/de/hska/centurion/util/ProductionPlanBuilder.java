@@ -15,7 +15,7 @@ import de.hska.centurion.domain.production.item.Item;
 import de.hska.centurion.domain.production.item.KItem;
 import de.hska.centurion.domain.production.item.PItem;
 import de.hska.centurion.domain.production.resources.ItemTypeEnum;
-import de.hska.centurion.domain.production.workplace.Input;
+import de.hska.centurion.domain.production.workplace.ProductionInput;
 import de.hska.centurion.domain.production.workplace.Workplace;
 
 /**
@@ -124,7 +124,7 @@ public class ProductionPlanBuilder {
 		Item output = getItem(outputString, xmlResults);
 
 		// Get all known inputs for this workplace from properties
-		List<Input> inputs = new ArrayList<Input>();
+		List<ProductionInput> inputs = new ArrayList<ProductionInput>();
 		final int inputCount = Integer.parseInt(propertyString
 				+ Constants.getInputKey() + Constants.getCountKey());
 		int inputIndex = 0;
@@ -179,8 +179,8 @@ public class ProductionPlanBuilder {
 	 *            index of current input in properties
 	 * @return Input of requested workplace
 	 */
-	private static Input getInput(String workplaceProperty, int index,
-			Results xmlResults) {
+	private static ProductionInput getInput(String workplaceProperty,
+			int index, Results xmlResults) {
 		String propertyString = workplaceProperty + index;
 
 		// Get item identifier from properties
@@ -201,7 +201,7 @@ public class ProductionPlanBuilder {
 		}
 
 		// Create a new input with all associated objects
-		Input input = new Input(item, quantity, producer);
+		ProductionInput input = new ProductionInput(item, quantity, producer);
 
 		return input;
 	}
@@ -229,11 +229,15 @@ public class ProductionPlanBuilder {
 		// Get item.name from properties
 		String name = prop.getProperty(propertyString + Constants.getNameKey());
 
-		// Get item.value from properties
-		Double value = Double.parseDouble(prop.getProperty(propertyString
-				+ Constants.getValueKey()));
+		// Get item.value from XML
 
-		// Get stock form XML
+		String priceString = xmlResults.getWarehousestock().getArticles()
+				.get(number).getPriceString();
+
+		priceString = priceString.replace(',', '.');
+		Double value = Double.parseDouble(priceString);
+
+		// Get item.stock form XML
 		Integer stock = xmlResults.getWarehousestock().getArticles()
 				.get(number).getAmount();
 
