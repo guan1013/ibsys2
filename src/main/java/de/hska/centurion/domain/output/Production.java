@@ -1,15 +1,42 @@
 package de.hska.centurion.domain.output;
-
+/**
+ * This class represents a production order in the list of production orders.
+ * @author Simon
+ *
+ */
 public class Production {
+	
+	/*
+	 * ======================== ATTRIBUTES ========================
+	 */
+	/**
+	 * The name of the article, between 1 and 56 (with exceptions).
+	 */
 	private int article;
+	
+	/**
+	 * The quantity of the article to be produced.
+	 */
 	private int quantity;
 
+	/*
+	 * ======================== CONSTRUCTORS ========================
+	 */
+	/**
+	 * The constructor to create a production order.
+	 * @param article
+	 * 				The name of the article, between 1 and 56 (with exceptions).
+	 * @param quantity
+	 * 				The quantity of the article to be produced.
+	 */
 	public Production(int article, int quantity) {
 		super();
 		this.article = article;
 		this.quantity = quantity;
 	}
-
+	/*
+	 * ======================== METHODS ========================
+	 */
 	public int getArticle() {
 		return article;
 	}

@@ -2,18 +2,53 @@ package de.hska.centurion.domain.gui;
 
 import java.util.Arrays;
 
+/**
+ * This class represents the four period forecast for the simulation.
+ * 
+ * @author Simon
+ *
+ */
 public class Forecast {
+	/*
+	 * ======================== ATTRIBUTES ========================
+	 */
+	/**
+	 * The forecasts are saved in a array of Sales-Objects.
+	 * @see Sales
+	 */
 	private Sales[] forecasts = new Sales[4];
 	
+	/*
+	 * ======================== CONSTRUCTORS ========================
+	 */
+	/**
+	 * This Constructor creates an Forecast-object through a Sales-Array.
+	 * The length of the array should be four.
+	 * @param forecasts
+	 */
 	public Forecast(Sales[] forecasts) {
 		super();
 		this.forecasts = forecasts;
 	}
 	
+	/**
+	 * This Constructor creates an Forecast-object trough four Sales-objects.
+	 * @param p1
+	 * 			the sales object for the first period.
+	 * @param p2
+	 * 			the sales object for the second period.
+	 * @param p3
+	 * 			the sales object for the third period.
+	 * @param p4
+	 * 			the sales object for the fourth period.
+	 */
 	public Forecast(Sales p1, Sales p2, Sales p3, Sales p4) {
 		this.forecasts = new Sales[]{p1, p2, p3, p4};
 	}
-
+	
+	/*
+	 * ======================== METHODS ========================
+	 */
 	public Sales[] getForecasts() {
 		return forecasts;
 	}

@@ -2,17 +2,52 @@ package de.hska.centurion.domain.gui;
 
 import de.hska.centurion.domain.output.Input;
 
+/**
+ * This class contains the inputs of the user. The user delivers the input
+ * through the GUI.
+ * 
+ * @author Simon
+ *
+ */
 public class UserInput {
+	/*
+	 * ======================== ATTRIBUTES ========================
+	 */
 	// Notwendige Inputs des Users.
+	/**
+	 * The Forecast contains the next four periods.
+	 */
 	private Forecast forecast;
+
+	/**
+	 * The Sales-object contains the sales of the three different bicycle-types
+	 * for the simulation period.
+	 */
 	private Sales sales;
+
+	/**
+	 * The DirectSales-Object contains the direct sales of the three different
+	 * bicycle-types for the simulation period-
+	 */
 	private Sales directSales;
+
+	/**
+	 * The SafetyStock contains the wished number of articles at the end of the
+	 * simulation period.
+	 */
 	private SafetyStock safetyStock;
 
 	// Das Output-Objekt, das während die GUI aufgebaut wird vom User angepasst
 	// werden kann.
+	/**
+	 * The Input-Object contains the suggested values for the scsim-input. The
+	 * inputs will be calculated by the program and can be changed by the user.
+	 */
 	private Input suggestedOutput;
 
+	/*
+	 * ======================== Methods ========================
+	 */
 	public Forecast getForecast() {
 		return forecast;
 	}

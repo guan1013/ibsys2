@@ -1,21 +1,70 @@
 package de.hska.centurion.domain.output;
 
 /**
+ * This class represents one sellwish for the list of sales or direct sales.
+ * 
  * @author Simon
  *
  */
 public class Item {
+	
+	/*
+	 * ======================== ATTRIBUTES ========================
+	 */
+	/**
+	 * the name of the article.
+	 * Either 1, 2 or 3.
+	 */
 	private int article;
+	
+	/**
+	 * the quantity of items of this article.
+	 */
 	private int quantity;
-	private double price;
-	private double penalty;
-
+	
+	/**
+	 * the price of the article apiece.
+	 * only needed if the sale is a direct sale.
+	 * Else this should be null.
+	 */
+	private Double price;
+	
+	/**
+	 * the contract penalty of the direct sell.
+	 * Only needed if the sale is a direct sale.
+	 * Else this should be null.
+	 */
+	private Double penalty;
+	
+	/*
+	 * ======================== CONSTRUCTORS ========================
+	 */
+	/**
+	 * The constructor to create a normal sellwish.
+	 * @param article
+	 * 				the name of the article, either 1, 2 or 3.
+	 * @param quantity
+	 * 				the quantity of items of the article.
+	 */
 	public Item(int article, int quantity) {
 		super();
 		this.article = article;
 		this.quantity = quantity;
+		this.price = null;
+		this.penalty = null;
 	}
 
+	/**
+	 * The constructor to create a direct sell.
+	 * @param article
+	 * 				the name of the article, either 1, 2 or 3.
+	 * @param quantity
+	 * 				the quantity of items of the article.
+	 * @param price
+	 * 				the price apiece of the article.
+	 * @param penalty
+	 * 				the contract penalty for this article.
+	 */
 	public Item(int article, int quantity, double price, double penalty) {
 		super();
 		this.article = article;
@@ -24,6 +73,9 @@ public class Item {
 		this.penalty = penalty;
 	}
 
+	/*
+	 * ======================== METHODS ========================
+	 */
 	public int getArticle() {
 		return article;
 	}

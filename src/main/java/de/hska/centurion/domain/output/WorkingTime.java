@@ -1,14 +1,39 @@
 package de.hska.centurion.domain.output;
 
 /**
+ * This class represents a time configuration for one workspace.
+ * 
  * @author Simon
  *
  */
 public class WorkingTime {
+	/*
+	 * ======================== ATTRIBUTES ========================
+	 */
+	/**
+	 * The name of the workspace, between 1 and 15 (except 5).
+	 */
 	private int station;
+	/**
+	 * The number of shifts for this workspace, between 1 and 3.
+	 */
 	private int shift;
+	/**
+	 * The Overtime in Minutes per working day, maximal 720(?).
+	 */
 	private int overtime;
 
+	/*
+	 * ======================== CONSTRUCTORS ========================
+	 */
+	/**
+	 * The constructor to create a working time configuration.
+	 * @param station
+	 * 				The name of the workspace, between 1 and 15 (except 5).
+	 * @param shift
+	 * 				The number of shifts for this workspace, between 1 and 3.
+	 * @param overtime
+ 	 */
 	public WorkingTime(int station, int shift, int overtime) {
 		super();
 		this.station = station;
@@ -16,6 +41,9 @@ public class WorkingTime {
 		this.overtime = overtime;
 	}
 
+	/*
+	 * ======================== METHODS ========================
+	 */
 	public int getStation() {
 		return station;
 	}

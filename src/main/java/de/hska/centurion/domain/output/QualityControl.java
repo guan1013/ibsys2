@@ -1,10 +1,21 @@
 package de.hska.centurion.domain.output;
 
+/**
+ * This class represents the static qualityControl of a simulation-input.
+ * @author Simon
+ *
+ */
 public class QualityControl {
+	/*
+	 * ======================== ATTRIBUTES ========================
+	 */
 	private String type = "no";
 	private int loseQuantity = 0;
 	private int delay = 0;
-
+	
+	/*
+	 * ======================== METHODS ========================
+	 */
 	public String getType() {
 		return type;
 	}
