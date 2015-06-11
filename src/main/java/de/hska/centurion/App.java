@@ -25,7 +25,7 @@ import de.hska.centurion.io.XmlInputParser;
  *
  */
 public class App {
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 
 		try {
 
