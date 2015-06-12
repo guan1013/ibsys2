@@ -20,7 +20,28 @@ import de.hska.centurion.domain.production.workplace.Workplace;
 import de.hska.centurion.io.XmlInputParser;
 import de.hska.centurion.util.ProductionPlanBuilder;
 
+/**
+ * Service Object which provides business logic functionality
+ * 
+ * @author Matthias Schnell
+ *
+ */
 public class ProductionService {
+
+	/*
+	 * ======================== CONSTANTS ========================
+	 */
+
+	private String ACCUMULATED = "accumulated";
+
+	private Integer SHIFT_TIME_MINS = 2400;
+
+	private Integer MAX_CAPACITY = (3 * SHIFT_TIME_MINS)
+			+ (3 * SHIFT_TIME_MINS / 2);
+
+	/*
+	 * ======================== CONSTRUCTOR ========================
+	 */
 
 	/**
 	 * Standard Constructor
@@ -44,6 +65,10 @@ public class ProductionService {
 		this.userInput = new UserInput();
 	}
 
+	/*
+	 * ======================== ATTRIBUTES ========================
+	 */
+
 	/**
 	 * List of all production plans
 	 */
@@ -54,19 +79,67 @@ public class ProductionService {
 	 */
 	private Results xmlResults;
 
+	/**
+	 * Object which holds user input information
+	 */
 	private UserInput userInput;
 
+	/**
+	 * list of item which should be produced
+	 */
 	private Map<String, Integer> productions;
 
+	/**
+	 * Object which holds informations for the application output "input.xml"
+	 */
 	private Input suggestedOutput;
 
-	private String ACCUMULATED = "accumulated";
+	/*
+	 * ======================== METHODS ========================
+	 */
 
-	private Integer SHIFT_TIME_MINS = 2400;
+	/**
+	 * Calculate produced items with given safetystock
+	 * 
+	 * @param safetyStockInput
+	 *            given safetystock for calculation
+	 * @return items which will be produced under consideration of safetystock,
+	 *         sellwish, current stock and unfinished productions
+	 */
+	public Map<String, Integer> calculateSafetyStock(
+			SafetyStock safetyStockInput) {
 
-	private Integer MAX_CAPACITY = (3 * SHIFT_TIME_MINS)
-			+ (3 * SHIFT_TIME_MINS / 2);
+		// Place safetystock in global UserInput object for further calculation
+		userInput.setSafetyStock(safetyStockInput);
 
+		Map<String, Integer> salesMap = new HashMap<String, Integer>();
+		salesMap.put("P1", userInput.getSales().getChildrenSales()
+				+ userInput.getDirectSales().getChildrenSales());
+		salesMap.put("P2", userInput.getSales().getWomenSales()
+				+ userInput.getDirectSales().getWomenSales());
+		salesMap.put("P3", userInput.getSales().getMenSales()
+				+ userInput.getDirectSales().getMenSales());
+
+		Map<String, Integer> productions = new SafetyStock(0).getSafetyStocks();
+
+		for (ProductionPlan plan : plans) {
+			String planName = plan.getName().toUpperCase();
+
+			productions = putWorkplaceToProductions(plan.getProducer(),
+					productions, salesMap.get(planName));
+		}
+
+		this.productions = productions;
+
+		return productions;
+
+	}
+
+	/**
+	 * 
+	 * 
+	 * @return
+	 */
 	public Input calculateProductionOrder() {
 
 		Map<String, Map<String, Integer>> roundTripTimes = new HashMap<String, Map<String, Integer>>();
@@ -102,6 +175,10 @@ public class ProductionService {
 
 		return null;
 	}
+
+	/*
+	 * ======================== PRIVATS ========================
+	 */
 
 	private String calcBottleNeck(
 			Map<String, Map<String, Integer>> roundTripTimes) {
@@ -212,34 +289,6 @@ public class ProductionService {
 		return roundTripTimes;
 	}
 
-	public Map<String, Integer> calculateSafetyStock(
-			SafetyStock safetyStockInput) {
-
-		userInput.setSafetyStock(safetyStockInput);
-
-		Map<String, Integer> salesMap = new HashMap<String, Integer>();
-		salesMap.put("P1", userInput.getSales().getChildrenSales()
-				+ userInput.getDirectSales().getChildrenSales());
-		salesMap.put("P2", userInput.getSales().getWomenSales()
-				+ userInput.getDirectSales().getWomenSales());
-		salesMap.put("P3", userInput.getSales().getMenSales()
-				+ userInput.getDirectSales().getMenSales());
-
-		Map<String, Integer> productions = new SafetyStock(0).getSafetyStocks();
-
-		for (ProductionPlan plan : plans) {
-			String planName = plan.getName().toUpperCase();
-
-			productions = putWorkplaceToProductions(plan.getProducer(),
-					productions, salesMap.get(planName));
-		}
-
-		this.productions = productions;
-
-		return productions;
-
-	}
-
 	private Map<String, Integer> putWorkplaceToProductions(Workplace workplace,
 			Map<String, Integer> productions, Integer quantity) {
 
@@ -276,6 +325,10 @@ public class ProductionService {
 
 		return productions;
 	}
+
+	/*
+	 * ======================== GETS & SETS ========================
+	 */
 
 	public void setForecast(Forecast forecast) {
 		userInput.setForecast(forecast);
