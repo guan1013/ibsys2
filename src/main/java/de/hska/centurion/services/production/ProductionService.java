@@ -125,10 +125,10 @@ public class ProductionService {
 					productions, salesMap.get(planName));
 		}
 
-		for (Map.Entry<String, Integer> p : productions.entrySet()) {
+		/*for (Map.Entry<String, Integer> p : productions.entrySet()) {
 
 			System.out.println("#### " + p.getKey() + " = " + p.getValue());
-		}
+		}*/
 
 		this.productions = productions;
 
