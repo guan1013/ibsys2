@@ -44,7 +44,9 @@ import de.hska.centurion.domain.input.components.IdleTimeCostsSum;
 import de.hska.centurion.domain.input.components.Order;
 import de.hska.centurion.domain.input.components.WorkplaceCosts;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
+import de.hska.centurion.domain.output.Production;
 import de.hska.centurion.io.XmlInputParser;
+import de.hska.centurion.services.production.ProductionService;
 
 import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
@@ -69,7 +71,6 @@ import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 
 public class PlanungstoolGUI {
-
 
 	private JFrame frmIbsysiiplanungstoolGruppe;
 	private JTable tableWarehouse;
@@ -147,8 +148,6 @@ public class PlanungstoolGUI {
 
 	private JLabel lblStep1Periode4Title;
 
-	private UserInput userInput;
-
 	private JSpinner spinnerStep1P1Periode1;
 
 	private JSpinner spinnerStep1P2Periode1;
@@ -172,6 +171,22 @@ public class PlanungstoolGUI {
 	private JSpinner spinnerStep1P2Periode4;
 
 	private JSpinner spinnerStep1P3Periode4;
+	private JSpinner spinnerStep2P1Sales;
+	private JSpinner spinnerStep2P1DirectSales;
+	private JSpinner spinnerStep2P2Sales;
+	private JSpinner spinnerStep2P3Sales;
+	private JSpinner spinnerStep2P2DirectSales;
+	private JSpinner spinnerStep2P3DirectSales;
+
+	/*
+	 * CURRENTLY LOADED XML-RESULT FILE
+	 */
+	private Results results = null;
+
+	/*
+	 * PLACE TO STORE ALL USER INPUT FROM THE GUI
+	 */
+	private UserInput userInput;
 
 	/**
 	 * Launch the application.
@@ -592,6 +607,7 @@ public class PlanungstoolGUI {
 
 					gui.switchToStep(1);
 					gui.setPeriod(results.getPeriod());
+					gui.setResults(results);
 				}
 			}
 		});
@@ -746,27 +762,27 @@ public class PlanungstoolGUI {
 		lblStep2DirectSalesTitle.setBounds(269, 66, 141, 23);
 		panelStep2.add(lblStep2DirectSalesTitle);
 
-		JSpinner spinnerStep2P1Sales = new JSpinner();
+		spinnerStep2P1Sales = new JSpinner();
 		spinnerStep2P1Sales.setBounds(153, 103, 120, 20);
 		panelStep2.add(spinnerStep2P1Sales);
 
-		JSpinner spinnerStep2P1DirectSales = new JSpinner();
+		spinnerStep2P1DirectSales = new JSpinner();
 		spinnerStep2P1DirectSales.setBounds(290, 103, 120, 20);
 		panelStep2.add(spinnerStep2P1DirectSales);
 
-		JSpinner spinnerStep2P2Sales = new JSpinner();
+		spinnerStep2P2Sales = new JSpinner();
 		spinnerStep2P2Sales.setBounds(153, 163, 120, 20);
 		panelStep2.add(spinnerStep2P2Sales);
 
-		JSpinner spinnerStep2P3Sales = new JSpinner();
+		spinnerStep2P3Sales = new JSpinner();
 		spinnerStep2P3Sales.setBounds(153, 223, 120, 20);
 		panelStep2.add(spinnerStep2P3Sales);
 
-		JSpinner spinnerStep2P2DirectSales = new JSpinner();
+		spinnerStep2P2DirectSales = new JSpinner();
 		spinnerStep2P2DirectSales.setBounds(290, 163, 120, 20);
 		panelStep2.add(spinnerStep2P2DirectSales);
 
-		JSpinner spinnerStep2P3DirectSales = new JSpinner();
+		spinnerStep2P3DirectSales = new JSpinner();
 		spinnerStep2P3DirectSales.setBounds(290, 223, 120, 20);
 		panelStep2.add(spinnerStep2P3DirectSales);
 
@@ -2215,19 +2231,42 @@ public class PlanungstoolGUI {
 		btnStep5PrevStep.addActionListener(switchStepsButtonActionListener);
 		btnStep5NextStep.addActionListener(switchStepsButtonActionListener);
 		btnStep6PrevStep.addActionListener(switchStepsButtonActionListener);
-		
+
 		btnStep1NextStep.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				inheritForecast();
-				
+
+			}
+		});
+
+		btnStep2NextStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				inheritSales();
+
+			}
+		});
+
+		btnStep3NextStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// ProductionService productionService = new
+				// ProductionService(xmlPath);
+
 			}
 		});
 
 		// PREPARE GUI
 		tabbedPanePlanning.removeAll();
 
+	}
+
+	protected void setResults(Results results2) {
+		this.results = results2;
 	}
 
 	protected void inheritForecast() {
@@ -2249,10 +2288,31 @@ public class PlanungstoolGUI {
 				(int) spinnerStep1P1Periode4.getValue(),
 				(int) spinnerStep1P2Periode4.getValue(),
 				(int) spinnerStep1P3Periode4.getValue());
-		
-		Forecast forecast = new Forecast(salesPeriode1, salesPeriode2, salesPeriode3, salesPeriode4);
-		
+
+		Forecast forecast = new Forecast(salesPeriode1, salesPeriode2,
+				salesPeriode3, salesPeriode4);
+
+		userInput.setForecast(forecast);
+
 		System.out.println(forecast);
+	}
+
+	protected void inheritSales() {
+		Sales sales = new Sales((int) spinnerStep2P1Sales.getValue(),
+				(int) spinnerStep2P2Sales.getValue(),
+				(int) spinnerStep2P3Sales.getValue());
+
+		Sales directSales = new Sales(
+				(int) spinnerStep2P1DirectSales.getValue(),
+				(int) spinnerStep2P2DirectSales.getValue(),
+				(int) spinnerStep2P3DirectSales.getValue());
+
+		userInput.setSales(sales);
+		userInput.setDirectSales(directSales);
+
+		System.out.println(sales);
+		System.out.println(directSales);
+
 	}
 
 	protected void setPeriod(int period) {

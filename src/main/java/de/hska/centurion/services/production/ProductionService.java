@@ -55,9 +55,9 @@ public class ProductionService {
 	 * @throws JAXBException
 	 *             throws exception if output.xml isn't parsable
 	 */
-	public ProductionService(String xmlPath) throws IOException, JAXBException {
+	public ProductionService(Results results) throws IOException, JAXBException {
 
-		this.xmlResults = XmlInputParser.parseXmlFile(xmlPath);
+		this.xmlResults = results;
 
 		this.plans = ProductionPlanBuilder
 				.createProductionPlans(this.xmlResults);
