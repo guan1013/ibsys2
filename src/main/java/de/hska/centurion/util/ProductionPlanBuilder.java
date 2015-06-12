@@ -62,7 +62,7 @@ public class ProductionPlanBuilder {
 	 * 
 	 * 
 	 * 
-	 * @param xmlResuls
+	 * @param xmlResults
 	 *            results from output.xml
 	 * 
 	 * @throws IOException
@@ -70,10 +70,7 @@ public class ProductionPlanBuilder {
 	 *             reachable
 	 * @return full list of all production plans
 	 */
-	public static List<ProductionPlan> createProductionPlans(Results xmlResuls) {
-
-		@SuppressWarnings("unused")
-		Results xmlResults = xmlResuls;
+	public static List<ProductionPlan> createProductionPlans(Results xmlResults) {
 
 		// Create a new empty list of ProductionPlans
 		List<ProductionPlan> productionPlans = new ArrayList<ProductionPlan>();
@@ -90,18 +87,32 @@ public class ProductionPlanBuilder {
 			String planName = prop.getProperty(Constants.getPlanInitKey() + i
 					+ Constants.getNameKey());
 
-			// Get production plan producer
-			String planProducer = prop.getProperty(Constants.getPlanInitKey()
-					+ i + Constants.getInitKey());
-
-			Workplace producer = getWorkspace(planProducer, planName, xmlResuls);
-
+			ProductionPlan plan = createProductionPlan(xmlResults, planName);
 			// Add current Production Plan to result list
-			productionPlans.add(new ProductionPlan(planName, producer));
+			productionPlans.add(plan);
 
 		}
 
 		return productionPlans;
+	}
+
+	/**
+	 * 
+	 * @param xmlResults
+	 *            results from output.xml
+	 * @param outputItem
+	 *            final output of this production plan
+	 * @return
+	 */
+	public static ProductionPlan createProductionPlan(Results xmlResults,
+			String outputItem) {
+
+		// Get name of final output producer workplace
+		String outputProducer = prop.getProperty(Constants.getItemInitKey()
+				+ outputItem + Constants.getProducerKey());
+
+		return new ProductionPlan(outputItem, getWorkspace(outputProducer,
+				outputItem, xmlResults));
 	}
 
 	/**

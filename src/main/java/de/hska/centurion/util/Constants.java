@@ -8,7 +8,6 @@ public class Constants {
 	private static final String ITEM_INIT_KEY = "item";
 	private static final String COUNT_KEY = ".count";
 	private static final String NAME_KEY = ".name";
-	private static final String INIT_KEY = ".init";
 	private static final String PTIME_KEY = ".ptime";
 	private static final String STIME_KEY = ".stime";
 	private static final String INPUT_KEY = ".input";
@@ -46,10 +45,6 @@ public class Constants {
 
 	public static String getNameKey() {
 		return NAME_KEY;
-	}
-
-	public static String getInitKey() {
-		return INIT_KEY;
 	}
 
 	public static String getPtimeKey() {

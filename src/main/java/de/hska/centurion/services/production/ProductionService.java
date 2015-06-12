@@ -14,7 +14,6 @@ import de.hska.centurion.domain.gui.UserInput;
 import de.hska.centurion.domain.input.Results;
 import de.hska.centurion.domain.output.Input;
 import de.hska.centurion.domain.production.ProductionPlan;
-import de.hska.centurion.domain.production.item.Item;
 import de.hska.centurion.domain.production.item.PItem;
 import de.hska.centurion.domain.production.workplace.ProductionInput;
 import de.hska.centurion.domain.production.workplace.Workplace;
@@ -61,7 +60,16 @@ public class ProductionService {
 
 	private Input suggestedOutput;
 
+	private String ACCUMULATED = "accumulated";
+
+	private Integer SHIFT_TIME_MINS = 2400;
+
+	private Integer MAX_CAPACITY = (3 * SHIFT_TIME_MINS)
+			+ (3 * SHIFT_TIME_MINS / 2);
+
 	public Input calculateProductionOrder() {
+
+		Map<String, Map<String, Integer>> roundTripTimes = new HashMap<String, Map<String, Integer>>();
 
 		for (ProductionPlan plan : plans) {
 
@@ -73,44 +81,135 @@ public class ProductionService {
 
 			}
 
-			Map<String, Integer> roundTripTimes = new HashMap<String, Integer>();
-			
-			
-			roundTripTimes = calculateRoundTripTime(plan.getProducer(), 0, roundTripTimes);
+			Integer quantity = productions.get(plan.getName().toUpperCase());
+
+			roundTripTimes = calculateRoundTripTime(plan.getProducer(),
+					quantity, roundTripTimes);
+
+		}
+
+		String bottleNeck = calcBottleNeck(roundTripTimes);
+
+		for (ProductionPlan plan : plans) {
+
+			PItem output = (PItem) plan.getProducer().getOutput();
+
+			Double productionOrder = output.getFixCostsCoverage()
+					/ roundTripTimes.get(bottleNeck).get(ACCUMULATED)
+							.doubleValue();
 
 		}
 
 		return null;
 	}
 
-	private Map<String, Integer> calculateRoundTripTime(Workplace workplace,
-			Integer quantity, Map<String, Integer> roundTripTimes) {
+	private String calcBottleNeck(
+			Map<String, Map<String, Integer>> roundTripTimes) {
+
+		String bottleNeckWorkplace = null;
+
+		Integer bottleNeckRTT = 0;
+
+		for (Map.Entry<String, Map<String, Integer>> rtt : roundTripTimes
+				.entrySet()) {
+
+			Integer currentRTT = MAX_CAPACITY - rtt.getValue().get(ACCUMULATED);
+
+			if (currentRTT < 0) {
+				// TODO: Order isn't possible within periode
+			}
+
+			if (currentRTT < bottleNeckRTT) {
+				bottleNeckRTT = currentRTT;
+
+				bottleNeckWorkplace = rtt.getKey();
+			}
+
+		}
+		return bottleNeckWorkplace;
+
+	}
+
+	private Map<String, Map<String, Integer>> calculateRoundTripTime(
+			Workplace workplace, Integer quantity,
+			Map<String, Map<String, Integer>> roundTripTimes) {
+
+		String itemName = workplace.getOutput().getType().toString()
+				+ workplace.getOutput().getNumber().toString();
+
+		int value = 0;
 
 		String workplaceNumber = workplace.getNumber();
+
+		Map<String, Integer> outputRRT = new HashMap<String, Integer>();
+
 		if (roundTripTimes.get(workplaceNumber) == null) {
 
-			roundTripTimes.put(
-					workplaceNumber,
-					(quantity * workplace.getProductionTime())
-							+ workplace.getSetupTime());
+			int currentStock = workplace.getOutput().getStock();
+
+			int waitingList = workplace.getWaitingList();
+
+			value = quantity + userInput.getSafetyStock().getStock(itemName)
+					- currentStock - waitingList;
+
+			Integer roundTripTime = (value * workplace.getProductionTime())
+					+ workplace.getSetupTime();
+
+			outputRRT.put(itemName, roundTripTime);
 
 		} else {
-			Integer currentValue = roundTripTimes.get(workplaceNumber);
 
-			roundTripTimes.put(workplaceNumber,
-					(quantity * workplace.getProductionTime()) + currentValue
-							+ workplace.getSetupTime());
+			outputRRT = roundTripTimes.get(workplaceNumber);
+
+			Integer roundTripTime = 0;
+
+			if (outputRRT.get(itemName) == null) {
+
+				int currentStock = workplace.getOutput().getStock();
+
+				int waitingList = workplace.getWaitingList();
+
+				value = quantity
+						+ userInput.getSafetyStock().getStock(itemName)
+						- currentStock - waitingList;
+
+				roundTripTime = (value * workplace.getProductionTime())
+						+ workplace.getSetupTime();
+
+			} else {
+
+				Integer currentValue = outputRRT.get(itemName);
+
+				roundTripTime = (quantity * workplace.getProductionTime())
+						+ currentValue + workplace.getSetupTime();
+
+			}
+
+			outputRRT.put(itemName, roundTripTime);
+
 		}
-		
+
+		Integer accumulatedRTT = 0;
+
+		for (Map.Entry<String, Integer> set : outputRRT.entrySet()) {
+			accumulatedRTT += set.getValue();
+		}
+
+		outputRRT.put(ACCUMULATED, accumulatedRTT);
+
+		roundTripTimes.put(workplaceNumber, outputRRT);
+
 		for (ProductionInput prodInput : workplace.getInputs()) {
 
 			if (prodInput.getProducer() != null) {
-				roundTripTimes = calculateRoundTripTime(prodInput.getProducer(), prodInput.getQuantity(), roundTripTimes);
+				roundTripTimes = calculateRoundTripTime(
+						prodInput.getProducer(), prodInput.getQuantity(),
+						roundTripTimes);
 			}
-				
+
 		}
 
-		return null;
+		return roundTripTimes;
 	}
 
 	public Map<String, Integer> calculateSafetyStock(
@@ -147,14 +246,22 @@ public class ProductionService {
 		String itemName = workplace.getOutput().getType().toString()
 				+ workplace.getOutput().getNumber().toString();
 
-		int currentStock = workplace.getOutput().getStock();
-
-		int waitingList = workplace.getWaitingList();
-
-		int value = quantity + userInput.getSafetyStock().getStock(itemName)
-				- currentStock - waitingList;
+		int value = 0;
 
 		int currentValue = productions.get(itemName);
+
+		if (currentValue <= 0) {
+
+			value = quantity;
+
+		} else {
+			int currentStock = workplace.getOutput().getStock();
+
+			int waitingList = workplace.getWaitingList();
+
+			value = quantity + userInput.getSafetyStock().getStock(itemName)
+					- currentStock - waitingList;
+		}
 		productions.put(itemName, currentValue + value);
 
 		for (ProductionInput prodInput : workplace.getInputs()) {
