@@ -32,19 +32,25 @@ public class ProductionPlanBuilder {
 	/**
 	 * Standard Constructor
 	 * 
+	 * @param xmlResults
+	 *            results from output.xml
+	 * 
 	 * @throws IOException
 	 *             throws exception if plan.properties not exists or isn't
 	 *             reachable
 	 * 
 	 */
-	public ProductionPlanBuilder() throws IOException {
+	public ProductionPlanBuilder(Results xmlResults) throws IOException {
 		// Get plan.properties from classpath
-		is = getClass().getResourceAsStream(
+		this.is = getClass().getResourceAsStream(
 				Constants.getProductionPlanProperties());
 
 		// Create new property object from plan.properties
-		ProductionPlanBuilder.prop = new Properties();
-		prop.load(is);
+		this.prop = new Properties();
+		this.prop.load(this.is);
+
+		this.xmlResults = xmlResults;
+
 	}
 
 	/*
@@ -52,32 +58,26 @@ public class ProductionPlanBuilder {
 	 */
 	private InputStream is;
 
-	private static Properties prop;
+	private Properties prop;
+
+	private Results xmlResults;
 
 	/*
 	 * ======================== METHODS ========================
 	 */
-	
+
 	/**
 	 * Creates all production plans listed in plan.properties file
 	 * 
-	 * 
-	 * 
-	 * @param xmlResults
-	 *            results from output.xml
-	 * 
-	 * @throws IOException
-	 *             throws exception if plan.properties not exists or isn't
-	 *             reachable
 	 * @return full list of all production plans
 	 */
-	public static List<ProductionPlan> createProductionPlans(Results xmlResults) {
+	public List<ProductionPlan> createProductionPlans() {
 
 		// Create a new empty list of ProductionPlans
 		List<ProductionPlan> productionPlans = new ArrayList<ProductionPlan>();
 
 		// Get all known productionplans from properties
-		final int plansCount = Integer.parseInt(prop.getProperty(Constants
+		final int plansCount = Integer.parseInt(this.prop.getProperty(Constants
 				.getPlanInitKey() + Constants.getCountKey()));
 		int i = 0;
 		// Foreach Production Plan build the associated objects
@@ -85,10 +85,10 @@ public class ProductionPlanBuilder {
 			i++;
 
 			// Get productionplan name
-			String planName = prop.getProperty(Constants.getPlanInitKey() + i
-					+ Constants.getNameKey());
+			String planName = this.prop.getProperty(Constants.getPlanInitKey()
+					+ "." + i + Constants.getNameKey());
 
-			ProductionPlan plan = createProductionPlan(xmlResults, planName);
+			ProductionPlan plan = createProductionPlan(planName);
 			// Add current Production Plan to result list
 			productionPlans.add(plan);
 
@@ -99,21 +99,22 @@ public class ProductionPlanBuilder {
 
 	/**
 	 * 
-	 * @param xmlResults
-	 *            results from output.xml
+	 * 
 	 * @param outputItem
 	 *            final output of this production plan
 	 * @return
 	 */
-	public static ProductionPlan createProductionPlan(Results xmlResults,
-			String outputItem) {
+	public ProductionPlan createProductionPlan(String outputItem) {
 
 		// Get name of final output producer workplace
-		String outputProducer = prop.getProperty(Constants.getItemInitKey()
-				+ outputItem + Constants.getProducerKey());
+		String outputProducer = this.prop.getProperty(Constants
+				.getItemInitKey()
+				+ "."
+				+ outputItem
+				+ Constants.getProducerKey());
 
 		return new ProductionPlan(outputItem, getWorkspace(outputProducer,
-				outputItem, xmlResults));
+				outputItem));
 	}
 
 	/**
@@ -125,20 +126,22 @@ public class ProductionPlanBuilder {
 	 *            number of output item in properties
 	 * @return workspace for requested production plan
 	 */
-	private static Workplace getWorkspace(String number, String outputString,
-			Results xmlResults) {
+	private Workplace getWorkspace(String number, String outputString) {
 
 		// build the commonly used string to access the key:value pairs in
 		// properties
 		String propertyString = Constants.getWpInitKey() + "." + number + "."
 				+ outputString;
 
-		Item output = getItem(outputString, xmlResults);
+		//System.out.println(propertyString);
+
+		Item output = getItem(outputString);
 
 		// Get all known inputs for this workplace from properties
 		List<ProductionInput> inputs = new ArrayList<ProductionInput>();
-		final int inputCount = Integer.parseInt(propertyString
-				+ Constants.getInputKey() + Constants.getCountKey());
+		final int inputCount = Integer.parseInt(this.prop
+				.getProperty(propertyString + Constants.getInputKey()
+						+ Constants.getCountKey()));
 		int inputIndex = 0;
 
 		while (inputIndex < inputCount) {
@@ -146,12 +149,12 @@ public class ProductionPlanBuilder {
 
 			// Get current interval's input for this workplace and add it to its
 			// input list
-			inputs.add(getInput(propertyString, inputIndex, xmlResults));
+			inputs.add(getInput(propertyString, inputIndex));
 		}
 
 		// Get open orders from output.xml
 
-		List<WorkplaceWaiting> workplaceWaitings = xmlResults
+		List<WorkplaceWaiting> workplaceWaitings = this.xmlResults
 				.getWaitingListWorkstations().getWorkplaces();
 
 		Integer openOrders = 0;
@@ -168,12 +171,12 @@ public class ProductionPlanBuilder {
 		}
 
 		// Get workplace.productionTime from properties
-		Integer productionTime = Integer.parseInt(prop
+		Integer productionTime = Integer.parseInt(this.prop
 				.getProperty(propertyString + Constants.getPtimeKey()));
 
 		// Get workplace.setupTime from properties
-		Integer setupTime = Integer.parseInt(prop.getProperty(propertyString
-				+ Constants.getStimeKey()));
+		Integer setupTime = Integer.parseInt(this.prop
+				.getProperty(propertyString + Constants.getStimeKey()));
 
 		// Create a new workplace with all associated objects
 		Workplace workplace = new Workplace(number, output, inputs, openOrders,
@@ -191,23 +194,27 @@ public class ProductionPlanBuilder {
 	 *            index of current input in properties
 	 * @return Input of requested workplace
 	 */
-	private static ProductionInput getInput(String workplaceProperty,
-			int index, Results xmlResults) {
-		String propertyString = workplaceProperty + index;
+	private ProductionInput getInput(String workplaceProperty, int index) {
+		String propertyString = workplaceProperty + Constants.getInputKey()
+				+ "." + index;
+
+		//System.out.println(propertyString);
 
 		// Get item identifier from properties
-		String item = prop.getProperty(propertyString + Constants.getItemKey());
+		String item = this.prop.getProperty(propertyString
+				+ Constants.getItemKey());
 
 		// Get input.quantity from properties
-		Integer quantity = Integer.parseInt(propertyString
-				+ Constants.getQuantityKey());
+		Integer quantity = Integer.parseInt(this.prop
+				.getProperty(propertyString + Constants.getQuantityKey()));
 
 		// Get input.producer from properties
-		String producerNumber = propertyString + Constants.getProducerKey();
+		String producerNumber = this.prop.getProperty(propertyString
+				+ Constants.getProducerKey());
 
 		Workplace producer;
 		if (Integer.parseInt(producerNumber) > 0) {
-			producer = getWorkspace(producerNumber, item, xmlResults);
+			producer = getWorkspace(producerNumber, item);
 		} else {
 			producer = null;
 		}
@@ -225,32 +232,36 @@ public class ProductionPlanBuilder {
 	 *            identifier of this item
 	 * @return an K, P or E item
 	 */
-	private static Item getItem(String itemString, Results xmlResults) {
+	private Item getItem(String itemString) {
 
 		// build the commonly used string to access the key:value pairs in
 		// properties
-		String propertyString = Constants.getItemInitKey() + itemString;
+		String propertyString = Constants.getItemInitKey() + "." + itemString;
+
+		//System.out.println(propertyString);
 
 		// Get item.type from properties
-		String type = prop.getProperty(propertyString + Constants.getTypeKey());
+		String type = this.prop.getProperty(propertyString
+				+ Constants.getTypeKey());
 
 		// Get item.number from properties
-		Integer number = Integer.parseInt(prop.getProperty(propertyString
+		Integer number = Integer.parseInt(this.prop.getProperty(propertyString
 				+ Constants.getNumberKey()));
 
 		// Get item.name from properties
-		String name = prop.getProperty(propertyString + Constants.getNameKey());
+		String name = this.prop.getProperty(propertyString
+				+ Constants.getNameKey());
 
 		// Get item.value from XML
 
-		String priceString = xmlResults.getWarehousestock().getArticles()
+		String priceString = this.xmlResults.getWarehousestock().getArticles()
 				.get(number).getPriceString();
 
 		priceString = priceString.replace(',', '.');
 		Double value = Double.parseDouble(priceString);
 
 		// Get item.stock form XML
-		Integer stock = xmlResults.getWarehousestock().getArticles()
+		Integer stock = this.xmlResults.getWarehousestock().getArticles()
 				.get(number).getAmount();
 
 		// Determine type of item
@@ -260,19 +271,19 @@ public class ProductionPlanBuilder {
 			// Create a new EItem
 			item = new EItem(number, name, value, stock);
 		} else if (type.equalsIgnoreCase(ItemTypeEnum.P.toString())) {
-			Double revenue = Double.parseDouble(prop.getProperty(propertyString
-					+ Constants.getRevenueKey()));
+			Double revenue = Double.parseDouble(this.prop
+					.getProperty(propertyString + Constants.getRevenueKey()));
 
 			item = new PItem(number, name, value, stock, revenue);
 
 		} else if (type.equalsIgnoreCase(ItemTypeEnum.K.toString())) {
-			Integer stack = Integer.parseInt(prop.getProperty(propertyString
-					+ Constants.getStackKey()));
-			Double orderCosts = Double.parseDouble(prop
+			Integer stack = Integer.parseInt(this.prop
+					.getProperty(propertyString + Constants.getStackKey()));
+			Double orderCosts = Double.parseDouble(this.prop
 					.getProperty(propertyString + Constants.getOrderKey()));
-			Double deliveryTime = Double.parseDouble(prop
+			Double deliveryTime = Double.parseDouble(this.prop
 					.getProperty(propertyString + Constants.getTimeKey()));
-			Double diviation = Double.parseDouble(prop
+			Double diviation = Double.parseDouble(this.prop
 					.getProperty(propertyString + Constants.getDivKey()));
 			item = new KItem(number, name, value, stock, stack, orderCosts,
 					deliveryTime, diviation);

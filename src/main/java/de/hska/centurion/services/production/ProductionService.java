@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBException;
-
 import de.hska.centurion.domain.gui.Forecast;
 import de.hska.centurion.domain.gui.SafetyStock;
 import de.hska.centurion.domain.gui.Sales;
@@ -17,7 +15,6 @@ import de.hska.centurion.domain.production.ProductionPlan;
 import de.hska.centurion.domain.production.item.PItem;
 import de.hska.centurion.domain.production.workplace.ProductionInput;
 import de.hska.centurion.domain.production.workplace.Workplace;
-import de.hska.centurion.io.XmlInputParser;
 import de.hska.centurion.util.ProductionPlanBuilder;
 
 /**
@@ -52,15 +49,14 @@ public class ProductionService {
 	 * @throws IOException
 	 *             throws exception if plan.properties not exists or isn't
 	 *             reachable
-	 * @throws JAXBException
-	 *             throws exception if output.xml isn't parsable
 	 */
-	public ProductionService(Results results) throws IOException, JAXBException {
+	public ProductionService(Results results) throws IOException {
 
 		this.xmlResults = results;
 
-		this.plans = ProductionPlanBuilder
-				.createProductionPlans(this.xmlResults);
+		ProductionPlanBuilder ppb = new ProductionPlanBuilder(this.xmlResults);
+
+		this.plans = ppb.createProductionPlans();
 
 		this.userInput = new UserInput();
 	}
@@ -129,6 +125,11 @@ public class ProductionService {
 					productions, salesMap.get(planName));
 		}
 
+		for (Map.Entry<String, Integer> p : productions.entrySet()) {
+
+			System.out.println("#### " + p.getKey() + " = " + p.getValue());
+		}
+
 		this.productions = productions;
 
 		return productions;
@@ -156,8 +157,8 @@ public class ProductionService {
 
 			Integer quantity = productions.get(plan.getName().toUpperCase());
 
-			roundTripTimes = calculateRoundTripTime(plan.getProducer(),
-					quantity, roundTripTimes);
+			roundTripTimes = calcRoundTripTime(plan.getProducer(), quantity,
+					roundTripTimes);
 
 		}
 
@@ -207,7 +208,7 @@ public class ProductionService {
 
 	}
 
-	private Map<String, Map<String, Integer>> calculateRoundTripTime(
+	private Map<String, Map<String, Integer>> calcRoundTripTime(
 			Workplace workplace, Integer quantity,
 			Map<String, Map<String, Integer>> roundTripTimes) {
 
@@ -279,9 +280,8 @@ public class ProductionService {
 		for (ProductionInput prodInput : workplace.getInputs()) {
 
 			if (prodInput.getProducer() != null) {
-				roundTripTimes = calculateRoundTripTime(
-						prodInput.getProducer(), prodInput.getQuantity(),
-						roundTripTimes);
+				roundTripTimes = calcRoundTripTime(prodInput.getProducer(),
+						prodInput.getQuantity(), roundTripTimes);
 			}
 
 		}
