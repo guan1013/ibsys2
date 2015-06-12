@@ -35,6 +35,9 @@ import java.awt.FlowLayout;
 import javax.swing.JPanel;
 import javax.swing.JInternalFrame;
 
+import de.hska.centurion.domain.gui.Forecast;
+import de.hska.centurion.domain.gui.Sales;
+import de.hska.centurion.domain.gui.UserInput;
 import de.hska.centurion.domain.input.Results;
 import de.hska.centurion.domain.input.components.Article;
 import de.hska.centurion.domain.input.components.IdleTimeCostsSum;
@@ -66,8 +69,7 @@ import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 
 public class PlanungstoolGUI {
-	private static final ResourceBundle BUNDLE = ResourceBundle
-			.getBundle("de.hska.centurion.gui.messages"); //$NON-NLS-1$
+
 
 	private JFrame frmIbsysiiplanungstoolGruppe;
 	private JTable tableWarehouse;
@@ -137,6 +139,40 @@ public class PlanungstoolGUI {
 
 	private JTabbedPane tabbedPanePlanning;
 
+	private JLabel lblStep1Periode1Title;
+
+	private JLabel lblStep1Periode2Title;
+
+	private JLabel lblStep1Periode3Title;
+
+	private JLabel lblStep1Periode4Title;
+
+	private UserInput userInput;
+
+	private JSpinner spinnerStep1P1Periode1;
+
+	private JSpinner spinnerStep1P2Periode1;
+
+	private JSpinner spinnerStep1P3Periode1;
+
+	private JSpinner spinnerStep1P1Periode2;
+
+	private JSpinner spinnerStep1P2Periode2;
+
+	private JSpinner spinnerStep1P3Periode2;
+
+	private JSpinner spinnerStep1P1Periode3;
+
+	private JSpinner spinnerStep1P2Periode3;
+
+	private JSpinner spinnerStep1P3Periode3;
+
+	private JSpinner spinnerStep1P1Periode4;
+
+	private JSpinner spinnerStep1P2Periode4;
+
+	private JSpinner spinnerStep1P3Periode4;
+
 	/**
 	 * Launch the application.
 	 */
@@ -158,6 +194,7 @@ public class PlanungstoolGUI {
 	 */
 	public PlanungstoolGUI() {
 		stepsMap = new HashMap<>();
+		userInput = new UserInput();
 		initialize();
 	}
 
@@ -381,12 +418,12 @@ public class PlanungstoolGUI {
 		tableFutureInwardStockMovement.getColumnModel().getColumn(5)
 				.setMinWidth(26);
 		internalFrame.setVisible(true);
-		
+
 		final PlanungstoolGUI gui = this;
 
 		JMenuItem mntmLoadResultXml = new JMenuItem("XML-Datei laden");
 		mntmLoadResultXml.addActionListener(new ActionListener() {
-			
+
 			public void actionPerformed(ActionEvent e) {
 				final JFileChooser fc = new JFileChooser();
 
@@ -552,9 +589,9 @@ public class PlanungstoolGUI {
 							model.addRow(new Object[] { wW.getId() });
 						}
 					}
-					
-					gui.switchToStep(1);
 
+					gui.switchToStep(1);
+					gui.setPeriod(results.getPeriod());
 				}
 			}
 		});
@@ -594,75 +631,75 @@ public class PlanungstoolGUI {
 		lblStep1P3Title.setBounds(10, 220, 141, 23);
 		panelStep1.add(lblStep1P3Title);
 
-		JLabel lblStep1Periode1Title = new JLabel("Periode n+1");
+		lblStep1Periode1Title = new JLabel("Periode n+1");
 		lblStep1Periode1Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep1Periode1Title.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblStep1Periode1Title.setBounds(132, 66, 141, 23);
 		panelStep1.add(lblStep1Periode1Title);
 
-		JLabel lblStep1Periode2Title = new JLabel("Periode n+2");
+		lblStep1Periode2Title = new JLabel("Periode n+2");
 		lblStep1Periode2Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep1Periode2Title.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblStep1Periode2Title.setBounds(269, 66, 141, 23);
 		panelStep1.add(lblStep1Periode2Title);
 
-		JLabel lblStep1Periode3Title = new JLabel("Periode n+3");
+		lblStep1Periode3Title = new JLabel("Periode n+3");
 		lblStep1Periode3Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep1Periode3Title.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblStep1Periode3Title.setBounds(420, 66, 141, 23);
 		panelStep1.add(lblStep1Periode3Title);
 
-		JLabel lblStep1Periode4Title = new JLabel("Periode n+4");
+		lblStep1Periode4Title = new JLabel("Periode n+4");
 		lblStep1Periode4Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep1Periode4Title.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblStep1Periode4Title.setBounds(571, 66, 141, 23);
 		panelStep1.add(lblStep1Periode4Title);
 
-		JSpinner spinnerStep1P1Periode1 = new JSpinner();
+		spinnerStep1P1Periode1 = new JSpinner();
 		spinnerStep1P1Periode1.setBounds(153, 103, 120, 20);
 		panelStep1.add(spinnerStep1P1Periode1);
 
-		JSpinner spinnerStep1P2Periode1 = new JSpinner();
+		spinnerStep1P2Periode1 = new JSpinner();
 		spinnerStep1P2Periode1.setBounds(153, 163, 120, 20);
 		panelStep1.add(spinnerStep1P2Periode1);
 
-		JSpinner spinnerStep1P3Periode1 = new JSpinner();
+		spinnerStep1P3Periode1 = new JSpinner();
 		spinnerStep1P3Periode1.setBounds(153, 223, 120, 20);
 		panelStep1.add(spinnerStep1P3Periode1);
 
-		JSpinner spinnerStep1P1Periode2 = new JSpinner();
+		spinnerStep1P1Periode2 = new JSpinner();
 		spinnerStep1P1Periode2.setBounds(290, 103, 120, 20);
 		panelStep1.add(spinnerStep1P1Periode2);
 
-		JSpinner spinnerStep1P2Periode2 = new JSpinner();
+		spinnerStep1P2Periode2 = new JSpinner();
 		spinnerStep1P2Periode2.setBounds(290, 163, 120, 20);
 		panelStep1.add(spinnerStep1P2Periode2);
 
-		JSpinner spinnerStep1P3Periode2 = new JSpinner();
+		spinnerStep1P3Periode2 = new JSpinner();
 		spinnerStep1P3Periode2.setBounds(290, 223, 120, 20);
 		panelStep1.add(spinnerStep1P3Periode2);
 
-		JSpinner spinnerStep1P1Periode3 = new JSpinner();
+		spinnerStep1P1Periode3 = new JSpinner();
 		spinnerStep1P1Periode3.setBounds(441, 103, 120, 20);
 		panelStep1.add(spinnerStep1P1Periode3);
 
-		JSpinner spinnerStep1P2Periode3 = new JSpinner();
+		spinnerStep1P2Periode3 = new JSpinner();
 		spinnerStep1P2Periode3.setBounds(441, 163, 120, 20);
 		panelStep1.add(spinnerStep1P2Periode3);
 
-		JSpinner spinnerStep1P3Periode3 = new JSpinner();
+		spinnerStep1P3Periode3 = new JSpinner();
 		spinnerStep1P3Periode3.setBounds(441, 223, 120, 20);
 		panelStep1.add(spinnerStep1P3Periode3);
 
-		JSpinner spinnerStep1P1Periode4 = new JSpinner();
+		spinnerStep1P1Periode4 = new JSpinner();
 		spinnerStep1P1Periode4.setBounds(592, 103, 120, 20);
 		panelStep1.add(spinnerStep1P1Periode4);
 
-		JSpinner spinnerStep1P2Periode4 = new JSpinner();
+		spinnerStep1P2Periode4 = new JSpinner();
 		spinnerStep1P2Periode4.setBounds(592, 163, 120, 20);
 		panelStep1.add(spinnerStep1P2Periode4);
 
-		JSpinner spinnerStep1P3Periode4 = new JSpinner();
+		spinnerStep1P3Periode4 = new JSpinner();
 		spinnerStep1P3Periode4.setBounds(592, 223, 120, 20);
 		panelStep1.add(spinnerStep1P3Periode4);
 
@@ -2178,10 +2215,52 @@ public class PlanungstoolGUI {
 		btnStep5PrevStep.addActionListener(switchStepsButtonActionListener);
 		btnStep5NextStep.addActionListener(switchStepsButtonActionListener);
 		btnStep6PrevStep.addActionListener(switchStepsButtonActionListener);
+		
+		btnStep1NextStep.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				inheritForecast();
+				
+			}
+		});
 
 		// PREPARE GUI
 		tabbedPanePlanning.removeAll();
 
+	}
+
+	protected void inheritForecast() {
+
+		Sales salesPeriode1 = new Sales(
+				(int) spinnerStep1P1Periode1.getValue(),
+				(int) spinnerStep1P2Periode1.getValue(),
+				(int) spinnerStep1P3Periode1.getValue());
+
+		Sales salesPeriode2 = new Sales(
+				(int) spinnerStep1P1Periode2.getValue(),
+				(int) spinnerStep1P2Periode2.getValue(),
+				(int) spinnerStep1P3Periode2.getValue());
+		Sales salesPeriode3 = new Sales(
+				(int) spinnerStep1P1Periode3.getValue(),
+				(int) spinnerStep1P2Periode3.getValue(),
+				(int) spinnerStep1P3Periode3.getValue());
+		Sales salesPeriode4 = new Sales(
+				(int) spinnerStep1P1Periode4.getValue(),
+				(int) spinnerStep1P2Periode4.getValue(),
+				(int) spinnerStep1P3Periode4.getValue());
+		
+		Forecast forecast = new Forecast(salesPeriode1, salesPeriode2, salesPeriode3, salesPeriode4);
+		
+		System.out.println(forecast);
+	}
+
+	protected void setPeriod(int period) {
+
+		lblStep1Periode1Title.setText("Periode " + (period + 1));
+		lblStep1Periode2Title.setText("Periode " + (period + 2));
+		lblStep1Periode3Title.setText("Periode " + (period + 3));
+		lblStep1Periode4Title.setText("Periode " + (period + 4));
 	}
 
 	private void removeAllRowsFromTable(DefaultTableModel model) {

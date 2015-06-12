@@ -52,7 +52,7 @@ public class XmlInputParser {
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		Results results = (Results) jaxbUnmarshaller.unmarshal(file);
 
-		printOnConsolue(results);
+//		printOnConsolue(results);
 
 		return results;
 	}
