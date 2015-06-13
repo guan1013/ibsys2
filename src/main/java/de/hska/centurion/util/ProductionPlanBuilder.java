@@ -133,7 +133,7 @@ public class ProductionPlanBuilder {
 		String propertyString = Constants.getWpInitKey() + "." + number + "."
 				+ outputString;
 
-		//System.out.println(propertyString);
+		// System.out.println(propertyString);
 
 		Item output = getItem(outputString);
 
@@ -198,7 +198,7 @@ public class ProductionPlanBuilder {
 		String propertyString = workplaceProperty + Constants.getInputKey()
 				+ "." + index;
 
-		//System.out.println(propertyString);
+		// System.out.println(propertyString);
 
 		// Get item identifier from properties
 		String item = this.prop.getProperty(propertyString
@@ -238,7 +238,7 @@ public class ProductionPlanBuilder {
 		// properties
 		String propertyString = Constants.getItemInitKey() + "." + itemString;
 
-		//System.out.println(propertyString);
+		// System.out.println(propertyString);
 
 		// Get item.type from properties
 		String type = this.prop.getProperty(propertyString
@@ -255,38 +255,51 @@ public class ProductionPlanBuilder {
 		// Get item.value from XML
 
 		String priceString = this.xmlResults.getWarehousestock().getArticles()
-				.get(number).getPriceString();
+				.get(number - 1).getPriceString();
 
 		priceString = priceString.replace(',', '.');
 		Double value = Double.parseDouble(priceString);
 
 		// Get item.stock form XML
 		Integer stock = this.xmlResults.getWarehousestock().getArticles()
-				.get(number).getAmount();
+				.get(number - 1).getAmount();
+
+		// Get item.producer from XML
+		String producer = this.prop.getProperty(propertyString
+				+ Constants.getProducerKey());
 
 		// Determine type of item
 		Item item;
 		if (type.equalsIgnoreCase(ItemTypeEnum.E.toString())) {
 
 			// Create a new EItem
-			item = new EItem(number, name, value, stock);
+			item = new EItem(number, name, value, stock, producer);
+
 		} else if (type.equalsIgnoreCase(ItemTypeEnum.P.toString())) {
+
+			// Create new PItem
 			Double revenue = Double.parseDouble(this.prop
 					.getProperty(propertyString + Constants.getRevenueKey()));
 
-			item = new PItem(number, name, value, stock, revenue);
+			item = new PItem(number, name, value, stock, revenue, producer);
 
 		} else if (type.equalsIgnoreCase(ItemTypeEnum.K.toString())) {
+
+			// Create new KItem
 			Integer stack = Integer.parseInt(this.prop
 					.getProperty(propertyString + Constants.getStackKey()));
+
 			Double orderCosts = Double.parseDouble(this.prop
 					.getProperty(propertyString + Constants.getOrderKey()));
+
 			Double deliveryTime = Double.parseDouble(this.prop
 					.getProperty(propertyString + Constants.getTimeKey()));
+
 			Double diviation = Double.parseDouble(this.prop
 					.getProperty(propertyString + Constants.getDivKey()));
+
 			item = new KItem(number, name, value, stock, stack, orderCosts,
-					deliveryTime, diviation);
+					deliveryTime, diviation, producer);
 		} else {
 			item = null;
 		}

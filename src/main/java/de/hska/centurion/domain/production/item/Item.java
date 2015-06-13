@@ -27,15 +27,18 @@ public abstract class Item {
 	 *            Monetary value of this item
 	 * @param stock
 	 *            Current amount in stock
+	 * @param producer
+	 *            Final Workplace which produce this item
 	 */
 	public Item(ItemTypeEnum type, Integer number, String name, Double value,
-			Integer stock) {
+			Integer stock, String producer) {
 		super();
 		this.type = type;
 		this.number = number;
 		this.name = name;
 		this.value = value;
 		this.stock = stock;
+		this.producer = producer;
 	}
 
 	/*
@@ -72,6 +75,11 @@ public abstract class Item {
 	 */
 	protected Integer stock;
 
+	/**
+	 * Final Workplace which produce this item
+	 */
+	protected String producer;
+
 	/*
 	 * ======================== OVERRIDES ========================
 	 */
@@ -79,7 +87,7 @@ public abstract class Item {
 	public String toString() {
 		return "Item [id=" + id + ", type=" + type + ", number=" + number
 				+ ", name=" + name + ", value=" + value + ", stock=" + stock
-				+ "]";
+				+ ", producer=" + producer + "]";
 	}
 
 	@Override
@@ -89,6 +97,8 @@ public abstract class Item {
 		result = prime * result + id;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((number == null) ? 0 : number.hashCode());
+		result = prime * result
+				+ ((producer == null) ? 0 : producer.hashCode());
 		result = prime * result + ((stock == null) ? 0 : stock.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
@@ -116,6 +126,11 @@ public abstract class Item {
 				return false;
 		} else if (!number.equals(other.number))
 			return false;
+		if (producer == null) {
+			if (other.producer != null)
+				return false;
+		} else if (!producer.equals(other.producer))
+			return false;
 		if (stock == null) {
 			if (other.stock != null)
 				return false;
@@ -137,6 +152,14 @@ public abstract class Item {
 
 	public int getId() {
 		return id;
+	}
+
+	public String getProducer() {
+		return producer;
+	}
+
+	public void setProducer(String producer) {
+		this.producer = producer;
 	}
 
 	public void setId(int id) {

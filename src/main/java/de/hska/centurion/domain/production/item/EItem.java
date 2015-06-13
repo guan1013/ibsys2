@@ -24,9 +24,12 @@ public class EItem extends Item {
 	 *            Monetary value of this item
 	 * @param stock
 	 *            Current amount in stock
+	 * @param producer
+	 *            Final Workplace which produce this item
 	 */
-	public EItem(Integer number, String name, Double value, Integer stock) {
-		super(ItemTypeEnum.E, number, name, value, stock);
+	public EItem(Integer number, String name, Double value, Integer stock,
+			String producer) {
+		super(ItemTypeEnum.E, number, name, value, stock, producer);
 	}
 
 }

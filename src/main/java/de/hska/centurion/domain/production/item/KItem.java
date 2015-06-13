@@ -33,11 +33,13 @@ public class KItem extends Item {
 	 *            average time (in Periods) for a delivery to get shipped
 	 * @param diviation
 	 *            to deliveryTime
+	 * @param producer
+	 *            Final Workplace which produce this item
 	 */
 	public KItem(Integer number, String name, Double value, Integer stock,
 			Integer stack, Double orderCosts, Double deliveryTime,
-			Double diviation) {
-		super(ItemTypeEnum.K, number, name, value, stock);
+			Double diviation, String producer) {
+		super(ItemTypeEnum.K, number, name, value, stock, producer);
 		this.stack = stack;
 		this.orderCosts = orderCosts;
 		this.deliveryTime = deliveryTime;

@@ -27,13 +27,15 @@ public class PItem extends Item {
 	 *            Current amount in stock
 	 * @param revenue
 	 *            price of one item
+	 * @param producer
+	 *            Final Workplace which produce this item
 	 */
 	public PItem(Integer number, String name, Double value, Integer stock,
-			Double revenue) {
-		super(ItemTypeEnum.P, number, name, value, stock);
+			Double revenue, String producer) {
+		super(ItemTypeEnum.P, number, name, value, stock, producer);
 		this.revenue = revenue;
 		calcFixCoverage();
-		
+
 	}
 
 	/*
@@ -62,13 +64,17 @@ public class PItem extends Item {
 	public String toString() {
 		return "PItem [id=" + id + ", type=" + type + ", number=" + number
 				+ ", name=" + name + ", value=" + value + ", stock=" + stock
-				+ ", revenue=" + revenue + "]";
+				+ ", revenue=" + revenue + ", fixCostsCoverage="
+				+ fixCostsCoverage + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime
+				* result
+				+ ((fixCostsCoverage == null) ? 0 : fixCostsCoverage.hashCode());
 		result = prime * result + ((revenue == null) ? 0 : revenue.hashCode());
 		return result;
 	}
@@ -82,6 +88,11 @@ public class PItem extends Item {
 		if (getClass() != obj.getClass())
 			return false;
 		PItem other = (PItem) obj;
+		if (fixCostsCoverage == null) {
+			if (other.fixCostsCoverage != null)
+				return false;
+		} else if (!fixCostsCoverage.equals(other.fixCostsCoverage))
+			return false;
 		if (revenue == null) {
 			if (other.revenue != null)
 				return false;
@@ -109,5 +120,4 @@ public class PItem extends Item {
 	public void setFixCostsCoverage(Double fixCostsCoverage) {
 		this.fixCostsCoverage = fixCostsCoverage;
 	}
-
 }
