@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -51,6 +52,7 @@ import de.hska.centurion.domain.input.components.IdleTimeCostsSum;
 import de.hska.centurion.domain.input.components.Order;
 import de.hska.centurion.domain.input.components.WorkplaceCosts;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
+import de.hska.centurion.exceptions.UserInputException;
 import de.hska.centurion.io.XmlInputParser;
 import de.hska.centurion.services.production.ProductionService;
 
@@ -76,7 +78,9 @@ public class PlanungstoolGUI {
 	// ATTRIBUTES
 
 	// STATIC ATTRIBUTES
-	private static final int DEFAULT_SAFETY_STOCK = 100;
+	private static final int DEFAULT_SAFETY_STOCK = 250;
+	private static final int MIN_FORECAST_AND_SALES = 0;
+	private static final int MAX_FORECAST_AND_SALES = 500;
 
 	// UI COMPONENTS - MAIN SCREEN
 	private JFrame frameMain;
@@ -201,6 +205,9 @@ public class PlanungstoolGUI {
 	 * Object which stores all data which was entered by the user.
 	 */
 	private UserInput userInput;
+
+	// HELP VARIABLES
+	private boolean stepValid = false;
 
 	/**
 	 * Launch the application.
@@ -669,89 +676,101 @@ public class PlanungstoolGUI {
 
 		JLabel lblStep1P1Title = new JLabel("P1 (Kinderfahrrad)");
 		lblStep1P1Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep1P1Title.setBounds(10, 100, 141, 23);
+		lblStep1P1Title.setBounds(129, 99, 141, 23);
 		panelStep1.add(lblStep1P1Title);
 
 		JLabel lblStep1P2Title = new JLabel("P2 (Damenfahrrad)");
 		lblStep1P2Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep1P2Title.setBounds(10, 160, 141, 23);
+		lblStep1P2Title.setBounds(129, 150, 141, 23);
 		panelStep1.add(lblStep1P2Title);
 
 		JLabel lblStep1P3Title = new JLabel("P3 (Herrenfahrrad)");
 		lblStep1P3Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep1P3Title.setBounds(10, 220, 141, 23);
+		lblStep1P3Title.setBounds(129, 201, 141, 23);
 		panelStep1.add(lblStep1P3Title);
 
 		lblStep1Periode1Title = new JLabel("Periode n+1");
 		lblStep1Periode1Title.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStep1Periode1Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep1Periode1Title.setBounds(132, 66, 141, 23);
+		lblStep1Periode1Title.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblStep1Periode1Title.setBounds(261, 56, 76, 23);
 		panelStep1.add(lblStep1Periode1Title);
 
 		lblStep1Periode2Title = new JLabel("Periode n+2");
 		lblStep1Periode2Title.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStep1Periode2Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep1Periode2Title.setBounds(269, 66, 141, 23);
+		lblStep1Periode2Title.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblStep1Periode2Title.setBounds(344, 56, 76, 23);
 		panelStep1.add(lblStep1Periode2Title);
 
 		lblStep1Periode3Title = new JLabel("Periode n+3");
 		lblStep1Periode3Title.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStep1Periode3Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep1Periode3Title.setBounds(420, 66, 141, 23);
+		lblStep1Periode3Title.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblStep1Periode3Title.setBounds(427, 56, 76, 23);
 		panelStep1.add(lblStep1Periode3Title);
 
 		lblStep1Periode4Title = new JLabel("Periode n+4");
 		lblStep1Periode4Title.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStep1Periode4Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep1Periode4Title.setBounds(571, 66, 141, 23);
+		lblStep1Periode4Title.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblStep1Periode4Title.setBounds(510, 56, 76, 23);
 		panelStep1.add(lblStep1Periode4Title);
 
 		spinnerStep1P1Periode1 = new JSpinner();
-		spinnerStep1P1Periode1.setBounds(153, 103, 120, 20);
+		spinnerStep1P1Periode1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P1Periode1.setBounds(272, 93, 56, 35);
 		panelStep1.add(spinnerStep1P1Periode1);
 
 		spinnerStep1P2Periode1 = new JSpinner();
-		spinnerStep1P2Periode1.setBounds(153, 163, 120, 20);
+		spinnerStep1P2Periode1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P2Periode1.setBounds(272, 146, 56, 35);
 		panelStep1.add(spinnerStep1P2Periode1);
 
 		spinnerStep1P3Periode1 = new JSpinner();
-		spinnerStep1P3Periode1.setBounds(153, 223, 120, 20);
+		spinnerStep1P3Periode1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P3Periode1.setBounds(272, 199, 56, 35);
 		panelStep1.add(spinnerStep1P3Periode1);
 
 		spinnerStep1P1Periode2 = new JSpinner();
-		spinnerStep1P1Periode2.setBounds(290, 103, 120, 20);
+		spinnerStep1P1Periode2.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P1Periode2.setBounds(354, 93, 56, 35);
 		panelStep1.add(spinnerStep1P1Periode2);
 
 		spinnerStep1P2Periode2 = new JSpinner();
-		spinnerStep1P2Periode2.setBounds(290, 163, 120, 20);
+		spinnerStep1P2Periode2.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P2Periode2.setBounds(354, 146, 56, 35);
 		panelStep1.add(spinnerStep1P2Periode2);
 
 		spinnerStep1P3Periode2 = new JSpinner();
-		spinnerStep1P3Periode2.setBounds(290, 223, 120, 20);
+		spinnerStep1P3Periode2.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P3Periode2.setBounds(354, 199, 56, 35);
 		panelStep1.add(spinnerStep1P3Periode2);
 
 		spinnerStep1P1Periode3 = new JSpinner();
-		spinnerStep1P1Periode3.setBounds(441, 103, 120, 20);
+		spinnerStep1P1Periode3.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P1Periode3.setBounds(436, 93, 56, 35);
 		panelStep1.add(spinnerStep1P1Periode3);
 
 		spinnerStep1P2Periode3 = new JSpinner();
-		spinnerStep1P2Periode3.setBounds(441, 163, 120, 20);
+		spinnerStep1P2Periode3.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P2Periode3.setBounds(436, 146, 56, 35);
 		panelStep1.add(spinnerStep1P2Periode3);
 
 		spinnerStep1P3Periode3 = new JSpinner();
-		spinnerStep1P3Periode3.setBounds(441, 223, 120, 20);
+		spinnerStep1P3Periode3.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P3Periode3.setBounds(436, 199, 56, 35);
 		panelStep1.add(spinnerStep1P3Periode3);
 
 		spinnerStep1P1Periode4 = new JSpinner();
-		spinnerStep1P1Periode4.setBounds(592, 103, 120, 20);
+		spinnerStep1P1Periode4.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P1Periode4.setBounds(518, 93, 56, 35);
 		panelStep1.add(spinnerStep1P1Periode4);
 
 		spinnerStep1P2Periode4 = new JSpinner();
-		spinnerStep1P2Periode4.setBounds(592, 163, 120, 20);
+		spinnerStep1P2Periode4.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P2Periode4.setBounds(518, 146, 56, 35);
 		panelStep1.add(spinnerStep1P2Periode4);
 
 		spinnerStep1P3Periode4 = new JSpinner();
-		spinnerStep1P3Periode4.setBounds(592, 223, 120, 20);
+		spinnerStep1P3Periode4.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep1P3Periode4.setBounds(518, 199, 56, 35);
 		panelStep1.add(spinnerStep1P3Periode4);
 
 		JButton btnStep1NextStep = new JButton("Schritt 2: Vertriebswunsch >>");
@@ -2126,6 +2145,7 @@ public class PlanungstoolGUI {
 
 		// PREPARE GUI
 		tabbedPanePlanning.removeAll();
+		stepValid = true;
 
 		// BUILD STEPS MAP FOR ACCESSING STEP PANELS BY INDEX
 		stepsMap.put(1, panelStep1);
@@ -2216,7 +2236,13 @@ public class PlanungstoolGUI {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				readInForecasts();
+				try {
+					readInForecasts();
+				} catch (UserInputException e1) {
+
+					e1.printStackTrace();
+					gui.showExceptionDialog(e1);
+				}
 			}
 		});
 
@@ -2243,6 +2269,11 @@ public class PlanungstoolGUI {
 
 		displayDefaultSafetyStock();
 
+	}
+
+	protected void showExceptionDialog(Exception e) {
+		JOptionPane.showMessageDialog(frameMain, e.getMessage(), "Fehler",
+				JOptionPane.ERROR_MESSAGE);
 	}
 
 	protected void calculateSafetyStock() {
@@ -2274,7 +2305,7 @@ public class PlanungstoolGUI {
 		this.results = results2;
 	}
 
-	protected void readInForecasts() {
+	protected void readInForecasts() throws UserInputException {
 
 		Sales salesPeriode1 = new Sales(
 				(int) spinnerStep1P1Periode1.getValue(),
@@ -2296,6 +2327,53 @@ public class PlanungstoolGUI {
 
 		Forecast forecast = new Forecast(salesPeriode1, salesPeriode2,
 				salesPeriode3, salesPeriode4);
+
+		for (int i = 0; i < forecast.getForecasts().length; i++) {
+			Sales s = forecast.getForecasts()[i];
+
+			// P1 kleiner 0
+			if (s.getChildrenSales() < MIN_FORECAST_AND_SALES) {
+				throw new UserInputException(s.getChildrenSales(),
+						MIN_FORECAST_AND_SALES, false, "P1 (Periode "
+								+ (results.getPeriod() + 1 + i) + ")");
+			}
+
+			// P2 kleiner 0
+			if (s.getWomenSales() < MIN_FORECAST_AND_SALES) {
+				throw new UserInputException(s.getWomenSales(),
+						MIN_FORECAST_AND_SALES, false, "P2 (Periode "
+								+ (results.getPeriod() + 1 + i) + ")");
+			}
+
+			// P3 kleiner 0
+			if (s.getMenSales() < MIN_FORECAST_AND_SALES) {
+				throw new UserInputException(s.getMenSales(),
+						MIN_FORECAST_AND_SALES, false, "P3 (Periode "
+								+ (results.getPeriod() + 1 + i) + ")");
+			}
+
+			// P1 größer als MAX_FORECAST_AND_SALES
+			if (s.getChildrenSales() > MAX_FORECAST_AND_SALES) {
+				throw new UserInputException(s.getChildrenSales(),
+						MAX_FORECAST_AND_SALES, true, "P1 (Periode "
+								+ (results.getPeriod() + 1 + i) + ")");
+			}
+
+			// P2 größer als MAX_FORECAST_AND_SALES
+			if (s.getWomenSales() > MAX_FORECAST_AND_SALES) {
+				throw new UserInputException(s.getWomenSales(),
+						MAX_FORECAST_AND_SALES, true, "P2 (Periode "
+								+ (results.getPeriod() + 1 + i) + ")");
+			}
+
+			// P3 größer als MAX_FORECAST_AND_SALES
+			if (s.getMenSales() > MAX_FORECAST_AND_SALES) {
+				throw new UserInputException(s.getMenSales(),
+						MAX_FORECAST_AND_SALES, true, "P3 (Periode "
+								+ (results.getPeriod() + 1 + i) + ")");
+			}
+		}
+		stepValid = true;
 
 		userInput.setForecast(forecast);
 
@@ -2377,6 +2455,11 @@ public class PlanungstoolGUI {
 	}
 
 	private void switchToStep(int goToStep) {
+
+		if (!stepValid) {
+			System.out.println("Step not valid");
+			return;
+		}
 		JPanel stepToShow = stepsMap.get(goToStep);
 		tabbedPanePlanning.removeAll();
 		tabbedPanePlanning.add(stepToShow);
