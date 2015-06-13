@@ -14,9 +14,11 @@ import javax.swing.JFileChooser;
 
 import java.awt.BorderLayout;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Toolkit;
@@ -36,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.JInternalFrame;
 
 import de.hska.centurion.domain.gui.Forecast;
+import de.hska.centurion.domain.gui.SafetyStock;
 import de.hska.centurion.domain.gui.Sales;
 import de.hska.centurion.domain.gui.UserInput;
 import de.hska.centurion.domain.input.Results;
@@ -69,6 +72,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
+import javax.xml.bind.JAXBException;
 
 public class PlanungstoolGUI {
 
@@ -136,8 +140,6 @@ public class PlanungstoolGUI {
 	private JTextField textField_54;
 	private JTextField textField_55;
 
-	private HashMap<Integer, JPanel> stepsMap;
-
 	private JTabbedPane tabbedPanePlanning;
 
 	private JLabel lblStep1Periode1Title;
@@ -178,6 +180,10 @@ public class PlanungstoolGUI {
 	private JSpinner spinnerStep2P2DirectSales;
 	private JSpinner spinnerStep2P3DirectSales;
 
+	private HashMap<Integer, JPanel> stepsMap;
+
+	private HashMap<String, SafetyStockEntity> safetyStockFormular;
+
 	/*
 	 * CURRENTLY LOADED XML-RESULT FILE
 	 */
@@ -210,6 +216,8 @@ public class PlanungstoolGUI {
 	public PlanungstoolGUI() {
 		stepsMap = new HashMap<>();
 		userInput = new UserInput();
+		safetyStockFormular = new HashMap<String, SafetyStockEntity>();
+		userInput.setSafetyStock(new SafetyStock(100));
 		initialize();
 	}
 
@@ -606,7 +614,7 @@ public class PlanungstoolGUI {
 					}
 
 					gui.switchToStep(1);
-					gui.setPeriod(results.getPeriod());
+					gui.displayPeriod(results.getPeriod());
 					gui.setResults(results);
 				}
 			}
@@ -809,289 +817,253 @@ public class PlanungstoolGUI {
 		JLabel lblStep3P1Title = new JLabel("P1 (Kinderfahrrad)");
 		lblStep3P1Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep3P1Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P1Title.setBounds(20, 45, 258, 23);
+		lblStep3P1Title.setBounds(20, 108, 258, 23);
 		panelStep3.add(lblStep3P1Title);
 
 		JLabel lblStep3P2Title = new JLabel("P2 (Damenfahrrad)");
 		lblStep3P2Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep3P2Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P2Title.setBounds(298, 45, 258, 23);
+		lblStep3P2Title.setBounds(298, 108, 258, 23);
 		panelStep3.add(lblStep3P2Title);
 
 		JLabel lblStep3P3Title = new JLabel("P3 ( Herrenfahrrad)");
 		lblStep3P3Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep3P3Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P3Title.setBounds(578, 45, 258, 23);
+		lblStep3P3Title.setBounds(578, 108, 258, 23);
 		panelStep3.add(lblStep3P3Title);
 
 		JLabel lblStep3P1 = new JLabel("P1");
 		lblStep3P1.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P1.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P1.setBounds(20, 79, 29, 23);
+		lblStep3P1.setBounds(20, 142, 29, 23);
 		panelStep3.add(lblStep3P1);
 
 		JLabel lblStep3P2 = new JLabel("P2");
 		lblStep3P2.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P2.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P2.setBounds(298, 79, 29, 23);
+		lblStep3P2.setBounds(298, 142, 29, 23);
 		panelStep3.add(lblStep3P2);
 
 		JLabel lblStep3P3 = new JLabel("P3");
 		lblStep3P3.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P3.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P3.setBounds(578, 79, 29, 23);
+		lblStep3P3.setBounds(578, 142, 29, 23);
 		panelStep3.add(lblStep3P3);
 
 		JLabel lblStep3E4 = new JLabel("E4");
 		lblStep3E4.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E4.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E4.setBounds(20, 101, 29, 23);
+		lblStep3E4.setBounds(20, 164, 29, 23);
 		panelStep3.add(lblStep3E4);
 
 		JLabel lblStep3E5 = new JLabel("E5");
 		lblStep3E5.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E5.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E5.setBounds(298, 101, 29, 23);
+		lblStep3E5.setBounds(298, 164, 29, 23);
 		panelStep3.add(lblStep3E5);
 
 		JLabel lblStep3E6 = new JLabel("E6");
 		lblStep3E6.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E6.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E6.setBounds(578, 101, 29, 23);
+		lblStep3E6.setBounds(578, 164, 29, 23);
 		panelStep3.add(lblStep3E6);
 
 		JLabel lblStep3E7 = new JLabel("E7");
 		lblStep3E7.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E7.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E7.setBounds(20, 124, 29, 23);
+		lblStep3E7.setBounds(20, 187, 29, 23);
 		panelStep3.add(lblStep3E7);
 
 		JLabel lblStep3E8 = new JLabel("E8");
 		lblStep3E8.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E8.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E8.setBounds(298, 124, 29, 23);
+		lblStep3E8.setBounds(298, 187, 29, 23);
 		panelStep3.add(lblStep3E8);
 
 		JLabel lblStep3E9 = new JLabel("E9");
 		lblStep3E9.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E9.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E9.setBounds(578, 124, 29, 23);
+		lblStep3E9.setBounds(578, 187, 29, 23);
 		panelStep3.add(lblStep3E9);
 
 		JLabel lblStep3E10 = new JLabel("E10");
 		lblStep3E10.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E10.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E10.setBounds(20, 146, 29, 23);
+		lblStep3E10.setBounds(20, 209, 29, 23);
 		panelStep3.add(lblStep3E10);
 
 		JLabel lblStep3E11 = new JLabel("E11");
 		lblStep3E11.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E11.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E11.setBounds(298, 146, 29, 23);
+		lblStep3E11.setBounds(298, 209, 29, 23);
 		panelStep3.add(lblStep3E11);
 
 		JLabel lblStep3E12 = new JLabel("E12");
 		lblStep3E12.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E12.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E12.setBounds(578, 146, 29, 23);
+		lblStep3E12.setBounds(578, 209, 29, 23);
 		panelStep3.add(lblStep3E12);
 
 		JLabel lblStep3E13 = new JLabel("E13");
 		lblStep3E13.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E13.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E13.setBounds(20, 169, 29, 23);
+		lblStep3E13.setBounds(20, 232, 29, 23);
 		panelStep3.add(lblStep3E13);
 
 		JLabel lblStep3E14 = new JLabel("E14");
 		lblStep3E14.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E14.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E14.setBounds(298, 169, 29, 23);
+		lblStep3E14.setBounds(298, 232, 29, 23);
 		panelStep3.add(lblStep3E14);
 
 		JLabel lblStep3E15 = new JLabel("E15");
 		lblStep3E15.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E15.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E15.setBounds(578, 169, 29, 23);
+		lblStep3E15.setBounds(578, 232, 29, 23);
 		panelStep3.add(lblStep3E15);
 
-		JLabel lblStep3E16P1 = new JLabel("E16");
-		lblStep3E16P1.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E16P1.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E16P1.setBounds(20, 194, 29, 23);
-		panelStep3.add(lblStep3E16P1);
+		JLabel lblStep3E16 = new JLabel("E16");
+		lblStep3E16.setHorizontalAlignment(SwingConstants.LEFT);
+		lblStep3E16.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblStep3E16.setBounds(268, 60, 29, 23);
+		panelStep3.add(lblStep3E16);
 
-		JLabel lblStep3E16P2 = new JLabel("E16");
-		lblStep3E16P2.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E16P2.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E16P2.setBounds(298, 194, 29, 23);
-		panelStep3.add(lblStep3E16P2);
-
-		JLabel lblStep3E16P3 = new JLabel("E16");
-		lblStep3E16P3.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E16P3.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E16P3.setBounds(578, 194, 29, 23);
-		panelStep3.add(lblStep3E16P3);
-
-		JLabel lblStep3E17P1 = new JLabel("E17");
-		lblStep3E17P1.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E17P1.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E17P1.setBounds(154, 79, 29, 23);
-		panelStep3.add(lblStep3E17P1);
-
-		JLabel lblStep3E17P2 = new JLabel("E17");
-		lblStep3E17P2.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E17P2.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E17P2.setBounds(432, 79, 29, 23);
-		panelStep3.add(lblStep3E17P2);
-
-		JLabel lblStep3E17P3 = new JLabel("E17");
-		lblStep3E17P3.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E17P3.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E17P3.setBounds(712, 79, 29, 23);
-		panelStep3.add(lblStep3E17P3);
+		JLabel lblStep3E17 = new JLabel("E17");
+		lblStep3E17.setHorizontalAlignment(SwingConstants.LEFT);
+		lblStep3E17.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblStep3E17.setBounds(402, 60, 29, 23);
+		panelStep3.add(lblStep3E17);
 
 		JLabel lblStep3E18 = new JLabel("E18");
 		lblStep3E18.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E18.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E18.setBounds(154, 101, 29, 23);
+		lblStep3E18.setBounds(154, 142, 29, 23);
 		panelStep3.add(lblStep3E18);
 
 		JLabel lblStep3E19 = new JLabel("E19");
 		lblStep3E19.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E19.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E19.setBounds(432, 101, 29, 23);
+		lblStep3E19.setBounds(432, 142, 29, 23);
 		panelStep3.add(lblStep3E19);
 
 		JLabel lblStep3E20 = new JLabel("E20");
 		lblStep3E20.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E20.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E20.setBounds(712, 101, 29, 23);
+		lblStep3E20.setBounds(712, 142, 29, 23);
 		panelStep3.add(lblStep3E20);
 
-		JLabel lblStep3E26P1 = new JLabel("E26");
-		lblStep3E26P1.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E26P1.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E26P1.setBounds(154, 124, 29, 23);
-		panelStep3.add(lblStep3E26P1);
-
-		JLabel lblStep3E26P2 = new JLabel("E26");
-		lblStep3E26P2.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E26P2.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E26P2.setBounds(432, 124, 29, 23);
-		panelStep3.add(lblStep3E26P2);
-
-		JLabel lblStep3E26P3 = new JLabel("E26");
-		lblStep3E26P3.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E26P3.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E26P3.setBounds(712, 124, 29, 23);
-		panelStep3.add(lblStep3E26P3);
+		JLabel lblStep3E26 = new JLabel("E26");
+		lblStep3E26.setHorizontalAlignment(SwingConstants.LEFT);
+		lblStep3E26.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblStep3E26.setBounds(534, 60, 29, 23);
+		panelStep3.add(lblStep3E26);
 
 		JLabel lblStep3E29 = new JLabel("E29");
 		lblStep3E29.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E29.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E29.setBounds(712, 146, 29, 23);
+		lblStep3E29.setBounds(712, 165, 29, 23);
 		panelStep3.add(lblStep3E29);
 
 		JLabel lblStep3E30 = new JLabel("E30");
 		lblStep3E30.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E30.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E30.setBounds(712, 169, 29, 23);
+		lblStep3E30.setBounds(712, 188, 29, 23);
 		panelStep3.add(lblStep3E30);
 
 		JLabel lblStep3E31 = new JLabel("E31");
 		lblStep3E31.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E31.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E31.setBounds(712, 194, 29, 23);
+		lblStep3E31.setBounds(712, 213, 29, 23);
 		panelStep3.add(lblStep3E31);
 
 		JLabel lblStep3E49 = new JLabel("E49");
 		lblStep3E49.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E49.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E49.setBounds(154, 146, 29, 23);
+		lblStep3E49.setBounds(154, 164, 29, 23);
 		panelStep3.add(lblStep3E49);
 
 		JLabel lblStep3E50 = new JLabel("E50");
 		lblStep3E50.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E50.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E50.setBounds(154, 169, 29, 23);
+		lblStep3E50.setBounds(154, 187, 29, 23);
 		panelStep3.add(lblStep3E50);
 
 		JLabel lblStep3E51 = new JLabel("E51");
 		lblStep3E51.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E51.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E51.setBounds(154, 194, 29, 23);
+		lblStep3E51.setBounds(154, 212, 29, 23);
 		panelStep3.add(lblStep3E51);
 
 		JLabel lblStep3E54 = new JLabel("E54");
 		lblStep3E54.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E54.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E54.setBounds(432, 146, 29, 23);
+		lblStep3E54.setBounds(432, 165, 29, 23);
 		panelStep3.add(lblStep3E54);
 
 		JLabel lblStep3E55 = new JLabel("E55");
 		lblStep3E55.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E55.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E55.setBounds(432, 169, 29, 23);
+		lblStep3E55.setBounds(432, 188, 29, 23);
 		panelStep3.add(lblStep3E55);
 
 		JLabel lblStep3E56 = new JLabel("E56");
 		lblStep3E56.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E56.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E56.setBounds(432, 194, 29, 23);
+		lblStep3E56.setBounds(432, 213, 29, 23);
 		panelStep3.add(lblStep3E56);
 
 		JLabel lblStep3P1PartsToBeProduced = new JLabel("250");
 		lblStep3P1PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P1PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3P1PartsToBeProduced.setBounds(115, 79, 29, 23);
+		lblStep3P1PartsToBeProduced.setBounds(115, 142, 29, 23);
 		panelStep3.add(lblStep3P1PartsToBeProduced);
 
 		JLabel lblStep3P2PartsToBeProduced = new JLabel("250");
 		lblStep3P2PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P2PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3P2PartsToBeProduced.setBounds(393, 79, 29, 23);
+		lblStep3P2PartsToBeProduced.setBounds(393, 142, 29, 23);
 		panelStep3.add(lblStep3P2PartsToBeProduced);
 
 		JLabel lblStep3P3PartsToBeProduced = new JLabel("250");
 		lblStep3P3PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P3PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3P3PartsToBeProduced.setBounds(673, 79, 29, 23);
+		lblStep3P3PartsToBeProduced.setBounds(673, 142, 29, 23);
 		panelStep3.add(lblStep3P3PartsToBeProduced);
 
 		JLabel lblStep3E4PartsToBeProduced = new JLabel("250");
 		lblStep3E4PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E4PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E4PartsToBeProduced.setBounds(115, 101, 29, 23);
+		lblStep3E4PartsToBeProduced.setBounds(115, 164, 29, 23);
 		panelStep3.add(lblStep3E4PartsToBeProduced);
 
 		JLabel lblStep3E5PartsToBeProduced = new JLabel("250");
 		lblStep3E5PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E5PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E5PartsToBeProduced.setBounds(393, 101, 29, 23);
+		lblStep3E5PartsToBeProduced.setBounds(393, 164, 29, 23);
 		panelStep3.add(lblStep3E5PartsToBeProduced);
 
 		JLabel lblStep3E6PartsToBeProduced = new JLabel("250");
 		lblStep3E6PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E6PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E6PartsToBeProduced.setBounds(673, 101, 29, 23);
+		lblStep3E6PartsToBeProduced.setBounds(673, 164, 29, 23);
 		panelStep3.add(lblStep3E6PartsToBeProduced);
 
 		JLabel lblStep3E7PartsToBeProduced = new JLabel("250");
 		lblStep3E7PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E7PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E7PartsToBeProduced.setBounds(115, 124, 29, 23);
+		lblStep3E7PartsToBeProduced.setBounds(115, 187, 29, 23);
 		panelStep3.add(lblStep3E7PartsToBeProduced);
 
 		JLabel lblStep3E8PartsToBeProduced = new JLabel("250");
 		lblStep3E8PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E8PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E8PartsToBeProduced.setBounds(393, 124, 29, 23);
+		lblStep3E8PartsToBeProduced.setBounds(393, 187, 29, 23);
 		panelStep3.add(lblStep3E8PartsToBeProduced);
 
 		JLabel lblStep3E9PartsToBeProduced = new JLabel("250");
 		lblStep3E9PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E9PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E9PartsToBeProduced.setBounds(673, 124, 29, 23);
+		lblStep3E9PartsToBeProduced.setBounds(673, 187, 29, 23);
 		panelStep3.add(lblStep3E9PartsToBeProduced);
 
 		JLabel lblStep3E10PartsToBeProduced = new JLabel("250");
@@ -1099,7 +1071,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E10PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E10PartsToBeProduced.setBounds(115, 146, 29, 23);
+		lblStep3E10PartsToBeProduced.setBounds(115, 209, 29, 23);
 		panelStep3.add(lblStep3E10PartsToBeProduced);
 
 		JLabel lblStep3E11PartsToBeProduced = new JLabel("250");
@@ -1107,7 +1079,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E11PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E11PartsToBeProduced.setBounds(393, 146, 29, 23);
+		lblStep3E11PartsToBeProduced.setBounds(393, 209, 29, 23);
 		panelStep3.add(lblStep3E11PartsToBeProduced);
 
 		JLabel lblStep3E12PartsToBeProduced = new JLabel("250");
@@ -1115,7 +1087,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E12PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E12PartsToBeProduced.setBounds(673, 146, 29, 23);
+		lblStep3E12PartsToBeProduced.setBounds(673, 209, 29, 23);
 		panelStep3.add(lblStep3E12PartsToBeProduced);
 
 		JLabel lblStep3E13PartsToBeProduced = new JLabel("250");
@@ -1123,7 +1095,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E13PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E13PartsToBeProduced.setBounds(115, 169, 29, 23);
+		lblStep3E13PartsToBeProduced.setBounds(115, 232, 29, 23);
 		panelStep3.add(lblStep3E13PartsToBeProduced);
 
 		JLabel lblStep3E14PartsToBeProduced = new JLabel("250");
@@ -1131,7 +1103,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E14PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E14PartsToBeProduced.setBounds(393, 169, 29, 23);
+		lblStep3E14PartsToBeProduced.setBounds(393, 232, 29, 23);
 		panelStep3.add(lblStep3E14PartsToBeProduced);
 
 		JLabel lblStep3E15PartsToBeProduced = new JLabel("250");
@@ -1139,63 +1111,31 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E15PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E15PartsToBeProduced.setBounds(673, 169, 29, 23);
+		lblStep3E15PartsToBeProduced.setBounds(673, 232, 29, 23);
 		panelStep3.add(lblStep3E15PartsToBeProduced);
 
-		JLabel lblStep3E16P1PartsToBeProduced = new JLabel("250");
-		lblStep3E16P1PartsToBeProduced
+		JLabel lblStep3E16PartsToBeProduced = new JLabel("250");
+		lblStep3E16PartsToBeProduced
 				.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E16P1PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN,
-				14));
-		lblStep3E16P1PartsToBeProduced.setBounds(115, 192, 29, 23);
-		panelStep3.add(lblStep3E16P1PartsToBeProduced);
+		lblStep3E16PartsToBeProduced
+				.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblStep3E16PartsToBeProduced.setBounds(368, 60, 29, 23);
+		panelStep3.add(lblStep3E16PartsToBeProduced);
 
-		JLabel lblStep3E16P2PartsToBeProduced = new JLabel("250");
-		lblStep3E16P2PartsToBeProduced
+		JLabel lblStep3E17PartsToBeProduced = new JLabel("250");
+		lblStep3E17PartsToBeProduced
 				.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E16P2PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN,
-				14));
-		lblStep3E16P2PartsToBeProduced.setBounds(393, 192, 29, 23);
-		panelStep3.add(lblStep3E16P2PartsToBeProduced);
-
-		JLabel lblStep3E16P3PartsToBeProduced = new JLabel("250");
-		lblStep3E16P3PartsToBeProduced
-				.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E16P3PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN,
-				14));
-		lblStep3E16P3PartsToBeProduced.setBounds(673, 192, 29, 23);
-		panelStep3.add(lblStep3E16P3PartsToBeProduced);
-
-		JLabel lblStep3E17P1PartsToBeProduced = new JLabel("250");
-		lblStep3E17P1PartsToBeProduced
-				.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E17P1PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN,
-				14));
-		lblStep3E17P1PartsToBeProduced.setBounds(249, 79, 29, 23);
-		panelStep3.add(lblStep3E17P1PartsToBeProduced);
-
-		JLabel lblStep3E17P2PartsToBeProduced = new JLabel("250");
-		lblStep3E17P2PartsToBeProduced
-				.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E17P2PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN,
-				14));
-		lblStep3E17P2PartsToBeProduced.setBounds(527, 79, 29, 23);
-		panelStep3.add(lblStep3E17P2PartsToBeProduced);
-
-		JLabel lblStep3E17P3PartsToBeProduced = new JLabel("250");
-		lblStep3E17P3PartsToBeProduced
-				.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E17P3PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN,
-				14));
-		lblStep3E17P3PartsToBeProduced.setBounds(807, 79, 29, 23);
-		panelStep3.add(lblStep3E17P3PartsToBeProduced);
+		lblStep3E17PartsToBeProduced
+				.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblStep3E17PartsToBeProduced.setBounds(500, 60, 29, 23);
+		panelStep3.add(lblStep3E17PartsToBeProduced);
 
 		JLabel lblStep3E18PartsToBeProduced = new JLabel("250");
 		lblStep3E18PartsToBeProduced
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E18PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E18PartsToBeProduced.setBounds(249, 101, 29, 23);
+		lblStep3E18PartsToBeProduced.setBounds(249, 142, 29, 23);
 		panelStep3.add(lblStep3E18PartsToBeProduced);
 
 		JLabel lblStep3E19PartsToBeProduced = new JLabel("250");
@@ -1203,7 +1143,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E19PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E19PartsToBeProduced.setBounds(527, 101, 29, 23);
+		lblStep3E19PartsToBeProduced.setBounds(527, 142, 29, 23);
 		panelStep3.add(lblStep3E19PartsToBeProduced);
 
 		JLabel lblStep3E20PartsToBeProduced = new JLabel("250");
@@ -1211,39 +1151,23 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E20PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E20PartsToBeProduced.setBounds(807, 101, 29, 23);
+		lblStep3E20PartsToBeProduced.setBounds(807, 142, 29, 23);
 		panelStep3.add(lblStep3E20PartsToBeProduced);
 
-		JLabel lblStep3E26P1PartsToBeProduced = new JLabel("250");
-		lblStep3E26P1PartsToBeProduced
+		JLabel lblStep3E26PartsToBeProduced = new JLabel("250");
+		lblStep3E26PartsToBeProduced
 				.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E26P1PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN,
-				14));
-		lblStep3E26P1PartsToBeProduced.setBounds(249, 124, 29, 23);
-		panelStep3.add(lblStep3E26P1PartsToBeProduced);
-
-		JLabel lblStep3E26P2PartsToBeProduced = new JLabel("250");
-		lblStep3E26P2PartsToBeProduced
-				.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E26P2PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN,
-				14));
-		lblStep3E26P2PartsToBeProduced.setBounds(527, 124, 29, 23);
-		panelStep3.add(lblStep3E26P2PartsToBeProduced);
-
-		JLabel lblStep3E26P3PartsToBeProduced = new JLabel("250");
-		lblStep3E26P3PartsToBeProduced
-				.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStep3E26P3PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN,
-				14));
-		lblStep3E26P3PartsToBeProduced.setBounds(807, 124, 29, 23);
-		panelStep3.add(lblStep3E26P3PartsToBeProduced);
+		lblStep3E26PartsToBeProduced
+				.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblStep3E26PartsToBeProduced.setBounds(639, 60, 29, 23);
+		panelStep3.add(lblStep3E26PartsToBeProduced);
 
 		JLabel lblStep3E29PartsToBeProduced = new JLabel("250");
 		lblStep3E29PartsToBeProduced
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E29PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E29PartsToBeProduced.setBounds(807, 146, 29, 23);
+		lblStep3E29PartsToBeProduced.setBounds(807, 165, 29, 23);
 		panelStep3.add(lblStep3E29PartsToBeProduced);
 
 		JLabel lblStep3E30PartsToBeProduced = new JLabel("250");
@@ -1251,7 +1175,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E30PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E30PartsToBeProduced.setBounds(807, 169, 29, 23);
+		lblStep3E30PartsToBeProduced.setBounds(807, 188, 29, 23);
 		panelStep3.add(lblStep3E30PartsToBeProduced);
 
 		JLabel lblStep3E31PartsToBeProduced = new JLabel("250");
@@ -1259,7 +1183,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E31PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E31PartsToBeProduced.setBounds(807, 192, 29, 23);
+		lblStep3E31PartsToBeProduced.setBounds(807, 211, 29, 23);
 		panelStep3.add(lblStep3E31PartsToBeProduced);
 
 		JLabel lblStep3E49PartsToBeProduced = new JLabel("250");
@@ -1267,7 +1191,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E49PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E49PartsToBeProduced.setBounds(249, 146, 29, 23);
+		lblStep3E49PartsToBeProduced.setBounds(249, 164, 29, 23);
 		panelStep3.add(lblStep3E49PartsToBeProduced);
 
 		JLabel lblStep3E50PartsToBeProduced = new JLabel("250");
@@ -1275,7 +1199,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E50PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E50PartsToBeProduced.setBounds(249, 169, 29, 23);
+		lblStep3E50PartsToBeProduced.setBounds(249, 187, 29, 23);
 		panelStep3.add(lblStep3E50PartsToBeProduced);
 
 		JLabel lblStep3E51PartsToBeProduced = new JLabel("250");
@@ -1283,7 +1207,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E51PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E51PartsToBeProduced.setBounds(249, 192, 29, 23);
+		lblStep3E51PartsToBeProduced.setBounds(249, 210, 29, 23);
 		panelStep3.add(lblStep3E51PartsToBeProduced);
 
 		JLabel lblStep3E54PartsToBeProduced = new JLabel("250");
@@ -1291,7 +1215,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E54PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E54PartsToBeProduced.setBounds(527, 146, 29, 23);
+		lblStep3E54PartsToBeProduced.setBounds(527, 165, 29, 23);
 		panelStep3.add(lblStep3E54PartsToBeProduced);
 
 		JLabel lblStep3E55PartsToBeProduced = new JLabel("250");
@@ -1299,7 +1223,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E55PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E55PartsToBeProduced.setBounds(527, 169, 29, 23);
+		lblStep3E55PartsToBeProduced.setBounds(527, 188, 29, 23);
 		panelStep3.add(lblStep3E55PartsToBeProduced);
 
 		JLabel lblStep3E56PartsToBeProduced = new JLabel("250");
@@ -1307,152 +1231,128 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E56PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E56PartsToBeProduced.setBounds(527, 192, 29, 23);
+		lblStep3E56PartsToBeProduced.setBounds(527, 211, 29, 23);
 		panelStep3.add(lblStep3E56PartsToBeProduced);
 
 		JSpinner spinnerStep3P1 = new JSpinner();
 		lblStep3P1.setLabelFor(spinnerStep3P1);
-		spinnerStep3P1.setBounds(50, 82, 60, 20);
+		spinnerStep3P1.setBounds(50, 145, 60, 20);
 		panelStep3.add(spinnerStep3P1);
 
 		JSpinner spinnerStep3P2 = new JSpinner();
-		spinnerStep3P2.setBounds(328, 82, 60, 20);
+		spinnerStep3P2.setBounds(328, 145, 60, 20);
 		panelStep3.add(spinnerStep3P2);
 
 		JSpinner spinnerStep3P3 = new JSpinner();
-		spinnerStep3P3.setBounds(608, 82, 60, 20);
+		spinnerStep3P3.setBounds(608, 145, 60, 20);
 		panelStep3.add(spinnerStep3P3);
 
 		JSpinner spinnerStep3E4 = new JSpinner();
-		spinnerStep3E4.setBounds(50, 104, 60, 20);
+		spinnerStep3E4.setBounds(50, 167, 60, 20);
 		panelStep3.add(spinnerStep3E4);
 
 		JSpinner spinnerStep3E5 = new JSpinner();
-		spinnerStep3E5.setBounds(328, 104, 60, 20);
+		spinnerStep3E5.setBounds(328, 167, 60, 20);
 		panelStep3.add(spinnerStep3E5);
 
 		JSpinner spinnerStep3E6 = new JSpinner();
-		spinnerStep3E6.setBounds(608, 104, 60, 20);
+		spinnerStep3E6.setBounds(608, 167, 60, 20);
 		panelStep3.add(spinnerStep3E6);
 
 		JSpinner spinnerStep3E7 = new JSpinner();
-		spinnerStep3E7.setBounds(50, 127, 60, 20);
+		spinnerStep3E7.setBounds(50, 190, 60, 20);
 		panelStep3.add(spinnerStep3E7);
 
 		JSpinner spinnerStep3E8 = new JSpinner();
-		spinnerStep3E8.setBounds(328, 127, 60, 20);
+		spinnerStep3E8.setBounds(328, 190, 60, 20);
 		panelStep3.add(spinnerStep3E8);
 
 		JSpinner spinnerStep3E9 = new JSpinner();
-		spinnerStep3E9.setBounds(608, 127, 60, 20);
+		spinnerStep3E9.setBounds(608, 190, 60, 20);
 		panelStep3.add(spinnerStep3E9);
 
 		JSpinner spinnerStep3E10 = new JSpinner();
-		spinnerStep3E10.setBounds(50, 149, 60, 20);
+		spinnerStep3E10.setBounds(50, 212, 60, 20);
 		panelStep3.add(spinnerStep3E10);
 
 		JSpinner spinnerStep3E11 = new JSpinner();
-		spinnerStep3E11.setBounds(328, 149, 60, 20);
+		spinnerStep3E11.setBounds(328, 212, 60, 20);
 		panelStep3.add(spinnerStep3E11);
 
 		JSpinner spinnerStep3E12 = new JSpinner();
-		spinnerStep3E12.setBounds(608, 149, 60, 20);
+		spinnerStep3E12.setBounds(608, 212, 60, 20);
 		panelStep3.add(spinnerStep3E12);
 
 		JSpinner spinnerStep3E13 = new JSpinner();
-		spinnerStep3E13.setBounds(50, 172, 60, 20);
+		spinnerStep3E13.setBounds(50, 235, 60, 20);
 		panelStep3.add(spinnerStep3E13);
 
 		JSpinner spinnerStep3E14 = new JSpinner();
-		spinnerStep3E14.setBounds(328, 172, 60, 20);
+		spinnerStep3E14.setBounds(328, 235, 60, 20);
 		panelStep3.add(spinnerStep3E14);
 
 		JSpinner spinnerStep3E15 = new JSpinner();
-		spinnerStep3E15.setBounds(608, 172, 60, 20);
+		spinnerStep3E15.setBounds(608, 235, 60, 20);
 		panelStep3.add(spinnerStep3E15);
 
-		JSpinner spinnerStep3E16P1 = new JSpinner();
-		spinnerStep3E16P1.setBounds(50, 194, 60, 20);
-		panelStep3.add(spinnerStep3E16P1);
+		JSpinner spinnerStep3E16 = new JSpinner();
+		spinnerStep3E16.setBounds(303, 63, 60, 20);
+		panelStep3.add(spinnerStep3E16);
 
-		JSpinner spinnerStep3E16P2 = new JSpinner();
-		spinnerStep3E16P2.setBounds(328, 194, 60, 20);
-		panelStep3.add(spinnerStep3E16P2);
-
-		JSpinner spinnerStep3E16P3 = new JSpinner();
-		spinnerStep3E16P3.setBounds(608, 194, 60, 20);
-		panelStep3.add(spinnerStep3E16P3);
-
-		JSpinner spinnerStep3E17P1 = new JSpinner();
-		spinnerStep3E17P1.setBounds(184, 82, 60, 20);
-		panelStep3.add(spinnerStep3E17P1);
-
-		JSpinner spinnerStep3E17P2 = new JSpinner();
-		spinnerStep3E17P2.setBounds(462, 82, 60, 20);
-		panelStep3.add(spinnerStep3E17P2);
-
-		JSpinner spinnerStep3E17P3 = new JSpinner();
-		spinnerStep3E17P3.setBounds(742, 82, 60, 20);
-		panelStep3.add(spinnerStep3E17P3);
+		JSpinner spinnerStep3E17 = new JSpinner();
+		spinnerStep3E17.setBounds(433, 63, 60, 20);
+		panelStep3.add(spinnerStep3E17);
 
 		JSpinner spinnerStep3E18 = new JSpinner();
-		spinnerStep3E18.setBounds(184, 104, 60, 20);
+		spinnerStep3E18.setBounds(184, 145, 60, 20);
 		panelStep3.add(spinnerStep3E18);
 
-		JSpinner spinnerStep3E119 = new JSpinner();
-		spinnerStep3E119.setBounds(462, 104, 60, 20);
-		panelStep3.add(spinnerStep3E119);
+		JSpinner spinnerStep3E19 = new JSpinner();
+		spinnerStep3E19.setBounds(462, 145, 60, 20);
+		panelStep3.add(spinnerStep3E19);
 
 		JSpinner spinnerStep3E20 = new JSpinner();
-		spinnerStep3E20.setBounds(742, 104, 60, 20);
+		spinnerStep3E20.setBounds(742, 145, 60, 20);
 		panelStep3.add(spinnerStep3E20);
 
-		JSpinner spinnerStep3E26P1 = new JSpinner();
-		spinnerStep3E26P1.setBounds(184, 127, 60, 20);
-		panelStep3.add(spinnerStep3E26P1);
-
-		JSpinner spinnerStep3E26P2 = new JSpinner();
-		spinnerStep3E26P2.setBounds(462, 127, 60, 20);
-		panelStep3.add(spinnerStep3E26P2);
-
-		JSpinner spinnerStep3E26P3 = new JSpinner();
-		spinnerStep3E26P3.setBounds(742, 127, 60, 20);
-		panelStep3.add(spinnerStep3E26P3);
+		JSpinner spinnerStep3E26 = new JSpinner();
+		spinnerStep3E26.setBounds(569, 63, 60, 20);
+		panelStep3.add(spinnerStep3E26);
 
 		JSpinner spinnerStep3E29 = new JSpinner();
-		spinnerStep3E29.setBounds(742, 149, 60, 20);
+		spinnerStep3E29.setBounds(742, 168, 60, 20);
 		panelStep3.add(spinnerStep3E29);
 
 		JSpinner spinnerStep3E30 = new JSpinner();
-		spinnerStep3E30.setBounds(742, 172, 60, 20);
+		spinnerStep3E30.setBounds(742, 191, 60, 20);
 		panelStep3.add(spinnerStep3E30);
 
 		JSpinner spinnerStep3E31 = new JSpinner();
-		spinnerStep3E31.setBounds(742, 194, 60, 20);
+		spinnerStep3E31.setBounds(742, 213, 60, 20);
 		panelStep3.add(spinnerStep3E31);
 
 		JSpinner spinnerStep3E49 = new JSpinner();
-		spinnerStep3E49.setBounds(184, 149, 60, 20);
+		spinnerStep3E49.setBounds(184, 167, 60, 20);
 		panelStep3.add(spinnerStep3E49);
 
 		JSpinner spinnerStep3E50 = new JSpinner();
-		spinnerStep3E50.setBounds(184, 172, 60, 20);
+		spinnerStep3E50.setBounds(184, 190, 60, 20);
 		panelStep3.add(spinnerStep3E50);
 
 		JSpinner spinnerStep3E51 = new JSpinner();
-		spinnerStep3E51.setBounds(184, 194, 60, 20);
+		spinnerStep3E51.setBounds(184, 212, 60, 20);
 		panelStep3.add(spinnerStep3E51);
 
 		JSpinner spinnerStep3E54 = new JSpinner();
-		spinnerStep3E54.setBounds(462, 149, 60, 20);
+		spinnerStep3E54.setBounds(462, 168, 60, 20);
 		panelStep3.add(spinnerStep3E54);
 
 		JSpinner spinnerStep3E55 = new JSpinner();
-		spinnerStep3E55.setBounds(462, 172, 60, 20);
+		spinnerStep3E55.setBounds(462, 191, 60, 20);
 		panelStep3.add(spinnerStep3E55);
 
 		JSpinner spinnerStep3E56 = new JSpinner();
-		spinnerStep3E56.setBounds(462, 194, 60, 20);
+		spinnerStep3E56.setBounds(462, 213, 60, 20);
 		panelStep3.add(spinnerStep3E56);
 
 		JButton btnStep3NextStep = new JButton(
@@ -2210,6 +2110,21 @@ public class PlanungstoolGUI {
 		panelStep6.add(btnStep6PrevStep);
 		internalFrame_1.setVisible(true);
 
+		JLabel lblPP = new JLabel("P1 - P3");
+		lblPP.setHorizontalAlignment(SwingConstants.CENTER);
+		lblPP.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblPP.setBounds(173, 60, 90, 23);
+		panelStep3.add(lblPP);
+
+		// ENDE GUI BUILDER
+
+		// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// MANUELLE KONFIGURATION DER UI ITEMS
+
+		// PREPARE GUI
+		tabbedPanePlanning.removeAll();
+
+		// BUILD STEPS MAP FOR ACCESSING STEP PANELS BY INDEX
 		stepsMap.put(1, panelStep1);
 		stepsMap.put(2, panelStep2);
 		stepsMap.put(3, panelStep3);
@@ -2217,6 +2132,68 @@ public class PlanungstoolGUI {
 		stepsMap.put(5, panelStep5);
 		stepsMap.put(6, panelStep6);
 
+		safetyStockFormular.put("P1", new SafetyStockEntity(lblStep3P1,
+				spinnerStep3P1, lblStep3P1PartsToBeProduced));
+		safetyStockFormular.put("P2", new SafetyStockEntity(lblStep3P2,
+				spinnerStep3P2, lblStep3P2PartsToBeProduced));
+		safetyStockFormular.put("P3", new SafetyStockEntity(lblStep3P3,
+				spinnerStep3P3, lblStep3P3PartsToBeProduced));
+		safetyStockFormular.put("E4", new SafetyStockEntity(lblStep3E4,
+				spinnerStep3E4, lblStep3E4PartsToBeProduced));
+		safetyStockFormular.put("E5", new SafetyStockEntity(lblStep3E5,
+				spinnerStep3E5, lblStep3E5PartsToBeProduced));
+		safetyStockFormular.put("E6", new SafetyStockEntity(lblStep3E6,
+				spinnerStep3E6, lblStep3E6PartsToBeProduced));
+		safetyStockFormular.put("E7", new SafetyStockEntity(lblStep3E7,
+				spinnerStep3E7, lblStep3E7PartsToBeProduced));
+		safetyStockFormular.put("E8", new SafetyStockEntity(lblStep3E8,
+				spinnerStep3E8, lblStep3E8PartsToBeProduced));
+		safetyStockFormular.put("E9", new SafetyStockEntity(lblStep3E9,
+				spinnerStep3E9, lblStep3E9PartsToBeProduced));
+		safetyStockFormular.put("E10", new SafetyStockEntity(lblStep3E10,
+				spinnerStep3E10, lblStep3E10PartsToBeProduced));
+		safetyStockFormular.put("E11", new SafetyStockEntity(lblStep3E11,
+				spinnerStep3E11, lblStep3E11PartsToBeProduced));
+		safetyStockFormular.put("E12", new SafetyStockEntity(lblStep3E12,
+				spinnerStep3E12, lblStep3E12PartsToBeProduced));
+		safetyStockFormular.put("E13", new SafetyStockEntity(lblStep3E13,
+				spinnerStep3E13, lblStep3E13PartsToBeProduced));
+		safetyStockFormular.put("E14", new SafetyStockEntity(lblStep3E14,
+				spinnerStep3E14, lblStep3E14PartsToBeProduced));
+		safetyStockFormular.put("E15", new SafetyStockEntity(lblStep3E15,
+				spinnerStep3E15, lblStep3E15PartsToBeProduced));
+		safetyStockFormular.put("E16", new SafetyStockEntity(lblStep3E16,
+				spinnerStep3E16, lblStep3E16PartsToBeProduced));
+		safetyStockFormular.put("E17", new SafetyStockEntity(lblStep3E17,
+				spinnerStep3E17, lblStep3E17PartsToBeProduced));
+		safetyStockFormular.put("E18", new SafetyStockEntity(lblStep3E18,
+				spinnerStep3E18, lblStep3E18PartsToBeProduced));
+		safetyStockFormular.put("E19", new SafetyStockEntity(lblStep3E19,
+				spinnerStep3E19, lblStep3E19PartsToBeProduced));
+		safetyStockFormular.put("E20", new SafetyStockEntity(lblStep3E20,
+				spinnerStep3E20, lblStep3E20PartsToBeProduced));
+		safetyStockFormular.put("E26", new SafetyStockEntity(lblStep3E26,
+				spinnerStep3E26, lblStep3E26PartsToBeProduced));
+		safetyStockFormular.put("E29", new SafetyStockEntity(lblStep3E29,
+				spinnerStep3E29, lblStep3E29PartsToBeProduced));
+		safetyStockFormular.put("E30", new SafetyStockEntity(lblStep3E30,
+				spinnerStep3E30, lblStep3E30PartsToBeProduced));
+		safetyStockFormular.put("E31", new SafetyStockEntity(lblStep3E31,
+				spinnerStep3E31, lblStep3E31PartsToBeProduced));
+		safetyStockFormular.put("E49", new SafetyStockEntity(lblStep3E49,
+				spinnerStep3E49, lblStep3E49PartsToBeProduced));
+		safetyStockFormular.put("E50", new SafetyStockEntity(lblStep3E50,
+				spinnerStep3E50, lblStep3E50PartsToBeProduced));
+		safetyStockFormular.put("E51", new SafetyStockEntity(lblStep3E51,
+				spinnerStep3E51, lblStep3E51PartsToBeProduced));
+		safetyStockFormular.put("E54", new SafetyStockEntity(lblStep3E54,
+				spinnerStep3E54, lblStep3E54PartsToBeProduced));
+		safetyStockFormular.put("E55", new SafetyStockEntity(lblStep3E55,
+				spinnerStep3E55, lblStep3E55PartsToBeProduced));
+		safetyStockFormular.put("E56", new SafetyStockEntity(lblStep3E56,
+				spinnerStep3E56, lblStep3E56PartsToBeProduced));
+
+		// INITIALIZE ACTION LISTENERS
 		ActionListener switchStepsButtonActionListener = new StepButtonsActionDialog(
 				this);
 
@@ -2236,8 +2213,7 @@ public class PlanungstoolGUI {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				inheritForecast();
-
+				readInForecasts();
 			}
 		});
 
@@ -2245,23 +2221,47 @@ public class PlanungstoolGUI {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				inheritSales();
-
+				readInSales();
+				calculateSafetyStock();
 			}
 		});
 
-		btnStep3NextStep.addActionListener(new ActionListener() {
+		btnStep3Recalculate.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// ProductionService productionService = new
-				// ProductionService(xmlPath);
+				readInSales();
+				readInSafetyStock();
+				calculateSafetyStock();
 
 			}
 		});
+		
+		displaySafetyStock();
 
-		// PREPARE GUI
-		tabbedPanePlanning.removeAll();
+	}
+
+	protected void calculateSafetyStock() {
+
+		ProductionService productionService = null;
+
+		try {
+			productionService = new ProductionService(results);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+
+		productionService.setForecast(userInput.getForecast());
+		productionService.setSales(userInput.getSales(),
+				userInput.getDirectSales());
+		Map<String, Integer> safetyStockGui = productionService
+				.calculateSafetyStock(userInput.getSafetyStock());
+
+		userInput.getSafetyStock().setSafetyStocks(safetyStockGui);
+
+		this.displaySafetyStock();
 
 	}
 
@@ -2269,7 +2269,7 @@ public class PlanungstoolGUI {
 		this.results = results2;
 	}
 
-	protected void inheritForecast() {
+	protected void readInForecasts() {
 
 		Sales salesPeriode1 = new Sales(
 				(int) spinnerStep1P1Periode1.getValue(),
@@ -2294,10 +2294,9 @@ public class PlanungstoolGUI {
 
 		userInput.setForecast(forecast);
 
-		System.out.println(forecast);
 	}
 
-	protected void inheritSales() {
+	protected void readInSales() {
 		Sales sales = new Sales((int) spinnerStep2P1Sales.getValue(),
 				(int) spinnerStep2P2Sales.getValue(),
 				(int) spinnerStep2P3Sales.getValue());
@@ -2309,13 +2308,36 @@ public class PlanungstoolGUI {
 
 		userInput.setSales(sales);
 		userInput.setDirectSales(directSales);
-
-		System.out.println(sales);
-		System.out.println(directSales);
-
 	}
 
-	protected void setPeriod(int period) {
+	protected void readInSafetyStock() {
+
+		for (String id : safetyStockFormular.keySet()) {
+
+			SafetyStockEntity safetyStockEntity = safetyStockFormular.get(id);
+			userInput.getSafetyStock().getSafetyStocks()
+					.put(id, (Integer) safetyStockEntity.getWish().getValue());
+
+			System.out.println(id + ": "
+					+ userInput.getSafetyStock().getStock(id));
+		}
+	}
+
+	protected void displaySafetyStock() {
+
+		for (String id : userInput.getSafetyStock().getSafetyStocks().keySet()) {
+
+			safetyStockFormular
+					.get(id)
+					.getCalculated()
+					.setText(
+							userInput.getSafetyStock().getSafetyStocks()
+									.get(id).toString());
+			;
+		}
+	}
+
+	protected void displayPeriod(int period) {
 
 		lblStep1Periode1Title.setText("Periode " + (period + 1));
 		lblStep1Periode2Title.setText("Periode " + (period + 2));
