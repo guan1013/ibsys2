@@ -1,41 +1,45 @@
 package de.hska.centurion.gui;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.JFileChooser;
-
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.Toolkit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import javax.swing.JOptionPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.JDesktopPane;
-import javax.swing.JToolBar;
-import javax.swing.JSplitPane;
-import javax.swing.JLayeredPane;
-
-import java.awt.FlowLayout;
-
-import javax.swing.JPanel;
+import javax.swing.AbstractListModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.EtchedBorder;
+import javax.swing.table.DefaultTableModel;
 
 import de.hska.centurion.domain.gui.Forecast;
 import de.hska.centurion.domain.gui.SafetyStock;
@@ -47,42 +51,74 @@ import de.hska.centurion.domain.input.components.IdleTimeCostsSum;
 import de.hska.centurion.domain.input.components.Order;
 import de.hska.centurion.domain.input.components.WorkplaceCosts;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
-import de.hska.centurion.domain.output.Production;
 import de.hska.centurion.io.XmlInputParser;
 import de.hska.centurion.services.production.ProductionService;
 
-import javax.swing.JButton;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.ImageIcon;
-
-import java.awt.Font;
-
-import javax.swing.SwingConstants;
-import javax.swing.JSpinner;
-
-import java.util.ResourceBundle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.swing.JList;
-import javax.swing.AbstractListModel;
-import javax.swing.border.EtchedBorder;
-import javax.swing.JTextField;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.xml.bind.JAXBException;
-
+/**
+ * This is the main graphical user interface of the planning tool. It contains
+ * the window which contains the result and the planning frame. The main screen
+ * is devided in two parts: Results and planning. The result screen displays the
+ * data from the last period. Source of this data is a XML-File which is parsed
+ * into an object of {@link Class} {@link Results}. The planning screen contains
+ * formulas for the user to enter data (it is stored as {@link UserInput}. Also
+ * the result of the calculations is displayed in this area to help the user
+ * make decisions.
+ * 
+ * @see Results
+ * @see UserInput
+ * 
+ * @author Andreas Guentzel
+ *
+ */
 public class PlanungstoolGUI {
 
-	private JFrame frmIbsysiiplanungstoolGruppe;
+	// //////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ATTRIBUTES
+
+	// STATIC ATTRIBUTES
+	private static final int DEFAULT_SAFETY_STOCK = 100;
+
+	// UI COMPONENTS - MAIN SCREEN
+	private JFrame frameMain;
+
+	// UI COMPONENTS - PLANNING FRAME
+	private JTabbedPane tabbedPanePlanning;
+
+	// UI COMPONENTS - PLANNING STEP 1
+	private JLabel lblStep1Periode1Title;
+	private JLabel lblStep1Periode2Title;
+	private JLabel lblStep1Periode3Title;
+	private JLabel lblStep1Periode4Title;
+	private JSpinner spinnerStep1P1Periode1;
+	private JSpinner spinnerStep1P2Periode1;
+	private JSpinner spinnerStep1P3Periode1;
+	private JSpinner spinnerStep1P1Periode2;
+	private JSpinner spinnerStep1P2Periode2;
+	private JSpinner spinnerStep1P3Periode2;
+	private JSpinner spinnerStep1P1Periode3;
+	private JSpinner spinnerStep1P2Periode3;
+	private JSpinner spinnerStep1P3Periode3;
+	private JSpinner spinnerStep1P1Periode4;
+	private JSpinner spinnerStep1P2Periode4;
+	private JSpinner spinnerStep1P3Periode4;
+
+	// UI COMPONENTS - PLANNING STEP 2
+	private JSpinner spinnerStep2P1Sales;
+	private JSpinner spinnerStep2P1DirectSales;
+	private JSpinner spinnerStep2P2Sales;
+	private JSpinner spinnerStep2P3Sales;
+	private JSpinner spinnerStep2P2DirectSales;
+	private JSpinner spinnerStep2P3DirectSales;
+
+	// TABLES
 	private JTable tableWarehouse;
 	private JTable tableInwardStockMovement;
 	private JTable tableFutureInwardStockMovement;
 	private JTable tableIdleTimeCosts;
 	private JTable tableWaitingListWorkstations;
 	private JTable table;
+
+	// UNSORTED TEXTFIELDS
 	private JTextField textField;
 	private JTextField textField_1;
 	private JTextField textField_2;
@@ -140,57 +176,29 @@ public class PlanungstoolGUI {
 	private JTextField textField_54;
 	private JTextField textField_55;
 
-	private JTabbedPane tabbedPanePlanning;
+	// DIFFERENT MAPS FOR ACCESSING THE UI COMPONENTS
 
-	private JLabel lblStep1Periode1Title;
-
-	private JLabel lblStep1Periode2Title;
-
-	private JLabel lblStep1Periode3Title;
-
-	private JLabel lblStep1Periode4Title;
-
-	private JSpinner spinnerStep1P1Periode1;
-
-	private JSpinner spinnerStep1P2Periode1;
-
-	private JSpinner spinnerStep1P3Periode1;
-
-	private JSpinner spinnerStep1P1Periode2;
-
-	private JSpinner spinnerStep1P2Periode2;
-
-	private JSpinner spinnerStep1P3Periode2;
-
-	private JSpinner spinnerStep1P1Periode3;
-
-	private JSpinner spinnerStep1P2Periode3;
-
-	private JSpinner spinnerStep1P3Periode3;
-
-	private JSpinner spinnerStep1P1Periode4;
-
-	private JSpinner spinnerStep1P2Periode4;
-
-	private JSpinner spinnerStep1P3Periode4;
-	private JSpinner spinnerStep2P1Sales;
-	private JSpinner spinnerStep2P1DirectSales;
-	private JSpinner spinnerStep2P2Sales;
-	private JSpinner spinnerStep2P3Sales;
-	private JSpinner spinnerStep2P2DirectSales;
-	private JSpinner spinnerStep2P3DirectSales;
-
+	/**
+	 * A map of all planning steps. The panel which holds the ui components for
+	 * a specific step can be accessed by its index (key=1 is the panel of Step
+	 * 1).
+	 */
 	private HashMap<Integer, JPanel> stepsMap;
 
+	/**
+	 * A map of all ui components of the planning step 3. All items w
+	 */
 	private HashMap<String, SafetyStockEntity> safetyStockFormular;
 
-	/*
-	 * CURRENTLY LOADED XML-RESULT FILE
+	// Different attributes to store data.
+
+	/**
+	 * Currently displayed and used result object (parsed from xml file).
 	 */
 	private Results results = null;
 
-	/*
-	 * PLACE TO STORE ALL USER INPUT FROM THE GUI
+	/**
+	 * Object which stores all data which was entered by the user.
 	 */
 	private UserInput userInput;
 
@@ -198,11 +206,25 @@ public class PlanungstoolGUI {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+
+		// Set the look and feel to users OS LaF.
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					PlanungstoolGUI window = new PlanungstoolGUI();
-					window.frmIbsysiiplanungstoolGruppe.setVisible(true);
+					window.frameMain.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -214,10 +236,14 @@ public class PlanungstoolGUI {
 	 * Create the application.
 	 */
 	public PlanungstoolGUI() {
+
+		// Initialize attributes
 		stepsMap = new HashMap<>();
 		userInput = new UserInput();
 		safetyStockFormular = new HashMap<String, SafetyStockEntity>();
-		userInput.setSafetyStock(new SafetyStock(100));
+		userInput.setSafetyStock(new SafetyStock(DEFAULT_SAFETY_STOCK));
+
+		// Initialize UI Components
 		initialize();
 	}
 
@@ -225,38 +251,39 @@ public class PlanungstoolGUI {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frmIbsysiiplanungstoolGruppe = new JFrame();
-		frmIbsysiiplanungstoolGruppe
+
+		frameMain = new JFrame();
+		frameMain
 				.setIconImage(Toolkit
 						.getDefaultToolkit()
 						.getImage(
 								PlanungstoolGUI.class
 										.getResource("/com/sun/java/swing/plaf/windows/icons/Computer.gif")));
-		frmIbsysiiplanungstoolGruppe.setResizable(false);
-		frmIbsysiiplanungstoolGruppe
+		frameMain.setResizable(false);
+		frameMain
 				.setTitle("IBSYS-II-Planungstool - Gruppe Centurion - SS 2015");
-		frmIbsysiiplanungstoolGruppe.setBounds(100, 100, 893, 738);
-		frmIbsysiiplanungstoolGruppe
-				.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frameMain.setBounds(100, 100, 893, 738);
+		frameMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JMenuBar menuBar = new JMenuBar();
-		frmIbsysiiplanungstoolGruppe.setJMenuBar(menuBar);
+		frameMain.setJMenuBar(menuBar);
 
 		JMenu mnFile = new JMenu("Datei");
 		menuBar.add(mnFile);
 
-		final JInternalFrame internalFrame = new JInternalFrame("Ergebnisse");
-		internalFrame
+		final JInternalFrame internalFrameResults = new JInternalFrame(
+				"Ergebnisse");
+		internalFrameResults
 				.setFrameIcon(new ImageIcon(
 						PlanungstoolGUI.class
 								.getResource("/com/sun/java/swing/plaf/motif/icons/Inform.gif")));
-		internalFrame.setBounds(10, 11, 867, 286);
-		frmIbsysiiplanungstoolGruppe.getContentPane().add(internalFrame);
-		internalFrame.getContentPane().setLayout(null);
+		internalFrameResults.setBounds(10, 11, 867, 286);
+		frameMain.getContentPane().add(internalFrameResults);
+		internalFrameResults.getContentPane().setLayout(null);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBounds(10, 11, 831, 235);
-		internalFrame.getContentPane().add(tabbedPane);
+		internalFrameResults.getContentPane().add(tabbedPane);
 
 		JPanel panelWarehouse = new JPanel();
 		tabbedPane.addTab("Akt. Lagerbestand", null, panelWarehouse, null);
@@ -440,7 +467,7 @@ public class PlanungstoolGUI {
 				.setResizable(false);
 		tableFutureInwardStockMovement.getColumnModel().getColumn(5)
 				.setMinWidth(26);
-		internalFrame.setVisible(true);
+		internalFrameResults.setVisible(true);
 
 		final PlanungstoolGUI gui = this;
 
@@ -451,7 +478,7 @@ public class PlanungstoolGUI {
 				final JFileChooser fc = new JFileChooser();
 
 				// Zeige Dialog zum Auswählen einer Datei
-				int returnVal = fc.showOpenDialog(frmIbsysiiplanungstoolGruppe);
+				int returnVal = fc.showOpenDialog(frameMain);
 
 				// Warten bis der Benutzer eine Datei ausgewählt hat
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -467,8 +494,8 @@ public class PlanungstoolGUI {
 						results = XmlInputParser.parseXmlFile(file.getPath());
 					} catch (Exception ex) {
 						results = null;
-						JOptionPane.showMessageDialog(
-								frmIbsysiiplanungstoolGruppe, ex.getMessage());
+						JOptionPane.showMessageDialog(frameMain,
+								ex.getMessage());
 						return;
 					}
 
@@ -479,7 +506,7 @@ public class PlanungstoolGUI {
 					// ALLGEMEINES
 
 					// Titel des Ergebnis-Frames setzen
-					internalFrame.setTitle("Ergebnisse - Periode "
+					internalFrameResults.setTitle("Ergebnisse - Periode "
 							+ results.getPeriod() + " | Gruppe "
 							+ results.getGroup());
 
@@ -620,14 +647,14 @@ public class PlanungstoolGUI {
 			}
 		});
 		mnFile.add(mntmLoadResultXml);
-		frmIbsysiiplanungstoolGruppe.getContentPane().setLayout(null);
+		frameMain.getContentPane().setLayout(null);
 
-		JInternalFrame internalFrame_1 = new JInternalFrame("Planung");
-		internalFrame_1.setBounds(10, 305, 867, 371);
-		frmIbsysiiplanungstoolGruppe.getContentPane().add(internalFrame_1);
+		JInternalFrame internalFramePlanning = new JInternalFrame("Planung");
+		internalFramePlanning.setBounds(10, 305, 867, 371);
+		frameMain.getContentPane().add(internalFramePlanning);
 
 		tabbedPanePlanning = new JTabbedPane(JTabbedPane.TOP);
-		internalFrame_1.getContentPane().add(tabbedPanePlanning,
+		internalFramePlanning.getContentPane().add(tabbedPanePlanning,
 				BorderLayout.CENTER);
 
 		JPanel panelStep1 = new JPanel();
@@ -814,256 +841,238 @@ public class PlanungstoolGUI {
 		lblStep3Title.setBounds(10, 11, 826, 23);
 		panelStep3.add(lblStep3Title);
 
-		JLabel lblStep3P1Title = new JLabel("P1 (Kinderfahrrad)");
-		lblStep3P1Title.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStep3P1Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P1Title.setBounds(20, 108, 258, 23);
-		panelStep3.add(lblStep3P1Title);
-
-		JLabel lblStep3P2Title = new JLabel("P2 (Damenfahrrad)");
-		lblStep3P2Title.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStep3P2Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P2Title.setBounds(298, 108, 258, 23);
-		panelStep3.add(lblStep3P2Title);
-
-		JLabel lblStep3P3Title = new JLabel("P3 ( Herrenfahrrad)");
-		lblStep3P3Title.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStep3P3Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P3Title.setBounds(578, 108, 258, 23);
-		panelStep3.add(lblStep3P3Title);
-
 		JLabel lblStep3P1 = new JLabel("P1");
 		lblStep3P1.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P1.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P1.setBounds(20, 142, 29, 23);
+		lblStep3P1.setBounds(50, 45, 29, 23);
 		panelStep3.add(lblStep3P1);
 
 		JLabel lblStep3P2 = new JLabel("P2");
 		lblStep3P2.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P2.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P2.setBounds(298, 142, 29, 23);
+		lblStep3P2.setBounds(222, 45, 29, 23);
 		panelStep3.add(lblStep3P2);
 
 		JLabel lblStep3P3 = new JLabel("P3");
 		lblStep3P3.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P3.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3P3.setBounds(578, 142, 29, 23);
+		lblStep3P3.setBounds(398, 45, 29, 23);
 		panelStep3.add(lblStep3P3);
 
 		JLabel lblStep3E4 = new JLabel("E4");
 		lblStep3E4.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E4.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E4.setBounds(20, 164, 29, 23);
+		lblStep3E4.setBounds(50, 67, 29, 23);
 		panelStep3.add(lblStep3E4);
 
 		JLabel lblStep3E5 = new JLabel("E5");
 		lblStep3E5.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E5.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E5.setBounds(298, 164, 29, 23);
+		lblStep3E5.setBounds(222, 67, 29, 23);
 		panelStep3.add(lblStep3E5);
 
 		JLabel lblStep3E6 = new JLabel("E6");
 		lblStep3E6.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E6.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E6.setBounds(578, 164, 29, 23);
+		lblStep3E6.setBounds(398, 67, 29, 23);
 		panelStep3.add(lblStep3E6);
 
 		JLabel lblStep3E7 = new JLabel("E7");
 		lblStep3E7.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E7.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E7.setBounds(20, 187, 29, 23);
+		lblStep3E7.setBounds(50, 90, 29, 23);
 		panelStep3.add(lblStep3E7);
 
 		JLabel lblStep3E8 = new JLabel("E8");
 		lblStep3E8.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E8.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E8.setBounds(298, 187, 29, 23);
+		lblStep3E8.setBounds(222, 90, 29, 23);
 		panelStep3.add(lblStep3E8);
 
 		JLabel lblStep3E9 = new JLabel("E9");
 		lblStep3E9.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E9.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E9.setBounds(578, 187, 29, 23);
+		lblStep3E9.setBounds(398, 90, 29, 23);
 		panelStep3.add(lblStep3E9);
 
 		JLabel lblStep3E10 = new JLabel("E10");
 		lblStep3E10.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E10.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E10.setBounds(20, 209, 29, 23);
+		lblStep3E10.setBounds(50, 112, 29, 23);
 		panelStep3.add(lblStep3E10);
 
 		JLabel lblStep3E11 = new JLabel("E11");
 		lblStep3E11.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E11.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E11.setBounds(298, 209, 29, 23);
+		lblStep3E11.setBounds(222, 112, 29, 23);
 		panelStep3.add(lblStep3E11);
 
 		JLabel lblStep3E12 = new JLabel("E12");
 		lblStep3E12.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E12.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E12.setBounds(578, 209, 29, 23);
+		lblStep3E12.setBounds(398, 112, 29, 23);
 		panelStep3.add(lblStep3E12);
 
 		JLabel lblStep3E13 = new JLabel("E13");
 		lblStep3E13.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E13.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E13.setBounds(20, 232, 29, 23);
+		lblStep3E13.setBounds(50, 135, 29, 23);
 		panelStep3.add(lblStep3E13);
 
 		JLabel lblStep3E14 = new JLabel("E14");
 		lblStep3E14.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E14.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E14.setBounds(298, 232, 29, 23);
+		lblStep3E14.setBounds(222, 135, 29, 23);
 		panelStep3.add(lblStep3E14);
 
 		JLabel lblStep3E15 = new JLabel("E15");
 		lblStep3E15.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E15.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E15.setBounds(578, 232, 29, 23);
+		lblStep3E15.setBounds(398, 135, 29, 23);
 		panelStep3.add(lblStep3E15);
 
 		JLabel lblStep3E16 = new JLabel("E16");
 		lblStep3E16.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E16.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E16.setBounds(268, 60, 29, 23);
+		lblStep3E16.setBounds(569, 45, 29, 23);
 		panelStep3.add(lblStep3E16);
 
 		JLabel lblStep3E17 = new JLabel("E17");
 		lblStep3E17.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E17.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E17.setBounds(402, 60, 29, 23);
+		lblStep3E17.setBounds(569, 67, 29, 23);
 		panelStep3.add(lblStep3E17);
 
 		JLabel lblStep3E18 = new JLabel("E18");
 		lblStep3E18.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E18.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E18.setBounds(154, 142, 29, 23);
+		lblStep3E18.setBounds(50, 163, 29, 23);
 		panelStep3.add(lblStep3E18);
 
 		JLabel lblStep3E19 = new JLabel("E19");
 		lblStep3E19.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E19.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E19.setBounds(432, 142, 29, 23);
+		lblStep3E19.setBounds(222, 164, 29, 23);
 		panelStep3.add(lblStep3E19);
 
 		JLabel lblStep3E20 = new JLabel("E20");
 		lblStep3E20.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E20.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E20.setBounds(712, 142, 29, 23);
+		lblStep3E20.setBounds(398, 162, 29, 23);
 		panelStep3.add(lblStep3E20);
 
 		JLabel lblStep3E26 = new JLabel("E26");
 		lblStep3E26.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E26.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E26.setBounds(534, 60, 29, 23);
+		lblStep3E26.setBounds(569, 90, 29, 23);
 		panelStep3.add(lblStep3E26);
 
 		JLabel lblStep3E29 = new JLabel("E29");
 		lblStep3E29.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E29.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E29.setBounds(712, 165, 29, 23);
+		lblStep3E29.setBounds(398, 185, 29, 23);
 		panelStep3.add(lblStep3E29);
 
 		JLabel lblStep3E30 = new JLabel("E30");
 		lblStep3E30.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E30.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E30.setBounds(712, 188, 29, 23);
+		lblStep3E30.setBounds(398, 208, 29, 23);
 		panelStep3.add(lblStep3E30);
 
 		JLabel lblStep3E31 = new JLabel("E31");
 		lblStep3E31.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E31.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E31.setBounds(712, 213, 29, 23);
+		lblStep3E31.setBounds(398, 233, 29, 23);
 		panelStep3.add(lblStep3E31);
 
 		JLabel lblStep3E49 = new JLabel("E49");
 		lblStep3E49.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E49.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E49.setBounds(154, 164, 29, 23);
+		lblStep3E49.setBounds(50, 185, 29, 23);
 		panelStep3.add(lblStep3E49);
 
 		JLabel lblStep3E50 = new JLabel("E50");
 		lblStep3E50.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E50.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E50.setBounds(154, 187, 29, 23);
+		lblStep3E50.setBounds(50, 208, 29, 23);
 		panelStep3.add(lblStep3E50);
 
 		JLabel lblStep3E51 = new JLabel("E51");
 		lblStep3E51.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E51.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E51.setBounds(154, 212, 29, 23);
+		lblStep3E51.setBounds(50, 233, 29, 23);
 		panelStep3.add(lblStep3E51);
 
 		JLabel lblStep3E54 = new JLabel("E54");
 		lblStep3E54.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E54.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E54.setBounds(432, 165, 29, 23);
+		lblStep3E54.setBounds(222, 187, 29, 23);
 		panelStep3.add(lblStep3E54);
 
 		JLabel lblStep3E55 = new JLabel("E55");
 		lblStep3E55.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E55.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E55.setBounds(432, 188, 29, 23);
+		lblStep3E55.setBounds(222, 210, 29, 23);
 		panelStep3.add(lblStep3E55);
 
 		JLabel lblStep3E56 = new JLabel("E56");
 		lblStep3E56.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E56.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep3E56.setBounds(432, 213, 29, 23);
+		lblStep3E56.setBounds(222, 235, 29, 23);
 		panelStep3.add(lblStep3E56);
 
 		JLabel lblStep3P1PartsToBeProduced = new JLabel("250");
 		lblStep3P1PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P1PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3P1PartsToBeProduced.setBounds(115, 142, 29, 23);
+		lblStep3P1PartsToBeProduced.setBounds(145, 45, 60, 23);
 		panelStep3.add(lblStep3P1PartsToBeProduced);
 
 		JLabel lblStep3P2PartsToBeProduced = new JLabel("250");
 		lblStep3P2PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P2PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3P2PartsToBeProduced.setBounds(393, 142, 29, 23);
+		lblStep3P2PartsToBeProduced.setBounds(317, 45, 60, 23);
 		panelStep3.add(lblStep3P2PartsToBeProduced);
 
 		JLabel lblStep3P3PartsToBeProduced = new JLabel("250");
 		lblStep3P3PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3P3PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3P3PartsToBeProduced.setBounds(673, 142, 29, 23);
+		lblStep3P3PartsToBeProduced.setBounds(493, 45, 52, 23);
 		panelStep3.add(lblStep3P3PartsToBeProduced);
 
 		JLabel lblStep3E4PartsToBeProduced = new JLabel("250");
 		lblStep3E4PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E4PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E4PartsToBeProduced.setBounds(115, 164, 29, 23);
+		lblStep3E4PartsToBeProduced.setBounds(145, 67, 60, 23);
 		panelStep3.add(lblStep3E4PartsToBeProduced);
 
 		JLabel lblStep3E5PartsToBeProduced = new JLabel("250");
 		lblStep3E5PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E5PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E5PartsToBeProduced.setBounds(393, 164, 29, 23);
+		lblStep3E5PartsToBeProduced.setBounds(317, 67, 60, 23);
 		panelStep3.add(lblStep3E5PartsToBeProduced);
 
 		JLabel lblStep3E6PartsToBeProduced = new JLabel("250");
 		lblStep3E6PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E6PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E6PartsToBeProduced.setBounds(673, 164, 29, 23);
+		lblStep3E6PartsToBeProduced.setBounds(493, 67, 52, 23);
 		panelStep3.add(lblStep3E6PartsToBeProduced);
 
 		JLabel lblStep3E7PartsToBeProduced = new JLabel("250");
 		lblStep3E7PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E7PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E7PartsToBeProduced.setBounds(115, 187, 29, 23);
+		lblStep3E7PartsToBeProduced.setBounds(145, 90, 60, 23);
 		panelStep3.add(lblStep3E7PartsToBeProduced);
 
 		JLabel lblStep3E8PartsToBeProduced = new JLabel("250");
 		lblStep3E8PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E8PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E8PartsToBeProduced.setBounds(393, 187, 29, 23);
+		lblStep3E8PartsToBeProduced.setBounds(317, 90, 60, 23);
 		panelStep3.add(lblStep3E8PartsToBeProduced);
 
 		JLabel lblStep3E9PartsToBeProduced = new JLabel("250");
 		lblStep3E9PartsToBeProduced.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E9PartsToBeProduced.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E9PartsToBeProduced.setBounds(673, 187, 29, 23);
+		lblStep3E9PartsToBeProduced.setBounds(493, 90, 52, 23);
 		panelStep3.add(lblStep3E9PartsToBeProduced);
 
 		JLabel lblStep3E10PartsToBeProduced = new JLabel("250");
@@ -1071,7 +1080,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E10PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E10PartsToBeProduced.setBounds(115, 209, 29, 23);
+		lblStep3E10PartsToBeProduced.setBounds(145, 112, 60, 23);
 		panelStep3.add(lblStep3E10PartsToBeProduced);
 
 		JLabel lblStep3E11PartsToBeProduced = new JLabel("250");
@@ -1079,7 +1088,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E11PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E11PartsToBeProduced.setBounds(393, 209, 29, 23);
+		lblStep3E11PartsToBeProduced.setBounds(317, 112, 60, 23);
 		panelStep3.add(lblStep3E11PartsToBeProduced);
 
 		JLabel lblStep3E12PartsToBeProduced = new JLabel("250");
@@ -1087,7 +1096,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E12PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E12PartsToBeProduced.setBounds(673, 209, 29, 23);
+		lblStep3E12PartsToBeProduced.setBounds(493, 112, 52, 23);
 		panelStep3.add(lblStep3E12PartsToBeProduced);
 
 		JLabel lblStep3E13PartsToBeProduced = new JLabel("250");
@@ -1095,7 +1104,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E13PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E13PartsToBeProduced.setBounds(115, 232, 29, 23);
+		lblStep3E13PartsToBeProduced.setBounds(145, 135, 60, 23);
 		panelStep3.add(lblStep3E13PartsToBeProduced);
 
 		JLabel lblStep3E14PartsToBeProduced = new JLabel("250");
@@ -1103,7 +1112,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E14PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E14PartsToBeProduced.setBounds(393, 232, 29, 23);
+		lblStep3E14PartsToBeProduced.setBounds(317, 135, 60, 23);
 		panelStep3.add(lblStep3E14PartsToBeProduced);
 
 		JLabel lblStep3E15PartsToBeProduced = new JLabel("250");
@@ -1111,7 +1120,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E15PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E15PartsToBeProduced.setBounds(673, 232, 29, 23);
+		lblStep3E15PartsToBeProduced.setBounds(493, 135, 52, 23);
 		panelStep3.add(lblStep3E15PartsToBeProduced);
 
 		JLabel lblStep3E16PartsToBeProduced = new JLabel("250");
@@ -1119,7 +1128,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E16PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E16PartsToBeProduced.setBounds(368, 60, 29, 23);
+		lblStep3E16PartsToBeProduced.setBounds(668, 45, 52, 23);
 		panelStep3.add(lblStep3E16PartsToBeProduced);
 
 		JLabel lblStep3E17PartsToBeProduced = new JLabel("250");
@@ -1127,7 +1136,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E17PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E17PartsToBeProduced.setBounds(500, 60, 29, 23);
+		lblStep3E17PartsToBeProduced.setBounds(667, 67, 53, 23);
 		panelStep3.add(lblStep3E17PartsToBeProduced);
 
 		JLabel lblStep3E18PartsToBeProduced = new JLabel("250");
@@ -1135,7 +1144,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E18PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E18PartsToBeProduced.setBounds(249, 142, 29, 23);
+		lblStep3E18PartsToBeProduced.setBounds(145, 163, 60, 23);
 		panelStep3.add(lblStep3E18PartsToBeProduced);
 
 		JLabel lblStep3E19PartsToBeProduced = new JLabel("250");
@@ -1143,7 +1152,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E19PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E19PartsToBeProduced.setBounds(527, 142, 29, 23);
+		lblStep3E19PartsToBeProduced.setBounds(317, 164, 60, 23);
 		panelStep3.add(lblStep3E19PartsToBeProduced);
 
 		JLabel lblStep3E20PartsToBeProduced = new JLabel("250");
@@ -1151,7 +1160,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E20PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E20PartsToBeProduced.setBounds(807, 142, 29, 23);
+		lblStep3E20PartsToBeProduced.setBounds(493, 162, 52, 23);
 		panelStep3.add(lblStep3E20PartsToBeProduced);
 
 		JLabel lblStep3E26PartsToBeProduced = new JLabel("250");
@@ -1159,7 +1168,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E26PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E26PartsToBeProduced.setBounds(639, 60, 29, 23);
+		lblStep3E26PartsToBeProduced.setBounds(668, 90, 52, 23);
 		panelStep3.add(lblStep3E26PartsToBeProduced);
 
 		JLabel lblStep3E29PartsToBeProduced = new JLabel("250");
@@ -1167,7 +1176,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E29PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E29PartsToBeProduced.setBounds(807, 165, 29, 23);
+		lblStep3E29PartsToBeProduced.setBounds(493, 185, 52, 23);
 		panelStep3.add(lblStep3E29PartsToBeProduced);
 
 		JLabel lblStep3E30PartsToBeProduced = new JLabel("250");
@@ -1175,7 +1184,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E30PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E30PartsToBeProduced.setBounds(807, 188, 29, 23);
+		lblStep3E30PartsToBeProduced.setBounds(493, 208, 52, 23);
 		panelStep3.add(lblStep3E30PartsToBeProduced);
 
 		JLabel lblStep3E31PartsToBeProduced = new JLabel("250");
@@ -1183,7 +1192,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E31PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E31PartsToBeProduced.setBounds(807, 211, 29, 23);
+		lblStep3E31PartsToBeProduced.setBounds(493, 231, 52, 23);
 		panelStep3.add(lblStep3E31PartsToBeProduced);
 
 		JLabel lblStep3E49PartsToBeProduced = new JLabel("250");
@@ -1191,7 +1200,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E49PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E49PartsToBeProduced.setBounds(249, 164, 29, 23);
+		lblStep3E49PartsToBeProduced.setBounds(145, 185, 60, 23);
 		panelStep3.add(lblStep3E49PartsToBeProduced);
 
 		JLabel lblStep3E50PartsToBeProduced = new JLabel("250");
@@ -1199,7 +1208,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E50PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E50PartsToBeProduced.setBounds(249, 187, 29, 23);
+		lblStep3E50PartsToBeProduced.setBounds(145, 208, 60, 23);
 		panelStep3.add(lblStep3E50PartsToBeProduced);
 
 		JLabel lblStep3E51PartsToBeProduced = new JLabel("250");
@@ -1207,7 +1216,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E51PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E51PartsToBeProduced.setBounds(249, 210, 29, 23);
+		lblStep3E51PartsToBeProduced.setBounds(145, 231, 60, 23);
 		panelStep3.add(lblStep3E51PartsToBeProduced);
 
 		JLabel lblStep3E54PartsToBeProduced = new JLabel("250");
@@ -1215,7 +1224,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E54PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E54PartsToBeProduced.setBounds(527, 165, 29, 23);
+		lblStep3E54PartsToBeProduced.setBounds(317, 187, 60, 23);
 		panelStep3.add(lblStep3E54PartsToBeProduced);
 
 		JLabel lblStep3E55PartsToBeProduced = new JLabel("250");
@@ -1223,7 +1232,7 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E55PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E55PartsToBeProduced.setBounds(527, 188, 29, 23);
+		lblStep3E55PartsToBeProduced.setBounds(317, 210, 60, 23);
 		panelStep3.add(lblStep3E55PartsToBeProduced);
 
 		JLabel lblStep3E56PartsToBeProduced = new JLabel("250");
@@ -1231,128 +1240,128 @@ public class PlanungstoolGUI {
 				.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStep3E56PartsToBeProduced
 				.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep3E56PartsToBeProduced.setBounds(527, 211, 29, 23);
+		lblStep3E56PartsToBeProduced.setBounds(317, 233, 60, 23);
 		panelStep3.add(lblStep3E56PartsToBeProduced);
 
 		JSpinner spinnerStep3P1 = new JSpinner();
 		lblStep3P1.setLabelFor(spinnerStep3P1);
-		spinnerStep3P1.setBounds(50, 145, 60, 20);
+		spinnerStep3P1.setBounds(80, 48, 60, 20);
 		panelStep3.add(spinnerStep3P1);
 
 		JSpinner spinnerStep3P2 = new JSpinner();
-		spinnerStep3P2.setBounds(328, 145, 60, 20);
+		spinnerStep3P2.setBounds(252, 48, 60, 20);
 		panelStep3.add(spinnerStep3P2);
 
 		JSpinner spinnerStep3P3 = new JSpinner();
-		spinnerStep3P3.setBounds(608, 145, 60, 20);
+		spinnerStep3P3.setBounds(428, 48, 60, 20);
 		panelStep3.add(spinnerStep3P3);
 
 		JSpinner spinnerStep3E4 = new JSpinner();
-		spinnerStep3E4.setBounds(50, 167, 60, 20);
+		spinnerStep3E4.setBounds(80, 70, 60, 20);
 		panelStep3.add(spinnerStep3E4);
 
 		JSpinner spinnerStep3E5 = new JSpinner();
-		spinnerStep3E5.setBounds(328, 167, 60, 20);
+		spinnerStep3E5.setBounds(252, 70, 60, 20);
 		panelStep3.add(spinnerStep3E5);
 
 		JSpinner spinnerStep3E6 = new JSpinner();
-		spinnerStep3E6.setBounds(608, 167, 60, 20);
+		spinnerStep3E6.setBounds(428, 70, 60, 20);
 		panelStep3.add(spinnerStep3E6);
 
 		JSpinner spinnerStep3E7 = new JSpinner();
-		spinnerStep3E7.setBounds(50, 190, 60, 20);
+		spinnerStep3E7.setBounds(80, 93, 60, 20);
 		panelStep3.add(spinnerStep3E7);
 
 		JSpinner spinnerStep3E8 = new JSpinner();
-		spinnerStep3E8.setBounds(328, 190, 60, 20);
+		spinnerStep3E8.setBounds(252, 93, 60, 20);
 		panelStep3.add(spinnerStep3E8);
 
 		JSpinner spinnerStep3E9 = new JSpinner();
-		spinnerStep3E9.setBounds(608, 190, 60, 20);
+		spinnerStep3E9.setBounds(428, 93, 60, 20);
 		panelStep3.add(spinnerStep3E9);
 
 		JSpinner spinnerStep3E10 = new JSpinner();
-		spinnerStep3E10.setBounds(50, 212, 60, 20);
+		spinnerStep3E10.setBounds(80, 115, 60, 20);
 		panelStep3.add(spinnerStep3E10);
 
 		JSpinner spinnerStep3E11 = new JSpinner();
-		spinnerStep3E11.setBounds(328, 212, 60, 20);
+		spinnerStep3E11.setBounds(252, 115, 60, 20);
 		panelStep3.add(spinnerStep3E11);
 
 		JSpinner spinnerStep3E12 = new JSpinner();
-		spinnerStep3E12.setBounds(608, 212, 60, 20);
+		spinnerStep3E12.setBounds(428, 115, 60, 20);
 		panelStep3.add(spinnerStep3E12);
 
 		JSpinner spinnerStep3E13 = new JSpinner();
-		spinnerStep3E13.setBounds(50, 235, 60, 20);
+		spinnerStep3E13.setBounds(80, 138, 60, 20);
 		panelStep3.add(spinnerStep3E13);
 
 		JSpinner spinnerStep3E14 = new JSpinner();
-		spinnerStep3E14.setBounds(328, 235, 60, 20);
+		spinnerStep3E14.setBounds(252, 138, 60, 20);
 		panelStep3.add(spinnerStep3E14);
 
 		JSpinner spinnerStep3E15 = new JSpinner();
-		spinnerStep3E15.setBounds(608, 235, 60, 20);
+		spinnerStep3E15.setBounds(428, 138, 60, 20);
 		panelStep3.add(spinnerStep3E15);
 
 		JSpinner spinnerStep3E16 = new JSpinner();
-		spinnerStep3E16.setBounds(303, 63, 60, 20);
+		spinnerStep3E16.setBounds(598, 48, 60, 20);
 		panelStep3.add(spinnerStep3E16);
 
 		JSpinner spinnerStep3E17 = new JSpinner();
-		spinnerStep3E17.setBounds(433, 63, 60, 20);
+		spinnerStep3E17.setBounds(600, 70, 60, 20);
 		panelStep3.add(spinnerStep3E17);
 
 		JSpinner spinnerStep3E18 = new JSpinner();
-		spinnerStep3E18.setBounds(184, 145, 60, 20);
+		spinnerStep3E18.setBounds(80, 166, 60, 20);
 		panelStep3.add(spinnerStep3E18);
 
 		JSpinner spinnerStep3E19 = new JSpinner();
-		spinnerStep3E19.setBounds(462, 145, 60, 20);
+		spinnerStep3E19.setBounds(252, 167, 60, 20);
 		panelStep3.add(spinnerStep3E19);
 
 		JSpinner spinnerStep3E20 = new JSpinner();
-		spinnerStep3E20.setBounds(742, 145, 60, 20);
+		spinnerStep3E20.setBounds(428, 165, 60, 20);
 		panelStep3.add(spinnerStep3E20);
 
 		JSpinner spinnerStep3E26 = new JSpinner();
-		spinnerStep3E26.setBounds(569, 63, 60, 20);
+		spinnerStep3E26.setBounds(598, 93, 60, 20);
 		panelStep3.add(spinnerStep3E26);
 
 		JSpinner spinnerStep3E29 = new JSpinner();
-		spinnerStep3E29.setBounds(742, 168, 60, 20);
+		spinnerStep3E29.setBounds(428, 188, 60, 20);
 		panelStep3.add(spinnerStep3E29);
 
 		JSpinner spinnerStep3E30 = new JSpinner();
-		spinnerStep3E30.setBounds(742, 191, 60, 20);
+		spinnerStep3E30.setBounds(428, 211, 60, 20);
 		panelStep3.add(spinnerStep3E30);
 
 		JSpinner spinnerStep3E31 = new JSpinner();
-		spinnerStep3E31.setBounds(742, 213, 60, 20);
+		spinnerStep3E31.setBounds(428, 233, 60, 20);
 		panelStep3.add(spinnerStep3E31);
 
 		JSpinner spinnerStep3E49 = new JSpinner();
-		spinnerStep3E49.setBounds(184, 167, 60, 20);
+		spinnerStep3E49.setBounds(80, 188, 60, 20);
 		panelStep3.add(spinnerStep3E49);
 
 		JSpinner spinnerStep3E50 = new JSpinner();
-		spinnerStep3E50.setBounds(184, 190, 60, 20);
+		spinnerStep3E50.setBounds(80, 211, 60, 20);
 		panelStep3.add(spinnerStep3E50);
 
 		JSpinner spinnerStep3E51 = new JSpinner();
-		spinnerStep3E51.setBounds(184, 212, 60, 20);
+		spinnerStep3E51.setBounds(80, 233, 60, 20);
 		panelStep3.add(spinnerStep3E51);
 
 		JSpinner spinnerStep3E54 = new JSpinner();
-		spinnerStep3E54.setBounds(462, 168, 60, 20);
+		spinnerStep3E54.setBounds(252, 190, 60, 20);
 		panelStep3.add(spinnerStep3E54);
 
 		JSpinner spinnerStep3E55 = new JSpinner();
-		spinnerStep3E55.setBounds(462, 191, 60, 20);
+		spinnerStep3E55.setBounds(252, 213, 60, 20);
 		panelStep3.add(spinnerStep3E55);
 
 		JSpinner spinnerStep3E56 = new JSpinner();
-		spinnerStep3E56.setBounds(462, 213, 60, 20);
+		spinnerStep3E56.setBounds(252, 235, 60, 20);
 		panelStep3.add(spinnerStep3E56);
 
 		JButton btnStep3NextStep = new JButton(
@@ -2108,13 +2117,7 @@ public class PlanungstoolGUI {
 		btnStep6PrevStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep6PrevStep.setBounds(10, 268, 220, 35);
 		panelStep6.add(btnStep6PrevStep);
-		internalFrame_1.setVisible(true);
-
-		JLabel lblPP = new JLabel("P1 - P3");
-		lblPP.setHorizontalAlignment(SwingConstants.CENTER);
-		lblPP.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblPP.setBounds(173, 60, 90, 23);
-		panelStep3.add(lblPP);
+		internalFramePlanning.setVisible(true);
 
 		// ENDE GUI BUILDER
 
@@ -2222,6 +2225,7 @@ public class PlanungstoolGUI {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				readInSales();
+				readInSafetyStock();
 				calculateSafetyStock();
 			}
 		});
@@ -2236,8 +2240,8 @@ public class PlanungstoolGUI {
 
 			}
 		});
-		
-		displaySafetyStock();
+
+		displayDefaultSafetyStock();
 
 	}
 
@@ -2261,7 +2265,8 @@ public class PlanungstoolGUI {
 
 		userInput.getSafetyStock().setSafetyStocks(safetyStockGui);
 
-		this.displaySafetyStock();
+		// DISPLAY ON GUI
+		displaySafetyStock();
 
 	}
 
@@ -2323,6 +2328,15 @@ public class PlanungstoolGUI {
 		}
 	}
 
+	protected void displayDefaultSafetyStock() {
+
+		for (String id : userInput.getSafetyStock().getSafetyStocks().keySet()) {
+
+			safetyStockFormular.get(id).getWish()
+					.setValue(DEFAULT_SAFETY_STOCK);
+		}
+	}
+
 	protected void displaySafetyStock() {
 
 		for (String id : userInput.getSafetyStock().getSafetyStocks().keySet()) {
@@ -2333,7 +2347,6 @@ public class PlanungstoolGUI {
 					.setText(
 							userInput.getSafetyStock().getSafetyStocks()
 									.get(id).toString());
-			;
 		}
 	}
 
