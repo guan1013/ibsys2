@@ -70,16 +70,13 @@ public class KItem extends Item {
 	 */
 	private Double diviation;
 
-	/*
-	 * ======================== OVERRIDES ========================
-	 */
 	@Override
 	public String toString() {
 		return "KItem [id=" + id + ", type=" + type + ", number=" + number
 				+ ", name=" + name + ", value=" + value + ", stock=" + stock
-				+ ", stack=" + stack + ", orderCosts=" + orderCosts
-				+ ", deliveryTime=" + deliveryTime + ", diviation=" + diviation
-				+ "]";
+				+ ", producer=" + producer + ", stack=" + stack
+				+ ", orderCosts=" + orderCosts + ", deliveryTime="
+				+ deliveryTime + ", diviation=" + diviation + "]";
 	}
 
 	@Override

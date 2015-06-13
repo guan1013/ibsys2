@@ -64,8 +64,8 @@ public class PItem extends Item {
 	public String toString() {
 		return "PItem [id=" + id + ", type=" + type + ", number=" + number
 				+ ", name=" + name + ", value=" + value + ", stock=" + stock
-				+ ", revenue=" + revenue + ", fixCostsCoverage="
-				+ fixCostsCoverage + "]";
+				+ ", producer=" + producer + ", revenue=" + revenue
+				+ ", fixCostsCoverage=" + fixCostsCoverage + "]";
 	}
 
 	@Override

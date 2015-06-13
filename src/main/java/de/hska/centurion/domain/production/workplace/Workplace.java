@@ -111,9 +111,9 @@ public class Workplace {
 	@Override
 	public String toString() {
 		return "Workplace [id=" + id + ", number=" + number + ", output="
-				+ output + ", inputs=" + inputs + ", openOrders="
-				+ openOrders + ", productionTime=" + productionTime
-				+ ", setupTime=" + setupTime + "]";
+				+ output + ", inputs=" + inputs + ", openOrders=" + openOrders
+				+ ", productionTime=" + productionTime + ", setupTime="
+				+ setupTime + "]";
 	}
 
 	@Override
@@ -201,6 +201,14 @@ public class Workplace {
 		return output;
 	}
 
+	public Integer getOpenOrders() {
+		return openOrders;
+	}
+
+	public void setOpenOrders(Integer openOrders) {
+		this.openOrders = openOrders;
+	}
+
 	public void setOutput(Item output) {
 		this.output = output;
 	}
@@ -211,14 +219,6 @@ public class Workplace {
 
 	public void setInputs(List<ProductionInput> inputs) {
 		this.inputs = inputs;
-	}
-
-	public Integer getWaitingList() {
-		return openOrders;
-	}
-
-	public void setWaitingList(Integer waitingList) {
-		this.openOrders = waitingList;
 	}
 
 	public void setProductionTime(Integer productionTime) {

@@ -75,7 +75,7 @@ public class ProductionService {
 	private UserInput userInput;
 
 	/**
-	 * list of item which should be produced
+	 * List of item which should be produced
 	 */
 	private Map<String, Integer> productions;
 
@@ -129,6 +129,24 @@ public class ProductionService {
 					productions, salesMap.get(planName));
 		}
 
+		for (Map.Entry<String, Workplace> workplace : factory.entrySet()) {
+			String itemName = workplace.getValue().getOutput().getType()
+					.toString()
+					+ workplace.getValue().getOutput().getNumber().toString();
+
+			int planedAmount = userInput.getSafetyStock().getStock(itemName);
+
+			int actualAmount = workplace.getValue().getOutput().getStock();
+
+			if (actualAmount < planedAmount) {
+
+				// apply required amount to productions list
+				int currentAmount = productions.get(itemName);
+				productions.put(itemName, currentAmount + planedAmount
+						- actualAmount);
+			}
+		}
+
 		for (Map.Entry<String, Integer> p : productions.entrySet()) {
 
 			System.out.println("#### " + p.getKey() + " = " + p.getValue());
@@ -151,7 +169,7 @@ public class ProductionService {
 		// associated output items
 		Map<String, Map<String, Integer>> roundTripTimes = new HashMap<String, Map<String, Integer>>();
 
-		// For each production plan calculate the roundtriptiems
+		// For each production plan calculate the roundtriptimes
 		for (ProductionPlan plan : plans) {
 			PItem output = (PItem) plan.getProducer().getOutput();
 
@@ -191,40 +209,40 @@ public class ProductionService {
 	 * ======================== PRIVATS ========================
 	 */
 
-	private Map<String, Integer> putWorkplaceToProductions(Workplace workplace,
+	private Map<String, Integer> putWorkplaceToProductions(Workplace plan,
 			Map<String, Integer> productions, Integer quantity) {
 		// get name of current workplaces output item
-		String itemName = workplace.getOutput().getType().toString()
-				+ workplace.getOutput().getNumber().toString();
-
-		String factoryKey = workplace.getNumber() + itemName;
+		String itemName = plan.getOutput().getType().toString()
+				+ plan.getOutput().getNumber().toString();
 
 		int required = 0;
-		if (factory.get(factoryKey) == null) {
-			factory.put(factoryKey, workplace);
-			required = quantity + userInput.getSafetyStock().getStock(itemName);
+		if (plan.getOutput().getProducer().equalsIgnoreCase(plan.getNumber())) {
+			Workplace workplace;
 
-		} else {
-			required = quantity;
-		}
+			String factoryKey = plan.getNumber() + itemName;
+			if (factory.get(factoryKey) == null) {
+				workplace = new Workplace(plan.getNumber(), plan.getOutput(),
+						null, plan.getOpenOrders(), plan.getProductionTime(),
+						plan.getSetupTime());
+				factory.put(factoryKey, workplace);
+			}
+			workplace = factory.get(factoryKey);
 
-		workplace = factory.get(factoryKey);
-
-		if (workplace.getOutput().getProducer()
-				.equalsIgnoreCase(workplace.getNumber())) {
 			// get current Stock of workplaces output item
 			int currentStock = workplace.getOutput().getStock();
 
 			// get current unfinished items on this workplace
-			int waitingList = workplace.getWaitingList();
+			int waitingList = getWaitingList(plan, itemName, 0);
+
+			required = quantity;
 
 			// apply waiting list items to total required amount
 			if ((required - waitingList) < 0) {
-				factory.get(factoryKey).setWaitingList(waitingList - required);
+				factory.get(factoryKey).setOpenOrders(waitingList - required);
 				required = 0;
 			} else {
 				required -= waitingList;
-				factory.get(factoryKey).setWaitingList(0);
+				factory.get(factoryKey).setOpenOrders(0);
 			}
 
 			// apply stock items to total required amount
@@ -244,17 +262,30 @@ public class ProductionService {
 		}
 
 		// Recursively do this for each input item of this workplace
-		for (ProductionInput prodInput : workplace.getInputs()) {
-			if (prodInput.getProducer() != null) {
-				productions = putWorkplaceToProductions(
-						prodInput.getProducer(), productions,
-						prodInput.getQuantity() * required);
+		for (ProductionInput input : plan.getInputs()) {
+			if (input.getProducer() != null) {
+				productions = putWorkplaceToProductions(input.getProducer(),
+						productions, input.getQuantity() * required);
 
 			}
 
 		}
 
 		return productions;
+	}
+
+	private int getWaitingList(Workplace workplace, String item, int waitingList) {
+		waitingList += workplace.getOpenOrders();
+
+		for (ProductionInput input : workplace.getInputs()) {
+			if (input.getItem().equalsIgnoreCase(item)) {
+				waitingList += getWaitingList(input.getProducer(), item,
+						waitingList);
+			}
+
+		}
+
+		return waitingList;
 	}
 
 	private Map<String, Map<String, Integer>> calcRoundTripTime(
@@ -279,7 +310,7 @@ public class ProductionService {
 			int currentStock = workplace.getOutput().getStock();
 
 			// get current unfinished items on this workplace
-			int waitingList = workplace.getWaitingList();
+			int waitingList = workplace.getOpenOrders();
 
 			// calculate the actual quantity which should be produced
 			value = quantity + userInput.getSafetyStock().getStock(itemName)
@@ -306,7 +337,7 @@ public class ProductionService {
 				int currentStock = workplace.getOutput().getStock();
 
 				// get current unfinished items on this workplace
-				int waitingList = workplace.getWaitingList();
+				int waitingList = workplace.getOpenOrders();
 
 				// calculate the actual quantity which should be produced
 				value = quantity

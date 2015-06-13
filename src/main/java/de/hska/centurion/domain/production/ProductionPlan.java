@@ -1,7 +1,5 @@
 package de.hska.centurion.domain.production;
 
-import java.util.List;
-
 import de.hska.centurion.domain.production.workplace.Workplace;
 
 /**
