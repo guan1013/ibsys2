@@ -2,6 +2,7 @@ package de.hska.centurion.domain.input.components;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @XmlRootElement
 public class Order {
@@ -33,6 +34,10 @@ public class Order {
 	private String entireCostsStr;
 
 	private String pieceCostsStr;
+	
+	private String inwardStockMovementAvg;
+	
+	private String inwardStockMovementMax;
 
 	@XmlAttribute
 	public int getId() {
@@ -124,12 +129,34 @@ public class Order {
 		this.orderPeriod = orderPeriod;
 	}
 
+	@XmlTransient
+	public String getInwardStockMovementAvg() {
+		return inwardStockMovementAvg;
+	}
+
+	public void setInwardStockMovementAvg(String inwardStockMovementAvg) {
+		this.inwardStockMovementAvg = inwardStockMovementAvg;
+	}
+
+	@XmlTransient
+	public String getInwardStockMovementMax() {
+		return inwardStockMovementMax;
+	}
+
+	public void setInwardStockMovementMax(String inwardStockMovementMax) {
+		this.inwardStockMovementMax = inwardStockMovementMax;
+	}
+
 	@Override
 	public String toString() {
 		return "Order [orderPeriod=" + orderPeriod + ", id=" + id + ", mode="
 				+ mode + ", article=" + article + ", amount=" + amount
 				+ ", time=" + time + ", materialCostsStr=" + materialCostsStr
 				+ ", orderCostsStr=" + orderCostsStr + ", entireCostsStr="
-				+ entireCostsStr + ", pieceCostsStr=" + pieceCostsStr + "]";
+				+ entireCostsStr + ", pieceCostsStr=" + pieceCostsStr
+				+ ", inwardStockMovementAvg=" + inwardStockMovementAvg
+				+ ", inwardStockMovementMax=" + inwardStockMovementMax + "]";
 	}
+
+	
 }

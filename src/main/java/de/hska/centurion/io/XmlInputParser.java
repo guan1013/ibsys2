@@ -1,6 +1,7 @@
 package de.hska.centurion.io;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -17,6 +18,7 @@ import de.hska.centurion.domain.input.components.Order;
 import de.hska.centurion.domain.input.components.WorkplaceCosts;
 import de.hska.centurion.domain.input.components.WorkplaceOrder;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
+import de.hska.centurion.util.OrderInwardCalculator;
 
 public class XmlInputParser {
 
@@ -52,10 +54,22 @@ public class XmlInputParser {
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		Results results = (Results) jaxbUnmarshaller.unmarshal(file);
 
-//		printOnConsolue(results);
+		try {
+			OrderInwardCalculator calc = new OrderInwardCalculator();
+			results = calc.calculateOutstandingOrders(results);
+		}
+		catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		// printOnConsolue(results);
 
 		return results;
 	}
+
+	public static void main(String[] args) throws JAXBException {
+		parseXmlFile("C:\\Users\\Simon\\Desktop\\266_6_6result.xml");
+	}
+	
 
 	private static void printOnConsolue(Results results) {
 		// LAGERHAUS ARTIKEL
