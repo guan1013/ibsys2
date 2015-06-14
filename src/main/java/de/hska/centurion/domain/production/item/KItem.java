@@ -1,6 +1,7 @@
 package de.hska.centurion.domain.production.item;
 
 import de.hska.centurion.domain.production.resources.ItemTypeEnum;
+import de.hska.centurion.domain.purchase.Usage;
 
 /**
  * Item Class for purchased items (K for Kaufteile)
@@ -53,30 +54,35 @@ public class KItem extends Item {
 	/**
 	 * quantity per stack
 	 */
-	protected Integer stack;
+	private Integer stack;
 
 	/**
 	 * costs per order
 	 */
-	protected Double orderCosts;
+	private Double orderCosts;
 
 	/**
 	 * average time (in Periods) for a delivery to get shipped
 	 */
-	protected Double deliveryTime;
+	private Double deliveryTime;
 
 	/**
 	 * to deliveryTime
 	 */
-	protected Double diviation;
+	private Double diviation;
 
+	/**
+	 * how often is the item used in P1, P2, P3
+	 */
+	private Usage usage;
+	
 	@Override
 	public String toString() {
-		return "KItem [id=" + id + ", type=" + type + ", number=" + number
-				+ ", name=" + name + ", value=" + value + ", stock=" + stock
-				+ ", producer=" + producer + ", stack=" + stack
-				+ ", orderCosts=" + orderCosts + ", deliveryTime="
-				+ deliveryTime + ", diviation=" + diviation + "]";
+		return "KItem [stack=" + stack + ", orderCosts=" + orderCosts
+				+ ", deliveryTime=" + deliveryTime + ", diviation=" + diviation
+				+ ", usage=" + usage + ", id=" + id + ", type=" + type
+				+ ", number=" + number + ", name=" + name + ", value=" + value
+				+ ", stock=" + stock + ", producer=" + producer + "]";
 	}
 
 	@Override
@@ -159,6 +165,14 @@ public class KItem extends Item {
 
 	public void setDiviation(Double diviation) {
 		this.diviation = diviation;
+	}
+	
+	public Usage getUsage() {
+		return usage;
+	}
+
+	public void setUsage(Usage usage) {
+		this.usage = usage;
 	}
 
 }
