@@ -64,6 +64,7 @@ public class Order {
 	public int getArticle() {
 		return article;
 	}
+	
 	@XmlAttribute(name = "article")
 	public void setArticle(int article) {
 		this.article = article;

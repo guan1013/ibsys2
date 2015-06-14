@@ -22,7 +22,11 @@ public class Constants {
 	private static final String TIME_KEY = ".time";
 	private static final String DIV_KEY = ".div";
 	private static final String REVENUE_KEY = ".revenue";
-
+	private static final String USAGE_KEY = ".usage";
+	private static final String P1_KEY = ".P1";
+	private static final String P2_KEY = ".P2";
+	private static final String P3_KEY = ".P3";
+	
 	public static String getProductionPlanProperties() {
 		return PRODUCTION_PLAN_PROPERTIES;
 	}
@@ -101,6 +105,22 @@ public class Constants {
 
 	public static String getRevenueKey() {
 		return REVENUE_KEY;
+	}
+
+	public static String getUsageKey() {
+		return USAGE_KEY;
+	}
+
+	public static String getP1Key() {
+		return P1_KEY;
+	}
+
+	public static String getP2Key() {
+		return P2_KEY;
+	}
+
+	public static String getP3Key() {
+		return P3_KEY;
 	}
 
 }

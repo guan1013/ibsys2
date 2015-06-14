@@ -30,7 +30,6 @@ public class OrderInwardCalculator {
 					.round((order.getOrderPeriod() + time + 0.3) * 100) / 100.0f;
 			float inwardDateMax = Math.round((order.getOrderPeriod() + time
 					+ 0.3 + dev) * 100) / 100.0f;
-			System.out.println(inwardDateMax);
 
 			int inwardPeriod = (int) inwardDate;
 			if (inwardDate - inwardPeriod == 0) {
@@ -40,17 +39,14 @@ public class OrderInwardCalculator {
 			if (inwardDateMax - inwardPeriodMax == 0) {
 				inwardPeriodMax--;
 			}
-			System.out.println(inwardPeriodMax);
 
 			int inwardDay = (int) Math.ceil((inwardDate - inwardPeriod) * 5.0f);
 			int inwardDayMax = (int) Math
 					.ceil((inwardDateMax - inwardPeriodMax) * 5.0f);
-			System.out.println(inwardDayMax);
 
 			order.setInwardStockMovementAvg(inwardPeriod + "-" + inwardDay
 					+ "-0-0");
 			order.setInwardStockMovementMax(inwardPeriodMax + "-" + inwardDayMax + "-0-0");
-			System.out.println(order);
 		}
 		return results;
 	}
