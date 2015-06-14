@@ -1,14 +1,13 @@
 package de.hska.centurion.gui;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
-import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,8 +38,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EtchedBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -56,11 +53,17 @@ import de.hska.centurion.domain.input.components.WorkplaceCosts;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
 import de.hska.centurion.domain.output.Input;
 import de.hska.centurion.domain.output.Production;
-import de.hska.centurion.exceptions.UserInputException;
-import de.hska.centurion.gui.SplittingDialog.DialogResult;
+import de.hska.centurion.domain.output.WorkingTime;
+import de.hska.centurion.gui.actionlistener.StepButtonsActionDialog;
+import de.hska.centurion.gui.dialogs.SplittingDialog;
+import de.hska.centurion.gui.dialogs.SplittingDialog.DialogResult;
+import de.hska.centurion.gui.util.OrderEntity;
+import de.hska.centurion.gui.util.OrderType;
+import de.hska.centurion.gui.util.SafetyStockEntity;
+import de.hska.centurion.gui.util.WorkplaceEntity;
 import de.hska.centurion.io.XmlInputParser;
 import de.hska.centurion.services.production.ProductionService;
-import de.hska.centurion.services.validation.UserInputValidator;
+import de.hska.centurion.services.purchase.OrderService;
 
 /**
  * This is the main graphical user interface of the planning tool. It contains
@@ -82,46 +85,6 @@ public class PlanungstoolGUI {
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ATTRIBUTES
-
-	public class StepButtonsActionDialog implements ActionListener {
-
-		PlanungstoolGUI parent;
-
-		public StepButtonsActionDialog(PlanungstoolGUI parent) {
-			super();
-			this.parent = parent;
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-
-			Object src = e.getSource();
-
-			if (src instanceof JButton) {
-				Integer goToStep = getNumberFromString(((JButton) src)
-						.getText());
-				if (goToStep != null) {
-					switchToStep(goToStep);
-				} else {
-					return;
-				}
-			}
-
-			return;
-		}
-
-		private Integer getNumberFromString(String s) {
-
-			String pattern = ".*(\\d+).*";
-			Matcher m = Pattern.compile(pattern).matcher(s);
-
-			if (m.find()) {
-				return Integer.parseInt(m.group(1));
-			}
-
-			return null;
-		}
-	}
 
 	// STATIC ATTRIBUTES
 	private static final int DEFAULT_SAFETY_STOCK = 250;
@@ -172,64 +135,6 @@ public class PlanungstoolGUI {
 	private JTable tableWaitingListWorkstations;
 	private JTable table;
 
-	// UNSORTED TEXTFIELDS
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
-	private JTextField textField_4;
-	private JTextField textField_5;
-	private JTextField textField_6;
-	private JTextField textField_7;
-	private JTextField textField_8;
-	private JTextField textField_9;
-	private JTextField textField_10;
-	private JTextField textField_11;
-	private JTextField textField_12;
-	private JTextField textField_13;
-	private JTextField textField_14;
-	private JTextField textField_15;
-	private JTextField textField_16;
-	private JTextField textField_17;
-	private JTextField textField_18;
-	private JTextField textField_19;
-	private JTextField textField_20;
-	private JTextField textField_21;
-	private JTextField textField_22;
-	private JTextField textField_23;
-	private JTextField textField_24;
-	private JTextField textField_25;
-	private JTextField textField_26;
-	private JTextField textField_27;
-	private JTextField textField_28;
-	private JTextField textField_29;
-	private JTextField textField_30;
-	private JTextField textField_31;
-	private JTextField textField_32;
-	private JTextField textField_33;
-	private JTextField textField_34;
-	private JTextField textField_35;
-	private JTextField textField_36;
-	private JTextField textField_37;
-	private JTextField textField_38;
-	private JTextField textField_39;
-	private JTextField textField_40;
-	private JTextField textField_41;
-	private JTextField textField_42;
-	private JTextField textField_43;
-	private JTextField textField_44;
-	private JTextField textField_45;
-	private JTextField textField_46;
-	private JTextField textField_47;
-	private JTextField textField_48;
-	private JTextField textField_49;
-	private JTextField textField_50;
-	private JTextField textField_51;
-	private JTextField textField_52;
-	private JTextField textField_53;
-	private JTextField textField_54;
-	private JTextField textField_55;
-
 	// OTHER FIELDS
 
 	/**
@@ -244,6 +149,10 @@ public class PlanungstoolGUI {
 	 */
 	private HashMap<String, SafetyStockEntity> safetyStockFormular;
 
+	private HashMap<Integer, WorkplaceEntity> workplaceFormular;
+
+	private List<OrderEntity> orderFormular;
+
 	/**
 	 * Currently displayed and used result object (parsed from xml file).
 	 */
@@ -257,6 +166,7 @@ public class PlanungstoolGUI {
 	private Input output;
 
 	private ProductionService productionService;
+
 	private JList listStep4ProductionOrder;
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -271,6 +181,8 @@ public class PlanungstoolGUI {
 		stepsMap = new HashMap<>();
 		userInput = new UserInput();
 		safetyStockFormular = new HashMap<String, SafetyStockEntity>();
+		workplaceFormular = new HashMap<Integer, WorkplaceEntity>();
+		orderFormular = new ArrayList<>();
 		userInput.setSafetyStock(new SafetyStock(DEFAULT_SAFETY_STOCK));
 		output = new Input();
 
@@ -282,6 +194,30 @@ public class PlanungstoolGUI {
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 	// PRIVATE METHODS
+
+	private void calculateCapacity() {
+		displayCapacity(productionService.calculateCapacity());
+	}
+
+	protected void calculateOrders() {
+
+		OrderService orderService = new OrderService(userInput, results, output);
+
+		displayOrders(orderService.calculatePurchaseOrders());
+
+	}
+
+	private void calculateProductionOrder() {
+
+		readInForecasts();
+		readInSales();
+		readInSafetyStock();
+		calculateSafetyStock();
+
+		output.setProductionList(productionService.getProductionOrder());
+
+		displayProductionOrder();
+	}
 
 	/**
 	 * This method calls the production service to calculate the count of items
@@ -304,16 +240,14 @@ public class PlanungstoolGUI {
 
 	}
 
-	private void calculateProductionOrder() {
+	private void displayCapacity(List<WorkingTime> calculateCapacity) {
 
-		readInForecasts();
-		readInSales();
-		readInSafetyStock();
-		calculateSafetyStock();
-
-		output.setProductionList(productionService.getProductionOrder());
-
-		displayProductionOrder();
+		for (WorkingTime workingTime : calculateCapacity) {
+			WorkplaceEntity workplace = workplaceFormular.get(workingTime
+					.getStation());
+			workplace.getOvertime().setValue(workingTime.getOvertime());
+			workplace.getShift().setValue(workingTime.getShift());
+		}
 	}
 
 	/**
@@ -329,6 +263,39 @@ public class PlanungstoolGUI {
 		}
 	}
 
+	private void displayOrders(
+			List<de.hska.centurion.domain.output.Order> calculatePurchaseOrders) {
+
+		for (OrderEntity orderEntity : orderFormular) {
+			orderEntity.getItemIndex().setText("");
+			orderEntity.getQuantity().setText("");
+			orderEntity.getOrderType().setSelectedIndex(0);
+		}
+
+		for (int i = 0; i < calculatePurchaseOrders.size(); i++) {
+
+			System.out.println(calculatePurchaseOrders.get(i));
+
+			if (i >= orderFormular.size()) {
+				System.out
+						.println("Only 28 Orders can be displayed on GUI (Found: "
+								+ calculatePurchaseOrders.size() + ")");
+				break;
+			}
+
+			orderFormular.get(i).getItemIndex()
+					.setText("" + calculatePurchaseOrders.get(i).getArticle());
+			orderFormular.get(i).getQuantity()
+					.setText("" + calculatePurchaseOrders.get(i).getQuantity());
+			orderFormular
+					.get(i)
+					.getOrderType()
+					.setSelectedIndex(calculatePurchaseOrders.get(i).getModus());
+
+		}
+
+	}
+
 	/**
 	 * Change gui labels where current period is used.
 	 * 
@@ -341,6 +308,22 @@ public class PlanungstoolGUI {
 		lblStep1Periode2Title.setText("Periode " + (period + 2));
 		lblStep1Periode3Title.setText("Periode " + (period + 3));
 		lblStep1Periode4Title.setText("Periode " + (period + 4));
+	}
+
+	private void displayProductionOrder() {
+
+		// Clean UI component
+		listStep4ProductionOrder.removeAll();
+
+		DefaultListModel<String> model = new DefaultListModel<>();
+
+		for (Production production : output.getProductionList()) {
+			model.addElement(production.getArticle() + " --- "
+					+ production.getQuantity());
+		}
+
+		listStep4ProductionOrder.setModel(model);
+
 	}
 
 	/**
@@ -359,20 +342,8 @@ public class PlanungstoolGUI {
 		}
 	}
 
-	private void displayProductionOrder() {
-
-		// Clean UI component
-		listStep4ProductionOrder.removeAll();
-
-		DefaultListModel<String> model = new DefaultListModel<>();
-
-		for (Production production : output.getProductionList()) {
-			model.addElement(production.getArticle() + " --- "
-					+ production.getQuantity());
-		}
-
-		listStep4ProductionOrder.setModel(model);
-
+	public JFrame getFrameMain() {
+		return frameMain;
 	}
 
 	private String getModeAsString(int modeInt) {
@@ -1751,37 +1722,37 @@ public class PlanungstoolGUI {
 		btnStep5NextStep.setBounds(616, 268, 220, 35);
 		panelStep5.add(btnStep5NextStep);
 
-		JSpinner spinner = new JSpinner();
-		spinner.setBounds(545, 217, 108, 20);
-		panelStep5.add(spinner);
+		JSpinner spinnerStep5OvertimeWorkplace15 = new JSpinner();
+		spinnerStep5OvertimeWorkplace15.setBounds(545, 217, 108, 20);
+		panelStep5.add(spinnerStep5OvertimeWorkplace15);
 
-		JSpinner spinner_1 = new JSpinner();
-		spinner_1.setBounds(480, 217, 52, 20);
-		panelStep5.add(spinner_1);
+		JSpinner spinnerStep5ShiftWorkplace15 = new JSpinner();
+		spinnerStep5ShiftWorkplace15.setBounds(480, 217, 52, 20);
+		panelStep5.add(spinnerStep5ShiftWorkplace15);
 
-		JSpinner spinner_2 = new JSpinner();
-		spinner_2.setBounds(480, 194, 52, 20);
-		panelStep5.add(spinner_2);
+		JSpinner spinnerStep5ShiftWorkplace14 = new JSpinner();
+		spinnerStep5ShiftWorkplace14.setBounds(480, 194, 52, 20);
+		panelStep5.add(spinnerStep5ShiftWorkplace14);
 
-		JSpinner spinner_3 = new JSpinner();
-		spinner_3.setBounds(480, 170, 52, 20);
-		panelStep5.add(spinner_3);
+		JSpinner spinnerStep5ShiftWorkplace13 = new JSpinner();
+		spinnerStep5ShiftWorkplace13.setBounds(480, 170, 52, 20);
+		panelStep5.add(spinnerStep5ShiftWorkplace13);
 
-		JSpinner spinner_4 = new JSpinner();
-		spinner_4.setBounds(480, 147, 52, 20);
-		panelStep5.add(spinner_4);
+		JSpinner spinnerStep5ShiftWorkplace12 = new JSpinner();
+		spinnerStep5ShiftWorkplace12.setBounds(480, 147, 52, 20);
+		panelStep5.add(spinnerStep5ShiftWorkplace12);
 
-		JSpinner spinner_5 = new JSpinner();
-		spinner_5.setBounds(480, 124, 52, 20);
-		panelStep5.add(spinner_5);
+		JSpinner spinnerStep5ShiftWorkplace11 = new JSpinner();
+		spinnerStep5ShiftWorkplace11.setBounds(480, 124, 52, 20);
+		panelStep5.add(spinnerStep5ShiftWorkplace11);
 
-		JSpinner spinner_6 = new JSpinner();
-		spinner_6.setBounds(480, 101, 52, 20);
-		panelStep5.add(spinner_6);
+		JSpinner spinnerStep5ShiftWorkplace10 = new JSpinner();
+		spinnerStep5ShiftWorkplace10.setBounds(480, 101, 52, 20);
+		panelStep5.add(spinnerStep5ShiftWorkplace10);
 
-		JSpinner spinner_7 = new JSpinner();
-		spinner_7.setBounds(480, 79, 52, 20);
-		panelStep5.add(spinner_7);
+		JSpinner spinnerStep5ShiftWorkplace9 = new JSpinner();
+		spinnerStep5ShiftWorkplace9.setBounds(480, 79, 52, 20);
+		panelStep5.add(spinnerStep5ShiftWorkplace9);
 
 		JLabel label = new JLabel("15");
 		label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1843,29 +1814,29 @@ public class PlanungstoolGUI {
 		label_9.setBounds(545, 45, 108, 23);
 		panelStep5.add(label_9);
 
-		JSpinner spinner_8 = new JSpinner();
-		spinner_8.setBounds(545, 194, 108, 20);
-		panelStep5.add(spinner_8);
+		JSpinner spinnerStep5OvertimeWorkplace14 = new JSpinner();
+		spinnerStep5OvertimeWorkplace14.setBounds(545, 194, 108, 20);
+		panelStep5.add(spinnerStep5OvertimeWorkplace14);
 
-		JSpinner spinner_9 = new JSpinner();
-		spinner_9.setBounds(545, 170, 108, 20);
-		panelStep5.add(spinner_9);
+		JSpinner spinnerStep5OvertimeWorkplace13 = new JSpinner();
+		spinnerStep5OvertimeWorkplace13.setBounds(545, 170, 108, 20);
+		panelStep5.add(spinnerStep5OvertimeWorkplace13);
 
-		JSpinner spinner_10 = new JSpinner();
-		spinner_10.setBounds(545, 147, 108, 20);
-		panelStep5.add(spinner_10);
+		JSpinner spinnerStep5OvertimeWorkplace12 = new JSpinner();
+		spinnerStep5OvertimeWorkplace12.setBounds(545, 147, 108, 20);
+		panelStep5.add(spinnerStep5OvertimeWorkplace12);
 
-		JSpinner spinner_11 = new JSpinner();
-		spinner_11.setBounds(545, 124, 108, 20);
-		panelStep5.add(spinner_11);
+		JSpinner spinnerStep5OvertimeWorkplace11 = new JSpinner();
+		spinnerStep5OvertimeWorkplace11.setBounds(545, 124, 108, 20);
+		panelStep5.add(spinnerStep5OvertimeWorkplace11);
 
-		JSpinner spinner_12 = new JSpinner();
-		spinner_12.setBounds(545, 101, 108, 20);
-		panelStep5.add(spinner_12);
+		JSpinner spinnerStep5OvertimeWorkplace10 = new JSpinner();
+		spinnerStep5OvertimeWorkplace10.setBounds(545, 101, 108, 20);
+		panelStep5.add(spinnerStep5OvertimeWorkplace10);
 
-		JSpinner spinner_13 = new JSpinner();
-		spinner_13.setBounds(545, 79, 108, 20);
-		panelStep5.add(spinner_13);
+		JSpinner spinnerStep5OvertimeWorkplace9 = new JSpinner();
+		spinnerStep5OvertimeWorkplace9.setBounds(545, 79, 108, 20);
+		panelStep5.add(spinnerStep5OvertimeWorkplace9);
 
 		JPanel panelStep6 = new JPanel();
 		tabbedPanePlanning.addTab("Schritt 6", null, panelStep6, null);
@@ -1877,418 +1848,453 @@ public class PlanungstoolGUI {
 		lblSchrittBestellungen.setBounds(10, 11, 826, 23);
 		panelStep6.add(lblSchrittBestellungen);
 
-		textField = new JTextField();
-		textField.setBounds(10, 45, 56, 20);
-		panelStep6.add(textField);
-		textField.setColumns(10);
-
-		textField_1 = new JTextField();
-		textField_1.setColumns(10);
-		textField_1.setBounds(70, 45, 56, 20);
-		panelStep6.add(textField_1);
-
-		JComboBox comboBox = new JComboBox();
-		comboBox.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox.setBounds(136, 45, 73, 20);
-		panelStep6.add(comboBox);
-
-		textField_2 = new JTextField();
-		textField_2.setColumns(10);
-		textField_2.setBounds(10, 76, 56, 20);
-		panelStep6.add(textField_2);
-
-		textField_3 = new JTextField();
-		textField_3.setColumns(10);
-		textField_3.setBounds(70, 76, 56, 20);
-		panelStep6.add(textField_3);
-
-		JComboBox comboBox_1 = new JComboBox();
-		comboBox_1.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_1.setBounds(136, 76, 73, 20);
-		panelStep6.add(comboBox_1);
-
-		textField_4 = new JTextField();
-		textField_4.setColumns(10);
-		textField_4.setBounds(10, 107, 56, 20);
-		panelStep6.add(textField_4);
-
-		textField_5 = new JTextField();
-		textField_5.setColumns(10);
-		textField_5.setBounds(70, 107, 56, 20);
-		panelStep6.add(textField_5);
-
-		JComboBox comboBox_2 = new JComboBox();
-		comboBox_2.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_2.setBounds(136, 107, 73, 20);
-		panelStep6.add(comboBox_2);
-
-		textField_6 = new JTextField();
-		textField_6.setColumns(10);
-		textField_6.setBounds(10, 138, 56, 20);
-		panelStep6.add(textField_6);
-
-		textField_7 = new JTextField();
-		textField_7.setColumns(10);
-		textField_7.setBounds(70, 138, 56, 20);
-		panelStep6.add(textField_7);
-
-		JComboBox comboBox_3 = new JComboBox();
-		comboBox_3.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_3.setBounds(136, 138, 73, 20);
-		panelStep6.add(comboBox_3);
-
-		textField_8 = new JTextField();
-		textField_8.setColumns(10);
-		textField_8.setBounds(10, 169, 56, 20);
-		panelStep6.add(textField_8);
-
-		textField_9 = new JTextField();
-		textField_9.setColumns(10);
-		textField_9.setBounds(70, 169, 56, 20);
-		panelStep6.add(textField_9);
-
-		JComboBox comboBox_4 = new JComboBox();
-		comboBox_4.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_4.setBounds(136, 169, 73, 20);
-		panelStep6.add(comboBox_4);
-
-		textField_10 = new JTextField();
-		textField_10.setColumns(10);
-		textField_10.setBounds(10, 200, 56, 20);
-		panelStep6.add(textField_10);
-
-		textField_11 = new JTextField();
-		textField_11.setColumns(10);
-		textField_11.setBounds(70, 200, 56, 20);
-		panelStep6.add(textField_11);
-
-		JComboBox comboBox_5 = new JComboBox();
-		comboBox_5.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_5.setBounds(136, 200, 73, 20);
-		panelStep6.add(comboBox_5);
-
-		textField_12 = new JTextField();
-		textField_12.setColumns(10);
-		textField_12.setBounds(10, 231, 56, 20);
-		panelStep6.add(textField_12);
-
-		textField_13 = new JTextField();
-		textField_13.setColumns(10);
-		textField_13.setBounds(70, 231, 56, 20);
-		panelStep6.add(textField_13);
-
-		JComboBox comboBox_6 = new JComboBox();
-		comboBox_6.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_6.setBounds(136, 231, 73, 20);
-		panelStep6.add(comboBox_6);
-
-		textField_14 = new JTextField();
-		textField_14.setColumns(10);
-		textField_14.setBounds(219, 231, 56, 20);
-		panelStep6.add(textField_14);
-
-		textField_15 = new JTextField();
-		textField_15.setColumns(10);
-		textField_15.setBounds(219, 200, 56, 20);
-		panelStep6.add(textField_15);
-
-		textField_16 = new JTextField();
-		textField_16.setColumns(10);
-		textField_16.setBounds(219, 169, 56, 20);
-		panelStep6.add(textField_16);
-
-		textField_17 = new JTextField();
-		textField_17.setColumns(10);
-		textField_17.setBounds(219, 138, 56, 20);
-		panelStep6.add(textField_17);
-
-		textField_18 = new JTextField();
-		textField_18.setColumns(10);
-		textField_18.setBounds(219, 107, 56, 20);
-		panelStep6.add(textField_18);
-
-		textField_19 = new JTextField();
-		textField_19.setColumns(10);
-		textField_19.setBounds(219, 76, 56, 20);
-		panelStep6.add(textField_19);
-
-		textField_20 = new JTextField();
-		textField_20.setColumns(10);
-		textField_20.setBounds(219, 45, 56, 20);
-		panelStep6.add(textField_20);
-
-		textField_21 = new JTextField();
-		textField_21.setColumns(10);
-		textField_21.setBounds(279, 45, 56, 20);
-		panelStep6.add(textField_21);
-
-		textField_22 = new JTextField();
-		textField_22.setColumns(10);
-		textField_22.setBounds(279, 76, 56, 20);
-		panelStep6.add(textField_22);
-
-		textField_23 = new JTextField();
-		textField_23.setColumns(10);
-		textField_23.setBounds(279, 107, 56, 20);
-		panelStep6.add(textField_23);
-
-		textField_24 = new JTextField();
-		textField_24.setColumns(10);
-		textField_24.setBounds(279, 138, 56, 20);
-		panelStep6.add(textField_24);
-
-		textField_25 = new JTextField();
-		textField_25.setColumns(10);
-		textField_25.setBounds(279, 169, 56, 20);
-		panelStep6.add(textField_25);
-
-		textField_26 = new JTextField();
-		textField_26.setColumns(10);
-		textField_26.setBounds(279, 200, 56, 20);
-		panelStep6.add(textField_26);
-
-		textField_27 = new JTextField();
-		textField_27.setColumns(10);
-		textField_27.setBounds(279, 231, 56, 20);
-		panelStep6.add(textField_27);
-
-		JComboBox comboBox_7 = new JComboBox();
-		comboBox_7.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_7.setBounds(345, 231, 73, 20);
-		panelStep6.add(comboBox_7);
-
-		JComboBox comboBox_8 = new JComboBox();
-		comboBox_8.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_8.setBounds(345, 200, 73, 20);
-		panelStep6.add(comboBox_8);
-
-		JComboBox comboBox_9 = new JComboBox();
-		comboBox_9.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_9.setBounds(345, 169, 73, 20);
-		panelStep6.add(comboBox_9);
-
-		JComboBox comboBox_10 = new JComboBox();
-		comboBox_10.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_10.setBounds(345, 138, 73, 20);
-		panelStep6.add(comboBox_10);
-
-		JComboBox comboBox_11 = new JComboBox();
-		comboBox_11.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_11.setBounds(345, 107, 73, 20);
-		panelStep6.add(comboBox_11);
-
-		JComboBox comboBox_12 = new JComboBox();
-		comboBox_12.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_12.setBounds(345, 76, 73, 20);
-		panelStep6.add(comboBox_12);
-
-		JComboBox comboBox_13 = new JComboBox();
-		comboBox_13.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_13.setBounds(345, 45, 73, 20);
-		panelStep6.add(comboBox_13);
-
-		textField_28 = new JTextField();
-		textField_28.setColumns(10);
-		textField_28.setBounds(434, 231, 56, 20);
-		panelStep6.add(textField_28);
-
-		textField_29 = new JTextField();
-		textField_29.setColumns(10);
-		textField_29.setBounds(434, 200, 56, 20);
-		panelStep6.add(textField_29);
-
-		textField_30 = new JTextField();
-		textField_30.setColumns(10);
-		textField_30.setBounds(434, 169, 56, 20);
-		panelStep6.add(textField_30);
-
-		textField_31 = new JTextField();
-		textField_31.setColumns(10);
-		textField_31.setBounds(434, 138, 56, 20);
-		panelStep6.add(textField_31);
-
-		textField_32 = new JTextField();
-		textField_32.setColumns(10);
-		textField_32.setBounds(434, 107, 56, 20);
-		panelStep6.add(textField_32);
-
-		textField_33 = new JTextField();
-		textField_33.setColumns(10);
-		textField_33.setBounds(434, 76, 56, 20);
-		panelStep6.add(textField_33);
-
-		textField_34 = new JTextField();
-		textField_34.setColumns(10);
-		textField_34.setBounds(434, 45, 56, 20);
-		panelStep6.add(textField_34);
-
-		textField_35 = new JTextField();
-		textField_35.setColumns(10);
-		textField_35.setBounds(494, 45, 56, 20);
-		panelStep6.add(textField_35);
-
-		textField_36 = new JTextField();
-		textField_36.setColumns(10);
-		textField_36.setBounds(494, 76, 56, 20);
-		panelStep6.add(textField_36);
-
-		textField_37 = new JTextField();
-		textField_37.setColumns(10);
-		textField_37.setBounds(494, 107, 56, 20);
-		panelStep6.add(textField_37);
-
-		textField_38 = new JTextField();
-		textField_38.setColumns(10);
-		textField_38.setBounds(494, 138, 56, 20);
-		panelStep6.add(textField_38);
-
-		textField_39 = new JTextField();
-		textField_39.setColumns(10);
-		textField_39.setBounds(494, 169, 56, 20);
-		panelStep6.add(textField_39);
-
-		textField_40 = new JTextField();
-		textField_40.setColumns(10);
-		textField_40.setBounds(494, 200, 56, 20);
-		panelStep6.add(textField_40);
-
-		textField_41 = new JTextField();
-		textField_41.setColumns(10);
-		textField_41.setBounds(494, 231, 56, 20);
-		panelStep6.add(textField_41);
-
-		JComboBox comboBox_14 = new JComboBox();
-		comboBox_14.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_14.setBounds(560, 231, 73, 20);
-		panelStep6.add(comboBox_14);
-
-		JComboBox comboBox_15 = new JComboBox();
-		comboBox_15.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_15.setBounds(560, 200, 73, 20);
-		panelStep6.add(comboBox_15);
-
-		JComboBox comboBox_16 = new JComboBox();
-		comboBox_16.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_16.setBounds(560, 169, 73, 20);
-		panelStep6.add(comboBox_16);
-
-		JComboBox comboBox_17 = new JComboBox();
-		comboBox_17.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_17.setBounds(560, 138, 73, 20);
-		panelStep6.add(comboBox_17);
-
-		JComboBox comboBox_18 = new JComboBox();
-		comboBox_18.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_18.setBounds(560, 107, 73, 20);
-		panelStep6.add(comboBox_18);
-
-		JComboBox comboBox_19 = new JComboBox();
-		comboBox_19.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_19.setBounds(560, 76, 73, 20);
-		panelStep6.add(comboBox_19);
-
-		JComboBox comboBox_20 = new JComboBox();
-		comboBox_20.setModel(new DefaultComboBoxModel(OrderType.values()));
-		comboBox_20.setBounds(560, 45, 73, 20);
-		panelStep6.add(comboBox_20);
-
-		textField_42 = new JTextField();
-		textField_42.setColumns(10);
-		textField_42.setBounds(637, 231, 56, 20);
-		panelStep6.add(textField_42);
-
-		textField_43 = new JTextField();
-		textField_43.setColumns(10);
-		textField_43.setBounds(637, 200, 56, 20);
-		panelStep6.add(textField_43);
-
-		textField_44 = new JTextField();
-		textField_44.setColumns(10);
-		textField_44.setBounds(637, 169, 56, 20);
-		panelStep6.add(textField_44);
-
-		textField_45 = new JTextField();
-		textField_45.setColumns(10);
-		textField_45.setBounds(637, 138, 56, 20);
-		panelStep6.add(textField_45);
-
-		textField_46 = new JTextField();
-		textField_46.setColumns(10);
-		textField_46.setBounds(637, 107, 56, 20);
-		panelStep6.add(textField_46);
-
-		textField_47 = new JTextField();
-		textField_47.setColumns(10);
-		textField_47.setBounds(637, 76, 56, 20);
-		panelStep6.add(textField_47);
-
-		textField_48 = new JTextField();
-		textField_48.setColumns(10);
-		textField_48.setBounds(637, 45, 56, 20);
-		panelStep6.add(textField_48);
-
-		textField_49 = new JTextField();
-		textField_49.setColumns(10);
-		textField_49.setBounds(697, 45, 56, 20);
-		panelStep6.add(textField_49);
-
-		textField_50 = new JTextField();
-		textField_50.setColumns(10);
-		textField_50.setBounds(697, 76, 56, 20);
-		panelStep6.add(textField_50);
-
-		textField_51 = new JTextField();
-		textField_51.setColumns(10);
-		textField_51.setBounds(697, 107, 56, 20);
-		panelStep6.add(textField_51);
-
-		textField_52 = new JTextField();
-		textField_52.setColumns(10);
-		textField_52.setBounds(697, 138, 56, 20);
-		panelStep6.add(textField_52);
-
-		textField_53 = new JTextField();
-		textField_53.setColumns(10);
-		textField_53.setBounds(697, 169, 56, 20);
-		panelStep6.add(textField_53);
-
-		textField_54 = new JTextField();
-		textField_54.setColumns(10);
-		textField_54.setBounds(697, 200, 56, 20);
-		panelStep6.add(textField_54);
-
-		textField_55 = new JTextField();
-		textField_55.setColumns(10);
-		textField_55.setBounds(697, 231, 56, 20);
-		panelStep6.add(textField_55);
-
-		JComboBox comboBox_21 = new JComboBox();
-		comboBox_21.setBounds(763, 231, 73, 20);
-		panelStep6.add(comboBox_21);
-
-		JComboBox comboBox_22 = new JComboBox();
-		comboBox_22.setBounds(763, 200, 73, 20);
-		panelStep6.add(comboBox_22);
-
-		JComboBox comboBox_23 = new JComboBox();
-		comboBox_23.setBounds(763, 169, 73, 20);
-		panelStep6.add(comboBox_23);
-
-		JComboBox comboBox_24 = new JComboBox();
-		comboBox_24.setBounds(763, 138, 73, 20);
-		panelStep6.add(comboBox_24);
-
-		JComboBox comboBox_25 = new JComboBox();
-		comboBox_25.setBounds(763, 107, 73, 20);
-		panelStep6.add(comboBox_25);
-
-		JComboBox comboBox_26 = new JComboBox();
-		comboBox_26.setBounds(763, 76, 73, 20);
-		panelStep6.add(comboBox_26);
-
-		JComboBox comboBox_27 = new JComboBox();
-		comboBox_27.setBounds(763, 45, 73, 20);
-		panelStep6.add(comboBox_27);
+		JTextField textFieldStep6ItemIndex1 = new JTextField();
+		textFieldStep6ItemIndex1.setBounds(10, 45, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex1);
+		textFieldStep6ItemIndex1.setColumns(10);
+
+		JTextField textFieldStep6Quantity1 = new JTextField();
+		textFieldStep6Quantity1.setColumns(10);
+		textFieldStep6Quantity1.setBounds(70, 45, 56, 20);
+		panelStep6.add(textFieldStep6Quantity1);
+
+		JComboBox comboBoxStep6OrderType1 = new JComboBox();
+		comboBoxStep6OrderType1.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType1.setBounds(136, 45, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType1);
+
+		JTextField textFieldStep6ItemIndex2 = new JTextField();
+		textFieldStep6ItemIndex2.setColumns(10);
+		textFieldStep6ItemIndex2.setBounds(10, 76, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex2);
+
+		JTextField textFieldStep6Quantity2 = new JTextField();
+		textFieldStep6Quantity2.setColumns(10);
+		textFieldStep6Quantity2.setBounds(70, 76, 56, 20);
+		panelStep6.add(textFieldStep6Quantity2);
+
+		JComboBox comboBoxStep6OrderType2 = new JComboBox();
+		comboBoxStep6OrderType2.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType2.setBounds(136, 76, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType2);
+
+		JTextField textFieldStep6ItemIndex3 = new JTextField();
+		textFieldStep6ItemIndex3.setColumns(10);
+		textFieldStep6ItemIndex3.setBounds(10, 107, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex3);
+
+		JTextField textFieldStep6Quantity3 = new JTextField();
+		textFieldStep6Quantity3.setColumns(10);
+		textFieldStep6Quantity3.setBounds(70, 107, 56, 20);
+		panelStep6.add(textFieldStep6Quantity3);
+
+		JComboBox comboBoxStep6OrderType3 = new JComboBox();
+		comboBoxStep6OrderType3.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType3.setBounds(136, 107, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType3);
+
+		JTextField textFieldStep6ItemIndex4 = new JTextField();
+		textFieldStep6ItemIndex4.setColumns(10);
+		textFieldStep6ItemIndex4.setBounds(10, 138, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex4);
+
+		JTextField textFieldStep6Quantity4 = new JTextField();
+		textFieldStep6Quantity4.setColumns(10);
+		textFieldStep6Quantity4.setBounds(70, 138, 56, 20);
+		panelStep6.add(textFieldStep6Quantity4);
+
+		JComboBox comboBoxStep6OrderType4 = new JComboBox();
+		comboBoxStep6OrderType4.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType4.setBounds(136, 138, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType4);
+
+		JTextField textFieldStep6ItemIndex5 = new JTextField();
+		textFieldStep6ItemIndex5.setColumns(10);
+		textFieldStep6ItemIndex5.setBounds(10, 169, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex5);
+
+		JTextField textFieldStep6Quantity5 = new JTextField();
+		textFieldStep6Quantity5.setColumns(10);
+		textFieldStep6Quantity5.setBounds(70, 169, 56, 20);
+		panelStep6.add(textFieldStep6Quantity5);
+
+		JComboBox comboBoxStep6OrderType5 = new JComboBox();
+		comboBoxStep6OrderType5.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType5.setBounds(136, 169, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType5);
+
+		JTextField textFieldStep6ItemIndex6 = new JTextField();
+		textFieldStep6ItemIndex6.setColumns(10);
+		textFieldStep6ItemIndex6.setBounds(10, 200, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex6);
+
+		JTextField textFieldStep6Quantity6 = new JTextField();
+		textFieldStep6Quantity6.setColumns(10);
+		textFieldStep6Quantity6.setBounds(70, 200, 56, 20);
+		panelStep6.add(textFieldStep6Quantity6);
+
+		JComboBox comboBoxStep6OrderType6 = new JComboBox();
+		comboBoxStep6OrderType6.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType6.setBounds(136, 200, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType6);
+
+		JTextField textFieldStep6ItemIndex7 = new JTextField();
+		textFieldStep6ItemIndex7.setColumns(10);
+		textFieldStep6ItemIndex7.setBounds(10, 231, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex7);
+
+		JTextField textFieldStep6Quantity7 = new JTextField();
+		textFieldStep6Quantity7.setColumns(10);
+		textFieldStep6Quantity7.setBounds(70, 231, 56, 20);
+		panelStep6.add(textFieldStep6Quantity7);
+
+		JComboBox comboBoxStep6OrderType7 = new JComboBox();
+		comboBoxStep6OrderType7.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType7.setBounds(136, 231, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType7);
+
+		JTextField textFieldStep6ItemIndex14 = new JTextField();
+		textFieldStep6ItemIndex14.setColumns(10);
+		textFieldStep6ItemIndex14.setBounds(219, 231, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex14);
+
+		JTextField textFieldStep6ItemIndex13 = new JTextField();
+		textFieldStep6ItemIndex13.setColumns(10);
+		textFieldStep6ItemIndex13.setBounds(219, 200, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex13);
+
+		JTextField textFieldStep6ItemIndex12 = new JTextField();
+		textFieldStep6ItemIndex12.setColumns(10);
+		textFieldStep6ItemIndex12.setBounds(219, 169, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex12);
+
+		JTextField textFieldStep6ItemIndex11 = new JTextField();
+		textFieldStep6ItemIndex11.setColumns(10);
+		textFieldStep6ItemIndex11.setBounds(219, 138, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex11);
+
+		JTextField textFieldStep6ItemIndex10 = new JTextField();
+		textFieldStep6ItemIndex10.setColumns(10);
+		textFieldStep6ItemIndex10.setBounds(219, 107, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex10);
+
+		JTextField textFieldStep6ItemIndex9 = new JTextField();
+		textFieldStep6ItemIndex9.setColumns(10);
+		textFieldStep6ItemIndex9.setBounds(219, 76, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex9);
+
+		JTextField textFieldStep6ItemIndex8 = new JTextField();
+		textFieldStep6ItemIndex8.setColumns(10);
+		textFieldStep6ItemIndex8.setBounds(219, 45, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex8);
+
+		JTextField textFieldStep6Quantity8 = new JTextField();
+		textFieldStep6Quantity8.setColumns(10);
+		textFieldStep6Quantity8.setBounds(279, 45, 56, 20);
+		panelStep6.add(textFieldStep6Quantity8);
+
+		JTextField textFieldStep6Quantity9 = new JTextField();
+		textFieldStep6Quantity9.setColumns(10);
+		textFieldStep6Quantity9.setBounds(279, 76, 56, 20);
+		panelStep6.add(textFieldStep6Quantity9);
+
+		JTextField textFieldStep6Quantity10 = new JTextField();
+		textFieldStep6Quantity10.setColumns(10);
+		textFieldStep6Quantity10.setBounds(279, 107, 56, 20);
+		panelStep6.add(textFieldStep6Quantity10);
+
+		JTextField textFieldStep6Quantity11 = new JTextField();
+		textFieldStep6Quantity11.setColumns(10);
+		textFieldStep6Quantity11.setBounds(279, 138, 56, 20);
+		panelStep6.add(textFieldStep6Quantity11);
+
+		JTextField textFieldStep6Quantity12 = new JTextField();
+		textFieldStep6Quantity12.setColumns(10);
+		textFieldStep6Quantity12.setBounds(279, 169, 56, 20);
+		panelStep6.add(textFieldStep6Quantity12);
+
+		JTextField textFieldStep6Quantity13 = new JTextField();
+		textFieldStep6Quantity13.setColumns(10);
+		textFieldStep6Quantity13.setBounds(279, 200, 56, 20);
+		panelStep6.add(textFieldStep6Quantity13);
+
+		JTextField textFieldStep6Quantity14 = new JTextField();
+		textFieldStep6Quantity14.setColumns(10);
+		textFieldStep6Quantity14.setBounds(279, 231, 56, 20);
+		panelStep6.add(textFieldStep6Quantity14);
+
+		JComboBox comboBoxStep6OrderType14 = new JComboBox();
+		comboBoxStep6OrderType14.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType14.setBounds(345, 231, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType14);
+
+		JComboBox comboBoxStep6OrderType13 = new JComboBox();
+		comboBoxStep6OrderType13.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType13.setBounds(345, 200, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType13);
+
+		JComboBox comboBoxStep6OrderType12 = new JComboBox();
+		comboBoxStep6OrderType12.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType12.setBounds(345, 169, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType12);
+
+		JComboBox comboBoxStep6OrderType11 = new JComboBox();
+		comboBoxStep6OrderType11.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType11.setBounds(345, 138, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType11);
+
+		JComboBox comboBoxStep6OrderType10 = new JComboBox();
+		comboBoxStep6OrderType10.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType10.setBounds(345, 107, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType10);
+
+		JComboBox comboBoxStep6OrderType9 = new JComboBox();
+		comboBoxStep6OrderType9.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType9.setBounds(345, 76, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType9);
+
+		JComboBox comboBoxStep6OrderType8 = new JComboBox();
+		comboBoxStep6OrderType8.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType8.setBounds(345, 45, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType8);
+
+		JTextField textFieldStep6ItemIndex21 = new JTextField();
+		textFieldStep6ItemIndex21.setColumns(10);
+		textFieldStep6ItemIndex21.setBounds(434, 231, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex21);
+
+		JTextField textFieldStep6ItemIndex20 = new JTextField();
+		textFieldStep6ItemIndex20.setColumns(10);
+		textFieldStep6ItemIndex20.setBounds(434, 200, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex20);
+
+		JTextField textFieldStep6ItemIndex19 = new JTextField();
+		textFieldStep6ItemIndex19.setColumns(10);
+		textFieldStep6ItemIndex19.setBounds(434, 169, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex19);
+
+		JTextField textFieldStep6ItemIndex18 = new JTextField();
+		textFieldStep6ItemIndex18.setColumns(10);
+		textFieldStep6ItemIndex18.setBounds(434, 138, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex18);
+
+		JTextField textFieldStep6ItemIndex17 = new JTextField();
+		textFieldStep6ItemIndex17.setColumns(10);
+		textFieldStep6ItemIndex17.setBounds(434, 107, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex17);
+
+		JTextField textFieldStep6ItemIndex16 = new JTextField();
+		textFieldStep6ItemIndex16.setColumns(10);
+		textFieldStep6ItemIndex16.setBounds(434, 76, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex16);
+
+		JTextField textFieldStep6ItemIndex15 = new JTextField();
+		textFieldStep6ItemIndex15.setColumns(10);
+		textFieldStep6ItemIndex15.setBounds(434, 45, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex15);
+
+		JTextField textFieldStep6Quantity15 = new JTextField();
+		textFieldStep6Quantity15.setColumns(10);
+		textFieldStep6Quantity15.setBounds(494, 45, 56, 20);
+		panelStep6.add(textFieldStep6Quantity15);
+
+		JTextField textFieldStep6Quantity16 = new JTextField();
+		textFieldStep6Quantity16.setColumns(10);
+		textFieldStep6Quantity16.setBounds(494, 76, 56, 20);
+		panelStep6.add(textFieldStep6Quantity16);
+
+		JTextField textFieldStep6Quantity17 = new JTextField();
+		textFieldStep6Quantity17.setColumns(10);
+		textFieldStep6Quantity17.setBounds(494, 107, 56, 20);
+		panelStep6.add(textFieldStep6Quantity17);
+
+		JTextField textFieldStep6Quantity18 = new JTextField();
+		textFieldStep6Quantity18.setColumns(10);
+		textFieldStep6Quantity18.setBounds(494, 138, 56, 20);
+		panelStep6.add(textFieldStep6Quantity18);
+
+		JTextField textFieldStep6Quantity19 = new JTextField();
+		textFieldStep6Quantity19.setColumns(10);
+		textFieldStep6Quantity19.setBounds(494, 169, 56, 20);
+		panelStep6.add(textFieldStep6Quantity19);
+
+		JTextField textFieldStep6Quantity20 = new JTextField();
+		textFieldStep6Quantity20.setColumns(10);
+		textFieldStep6Quantity20.setBounds(494, 200, 56, 20);
+		panelStep6.add(textFieldStep6Quantity20);
+
+		JTextField textFieldStep6Quantity21 = new JTextField();
+		textFieldStep6Quantity21.setColumns(10);
+		textFieldStep6Quantity21.setBounds(494, 231, 56, 20);
+		panelStep6.add(textFieldStep6Quantity21);
+
+		JComboBox comboBoxStep6OrderType21 = new JComboBox();
+		comboBoxStep6OrderType21.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType21.setBounds(560, 231, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType21);
+
+		JComboBox comboBoxStep6OrderType20 = new JComboBox();
+		comboBoxStep6OrderType20.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType20.setBounds(560, 200, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType20);
+
+		JComboBox comboBoxStep6OrderType19 = new JComboBox();
+		comboBoxStep6OrderType19.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType19.setBounds(560, 169, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType19);
+
+		JComboBox comboBoxStep6OrderType18 = new JComboBox();
+		comboBoxStep6OrderType18.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType18.setBounds(560, 138, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType18);
+
+		JComboBox comboBoxStep6OrderType17 = new JComboBox();
+		comboBoxStep6OrderType17.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType17.setBounds(560, 107, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType17);
+
+		JComboBox comboBoxStep6OrderType16 = new JComboBox();
+		comboBoxStep6OrderType16.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType16.setBounds(560, 76, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType16);
+
+		JComboBox comboBoxStep6OrderType15 = new JComboBox();
+		comboBoxStep6OrderType15.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType15.setBounds(560, 45, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType15);
+
+		JTextField textFieldStep6ItemIndex28 = new JTextField();
+		textFieldStep6ItemIndex28.setColumns(10);
+		textFieldStep6ItemIndex28.setBounds(637, 231, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex28);
+
+		JTextField textFieldStep6ItemIndex27 = new JTextField();
+		textFieldStep6ItemIndex27.setColumns(10);
+		textFieldStep6ItemIndex27.setBounds(637, 200, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex27);
+
+		JTextField textFieldStep6ItemIndex26 = new JTextField();
+		textFieldStep6ItemIndex26.setColumns(10);
+		textFieldStep6ItemIndex26.setBounds(637, 169, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex26);
+
+		JTextField textFieldStep6ItemIndex25 = new JTextField();
+		textFieldStep6ItemIndex25.setColumns(10);
+		textFieldStep6ItemIndex25.setBounds(637, 138, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex25);
+
+		JTextField textFieldStep6ItemIndex24 = new JTextField();
+		textFieldStep6ItemIndex24.setColumns(10);
+		textFieldStep6ItemIndex24.setBounds(637, 107, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex24);
+
+		JTextField textFieldStep6ItemIndex23 = new JTextField();
+		textFieldStep6ItemIndex23.setColumns(10);
+		textFieldStep6ItemIndex23.setBounds(637, 76, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex23);
+
+		JTextField textFieldStep6ItemIndex22 = new JTextField();
+		textFieldStep6ItemIndex22.setColumns(10);
+		textFieldStep6ItemIndex22.setBounds(637, 45, 56, 20);
+		panelStep6.add(textFieldStep6ItemIndex22);
+
+		JTextField textFieldStep6Quantity22 = new JTextField();
+		textFieldStep6Quantity22.setColumns(10);
+		textFieldStep6Quantity22.setBounds(697, 45, 56, 20);
+		panelStep6.add(textFieldStep6Quantity22);
+
+		JTextField textFieldStep6Quantity23 = new JTextField();
+		textFieldStep6Quantity23.setColumns(10);
+		textFieldStep6Quantity23.setBounds(697, 76, 56, 20);
+		panelStep6.add(textFieldStep6Quantity23);
+
+		JTextField textFieldStep6Quantity24 = new JTextField();
+		textFieldStep6Quantity24.setColumns(10);
+		textFieldStep6Quantity24.setBounds(697, 107, 56, 20);
+		panelStep6.add(textFieldStep6Quantity24);
+
+		JTextField textFieldStep6Quantity25 = new JTextField();
+		textFieldStep6Quantity25.setColumns(10);
+		textFieldStep6Quantity25.setBounds(697, 138, 56, 20);
+		panelStep6.add(textFieldStep6Quantity25);
+
+		JTextField textFieldStep6Quantity26 = new JTextField();
+		textFieldStep6Quantity26.setColumns(10);
+		textFieldStep6Quantity26.setBounds(697, 169, 56, 20);
+		panelStep6.add(textFieldStep6Quantity26);
+
+		JTextField textFieldStep6Quantity27 = new JTextField();
+		textFieldStep6Quantity27.setColumns(10);
+		textFieldStep6Quantity27.setBounds(697, 200, 56, 20);
+		panelStep6.add(textFieldStep6Quantity27);
+
+		JTextField textFieldStep6Quantity28 = new JTextField();
+		textFieldStep6Quantity28.setColumns(10);
+		textFieldStep6Quantity28.setBounds(697, 231, 56, 20);
+		panelStep6.add(textFieldStep6Quantity28);
+
+		JComboBox comboBoxStep6OrderType28 = new JComboBox();
+		comboBoxStep6OrderType28.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType28.setBounds(763, 231, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType28);
+
+		JComboBox comboBoxStep6OrderType27 = new JComboBox();
+		comboBoxStep6OrderType27.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType27.setBounds(763, 200, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType27);
+
+		JComboBox comboBoxStep6OrderType26 = new JComboBox();
+		comboBoxStep6OrderType26.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType26.setBounds(763, 169, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType26);
+
+		JComboBox comboBoxStep6OrderType25 = new JComboBox();
+		comboBoxStep6OrderType25.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType25.setBounds(763, 138, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType25);
+
+		JComboBox comboBoxStep6OrderType24 = new JComboBox();
+		comboBoxStep6OrderType24.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType24.setBounds(763, 107, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType24);
+
+		JComboBox comboBoxStep6OrderType23 = new JComboBox();
+		comboBoxStep6OrderType23.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType23.setBounds(763, 76, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType23);
+
+		JComboBox comboBoxStep6OrderType22 = new JComboBox();
+		comboBoxStep6OrderType22.setModel(new DefaultComboBoxModel(OrderType
+				.values()));
+		comboBoxStep6OrderType22.setBounds(763, 45, 73, 20);
+		panelStep6.add(comboBoxStep6OrderType22);
 
 		JButton btnStep6PrevStep = new JButton(
 				"<< Schritt 5: Kapazitätsplanung");
@@ -2374,6 +2380,92 @@ public class PlanungstoolGUI {
 		safetyStockFormular.put("E56", new SafetyStockEntity(lblStep3E56,
 				spinnerStep3E56, lblStep3E56PartsToBeProduced));
 
+		workplaceFormular.put(1, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace1, spinnerStep5OvertimeWorkplace1));
+		workplaceFormular.put(2, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace2, spinnerStep5OvertimeWorkplace2));
+		workplaceFormular.put(3, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace3, spinnerStep5OvertimeWorkplace3));
+		workplaceFormular.put(4, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace4, spinnerStep5OvertimeWorkplace4));
+		workplaceFormular.put(6, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace6, spinnerStep5OvertimeWorkplace6));
+		workplaceFormular.put(7, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace7, spinnerStep5OvertimeWorkplace7));
+		workplaceFormular.put(8, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace8, spinnerStep5OvertimeWorkplace8));
+		workplaceFormular.put(9, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace9, spinnerStep5OvertimeWorkplace9));
+		workplaceFormular.put(10, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace10, spinnerStep5OvertimeWorkplace10));
+		workplaceFormular.put(11, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace11, spinnerStep5OvertimeWorkplace11));
+		workplaceFormular.put(12, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace12, spinnerStep5OvertimeWorkplace12));
+		workplaceFormular.put(13, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace13, spinnerStep5OvertimeWorkplace13));
+		workplaceFormular.put(14, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace14, spinnerStep5OvertimeWorkplace14));
+		workplaceFormular.put(15, new WorkplaceEntity(
+				spinnerStep5ShiftWorkplace15, spinnerStep5OvertimeWorkplace15));
+
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex1,
+				textFieldStep6Quantity1, comboBoxStep6OrderType1));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex2,
+				textFieldStep6Quantity2, comboBoxStep6OrderType2));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex3,
+				textFieldStep6Quantity3, comboBoxStep6OrderType3));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex4,
+				textFieldStep6Quantity4, comboBoxStep6OrderType4));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex5,
+				textFieldStep6Quantity5, comboBoxStep6OrderType5));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex6,
+				textFieldStep6Quantity6, comboBoxStep6OrderType6));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex7,
+				textFieldStep6Quantity7, comboBoxStep6OrderType7));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex8,
+				textFieldStep6Quantity8, comboBoxStep6OrderType8));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex9,
+				textFieldStep6Quantity9, comboBoxStep6OrderType9));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex10,
+				textFieldStep6Quantity10, comboBoxStep6OrderType10));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex11,
+				textFieldStep6Quantity11, comboBoxStep6OrderType11));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex12,
+				textFieldStep6Quantity12, comboBoxStep6OrderType12));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex13,
+				textFieldStep6Quantity13, comboBoxStep6OrderType13));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex14,
+				textFieldStep6Quantity14, comboBoxStep6OrderType14));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex15,
+				textFieldStep6Quantity15, comboBoxStep6OrderType15));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex16,
+				textFieldStep6Quantity16, comboBoxStep6OrderType16));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex17,
+				textFieldStep6Quantity17, comboBoxStep6OrderType17));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex18,
+				textFieldStep6Quantity18, comboBoxStep6OrderType18));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex19,
+				textFieldStep6Quantity19, comboBoxStep6OrderType19));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex20,
+				textFieldStep6Quantity20, comboBoxStep6OrderType20));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex21,
+				textFieldStep6Quantity21, comboBoxStep6OrderType21));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex22,
+				textFieldStep6Quantity22, comboBoxStep6OrderType22));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex23,
+				textFieldStep6Quantity23, comboBoxStep6OrderType23));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex24,
+				textFieldStep6Quantity24, comboBoxStep6OrderType24));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex25,
+				textFieldStep6Quantity25, comboBoxStep6OrderType25));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex26,
+				textFieldStep6Quantity26, comboBoxStep6OrderType26));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex27,
+				textFieldStep6Quantity27, comboBoxStep6OrderType27));
+		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex28,
+				textFieldStep6Quantity28, comboBoxStep6OrderType28));
+
 		// INITIALIZE ACTION LISTENERS
 		ActionListener switchStepsButtonActionListener = new StepButtonsActionDialog(
 				this);
@@ -2391,7 +2483,7 @@ public class PlanungstoolGUI {
 		btnStep6PrevStep.addActionListener(switchStepsButtonActionListener);
 		btnStep2NextStep.addActionListener(switchStepsButtonActionListener);
 
-		btnStep3Recalculate.addActionListener(new ActionListener() {
+		btnStep2NextStep.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -2403,7 +2495,7 @@ public class PlanungstoolGUI {
 			}
 		});
 
-		btnStep2NextStep.addActionListener(new ActionListener() {
+		btnStep3Recalculate.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -2427,32 +2519,24 @@ public class PlanungstoolGUI {
 			}
 		});
 
+		btnStep4NextStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				calculateCapacity();
+			}
+		});
+
+		btnStep5NextStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				calculateOrders();
+			}
+		});
+
 		displayDefaultSafetyStock();
 
-	}
-
-	protected void showSplittingDialog() {
-
-		// Get the selected list item
-		int selectedIndex = listStep4ProductionOrder.getSelectedIndex();
-
-		// If no item is selected (index = -1), nothing to do => return
-		if (selectedIndex < 0)
-			return;
-
-		Production productionToSplit = output.getProductionList().get(
-				selectedIndex);
-		SplittingDialog splitDialog = new SplittingDialog(productionToSplit);
-		splitDialog.setLocationRelativeTo(frameMain);
-		splitDialog.setVisible(true);
-
-		if (splitDialog.getResult() == DialogResult.OK) {
-			output.splitProduction(selectedIndex, splitDialog.getQuantityA(),
-					splitDialog.getQuantityB());
-		}
-
-		displayProductionOrder();
-		listStep4ProductionOrder.setSelectedIndex(selectedIndex);
 	}
 
 	protected void moveProductionDown() {
@@ -2572,6 +2656,10 @@ public class PlanungstoolGUI {
 		}
 	}
 
+	public void setFrameMain(JFrame frameMain) {
+		this.frameMain = frameMain;
+	}
+
 	private void setResults(Results results2) {
 		this.results = results2;
 	}
@@ -2587,7 +2675,31 @@ public class PlanungstoolGUI {
 				JOptionPane.ERROR_MESSAGE);
 	}
 
-	private void switchToStep(int goToStep) {
+	protected void showSplittingDialog() {
+
+		// Get the selected list item
+		int selectedIndex = listStep4ProductionOrder.getSelectedIndex();
+
+		// If no item is selected (index = -1), nothing to do => return
+		if (selectedIndex < 0)
+			return;
+
+		Production productionToSplit = output.getProductionList().get(
+				selectedIndex);
+		SplittingDialog splitDialog = new SplittingDialog(productionToSplit);
+		splitDialog.setLocationRelativeTo(frameMain);
+		splitDialog.setVisible(true);
+
+		if (splitDialog.getResult() == DialogResult.OK) {
+			output.splitProduction(selectedIndex, splitDialog.getQuantityA(),
+					splitDialog.getQuantityB());
+		}
+
+		displayProductionOrder();
+		listStep4ProductionOrder.setSelectedIndex(selectedIndex);
+	}
+
+	public void switchToStep(int goToStep) {
 
 		readInForecasts();
 		readInSales();
@@ -2603,13 +2715,5 @@ public class PlanungstoolGUI {
 		tabbedPanePlanning.removeAll();
 		tabbedPanePlanning.add(stepToShow);
 		tabbedPanePlanning.addTab("Schritt " + goToStep, stepToShow);
-	}
-
-	public JFrame getFrameMain() {
-		return frameMain;
-	}
-
-	public void setFrameMain(JFrame frameMain) {
-		this.frameMain = frameMain;
 	}
 }
