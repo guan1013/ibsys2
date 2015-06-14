@@ -48,8 +48,10 @@ public class KItemBuilder {
 				int number = Integer.parseInt(props.getProperty(key
 						+ Constants.getNumberKey()));
 				String name = props.getProperty(key + Constants.getNameKey());
-				double value = Double.parseDouble(results.getWarehousestock()
-						.getArticles().get(i - 1).getStockValueString());
+				String valueStr = results.getWarehousestock()
+						.getArticles().get(i - 1).getStockValueString();
+				valueStr = valueStr.replace(',', '.');
+				double value = Double.parseDouble(valueStr);
 				int stock = results.getWarehousestock().getArticles()
 						.get(i - 1).getAmount();
 				int stack = Integer.parseInt(props.getProperty(key
