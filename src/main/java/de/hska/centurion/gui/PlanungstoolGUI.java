@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.AbstractListModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -52,9 +54,12 @@ import de.hska.centurion.domain.input.components.IdleTimeCostsSum;
 import de.hska.centurion.domain.input.components.Order;
 import de.hska.centurion.domain.input.components.WorkplaceCosts;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
+import de.hska.centurion.domain.output.Input;
+import de.hska.centurion.domain.output.Production;
 import de.hska.centurion.exceptions.UserInputException;
 import de.hska.centurion.io.XmlInputParser;
 import de.hska.centurion.services.production.ProductionService;
+import de.hska.centurion.services.validation.UserInputValidator;
 
 /**
  * This is the main graphical user interface of the planning tool. It contains
@@ -77,10 +82,52 @@ public class PlanungstoolGUI {
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ATTRIBUTES
 
+	public class StepButtonsActionDialog implements ActionListener {
+
+		PlanungstoolGUI parent;
+
+		public StepButtonsActionDialog(PlanungstoolGUI parent) {
+			super();
+			this.parent = parent;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			Object src = e.getSource();
+
+			if (src instanceof JButton) {
+				Integer goToStep = getNumberFromString(((JButton) src)
+						.getText());
+				if (goToStep != null) {
+					switchToStep(goToStep);
+				} else {
+					return;
+				}
+			}
+
+			return;
+		}
+
+		private Integer getNumberFromString(String s) {
+
+			String pattern = ".*(\\d+).*";
+			Matcher m = Pattern.compile(pattern).matcher(s);
+
+			if (m.find()) {
+				return Integer.parseInt(m.group(1));
+			}
+
+			return null;
+		}
+	}
+
 	// STATIC ATTRIBUTES
 	private static final int DEFAULT_SAFETY_STOCK = 250;
 	private static final int MIN_FORECAST_AND_SALES = 0;
 	private static final int MAX_FORECAST_AND_SALES = 500;
+	private static final String[] DELIVERY_MODES = new String[] { "?",
+			"special order", "cheap vendor", "JIT", "fast", "normal" };
 
 	// UI COMPONENTS - MAIN SCREEN
 	private JFrame frameMain;
@@ -111,6 +158,7 @@ public class PlanungstoolGUI {
 	private JSpinner spinnerStep2P1DirectSales;
 	private JSpinner spinnerStep2P2Sales;
 	private JSpinner spinnerStep2P3Sales;
+
 	private JSpinner spinnerStep2P2DirectSales;
 	private JSpinner spinnerStep2P3DirectSales;
 
@@ -119,6 +167,7 @@ public class PlanungstoolGUI {
 	private JTable tableInwardStockMovement;
 	private JTable tableFutureInwardStockMovement;
 	private JTable tableIdleTimeCosts;
+
 	private JTable tableWaitingListWorkstations;
 	private JTable table;
 
@@ -180,7 +229,7 @@ public class PlanungstoolGUI {
 	private JTextField textField_54;
 	private JTextField textField_55;
 
-	// DIFFERENT MAPS FOR ACCESSING THE UI COMPONENTS
+	// OTHER FIELDS
 
 	/**
 	 * A map of all planning steps. The panel which holds the ui components for
@@ -194,8 +243,6 @@ public class PlanungstoolGUI {
 	 */
 	private HashMap<String, SafetyStockEntity> safetyStockFormular;
 
-	// Different attributes to store data.
-
 	/**
 	 * Currently displayed and used result object (parsed from xml file).
 	 */
@@ -205,39 +252,15 @@ public class PlanungstoolGUI {
 	 * Object which stores all data which was entered by the user.
 	 */
 	private UserInput userInput;
+	
+	
+	private Input output;
 
-	// HELP VARIABLES
-	private boolean stepValid = false;
+	private ProductionService productionService;
+	private JList listStep4ProductionOrder;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-
-		// Set the look and feel to users OS LaF.
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e) {
-			e.printStackTrace();
-		}
-
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					PlanungstoolGUI window = new PlanungstoolGUI();
-					window.frameMain.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	// //////////////////////////////////////////////////////////////////////////////////////////////////////
+	// CONSTRUCTOR
 
 	/**
 	 * Create the application.
@@ -250,30 +273,123 @@ public class PlanungstoolGUI {
 		safetyStockFormular = new HashMap<String, SafetyStockEntity>();
 		userInput.setSafetyStock(new SafetyStock(DEFAULT_SAFETY_STOCK));
 
+		productionService = null;
+
 		// Initialize UI Components
 		initialize();
 	}
 
+	// //////////////////////////////////////////////////////////////////////////////////////////////////////
+	// PRIVATE METHODS
+
 	/**
-	 * Initialize the contents of the frame.
+	 * This method calls the production service to calculate the count of items
+	 * which has to be produced to have the entered safety stock at the end of
+	 * the planned period.
 	 */
+	private void calculateSafetyStock() {
+
+		// Permit the user input to the production service.
+		productionService.setForecast(userInput.getForecast());
+		productionService.setSales(userInput.getSales(),
+				userInput.getDirectSales());
+
+		// Calculate safety stock
+		Map<String, Integer> safetyStockGui = productionService
+				.calculateSafetyStock(userInput.getSafetyStock());
+
+		// Display calculation result on gui
+		displaySafetyStock(safetyStockGui);
+
+	}
+
+	private void calculateProductionOrder() {
+
+		displayProductionOrder();
+	}
+
+	/**
+	 * Displays the default value for safety stock in the number spinner (seems
+	 * like user entered it).
+	 */
+	private void displayDefaultSafetyStock() {
+
+		for (String id : userInput.getSafetyStock().getSafetyStocks().keySet()) {
+
+			safetyStockFormular.get(id).getWish()
+					.setValue(DEFAULT_SAFETY_STOCK);
+		}
+	}
+
+	/**
+	 * Change gui labels where current period is used.
+	 * 
+	 * @param period
+	 *            period of the loaded result file
+	 */
+	private void displayPeriod(int period) {
+
+		lblStep1Periode1Title.setText("Periode " + (period + 1));
+		lblStep1Periode2Title.setText("Periode " + (period + 2));
+		lblStep1Periode3Title.setText("Periode " + (period + 3));
+		lblStep1Periode4Title.setText("Periode " + (period + 4));
+	}
+
+	/**
+	 * Displays the result of the safety calculation as info on the gui. (Not in
+	 * the number spinners, in the labels behind the number spinners).
+	 * 
+	 * @param countOfPartsToProduce
+	 *            calculated count of items to produce
+	 */
+	private void displaySafetyStock(Map<String, Integer> countOfPartsToProduce) {
+
+		for (String id : countOfPartsToProduce.keySet()) {
+
+			safetyStockFormular.get(id).getCalculated()
+					.setText(countOfPartsToProduce.get(id).toString());
+		}
+	}
+
+	private void displayProductionOrder() {
+
+		// Clean UI component
+		listStep4ProductionOrder.removeAll();
+
+		DefaultListModel<String> model = new DefaultListModel<>();
+
+		for (Production production : productionService.getProductionOrder()) {
+			model.addElement(production.getArticle() + " --- "
+					+ production.getQuantity());
+		}
+
+		listStep4ProductionOrder.setModel(model);
+
+	}
+
+	private String getModeAsString(int modeInt) {
+
+		return DELIVERY_MODES[modeInt] + " (" + modeInt + ")";
+
+	}
+
 	private void initialize() {
 
-		frameMain = new JFrame();
-		frameMain
-				.setIconImage(Toolkit
-						.getDefaultToolkit()
-						.getImage(
-								PlanungstoolGUI.class
-										.getResource("/com/sun/java/swing/plaf/windows/icons/Computer.gif")));
-		frameMain.setResizable(false);
-		frameMain
-				.setTitle("IBSYS-II-Planungstool - Gruppe Centurion - SS 2015");
-		frameMain.setBounds(100, 100, 893, 738);
-		frameMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setFrameMain(new JFrame());
+		getFrameMain()
+				.setIconImage(
+						Toolkit.getDefaultToolkit()
+								.getImage(
+										PlanungstoolGUI.class
+												.getResource("/com/sun/java/swing/plaf/windows/icons/Computer.gif")));
+		getFrameMain().setResizable(false);
+		getFrameMain().setTitle(
+				"IBSYS-II-Planungstool - Gruppe Centurion - SS 2015");
+		getFrameMain().setBounds(100, 100, 893, 738);
+		getFrameMain().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JMenuBar menuBar = new JMenuBar();
-		frameMain.setJMenuBar(menuBar);
+		getFrameMain().setJMenuBar(menuBar);
 
 		JMenu mnFile = new JMenu("Datei");
 		menuBar.add(mnFile);
@@ -285,7 +401,7 @@ public class PlanungstoolGUI {
 						PlanungstoolGUI.class
 								.getResource("/com/sun/java/swing/plaf/motif/icons/Inform.gif")));
 		internalFrameResults.setBounds(10, 11, 867, 286);
-		frameMain.getContentPane().add(internalFrameResults);
+		getFrameMain().getContentPane().add(internalFrameResults);
 		internalFrameResults.getContentPane().setLayout(null);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -485,7 +601,7 @@ public class PlanungstoolGUI {
 				final JFileChooser fc = new JFileChooser();
 
 				// Zeige Dialog zum Auswählen einer Datei
-				int returnVal = fc.showOpenDialog(frameMain);
+				int returnVal = fc.showOpenDialog(getFrameMain());
 
 				// Warten bis der Benutzer eine Datei ausgewählt hat
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -501,7 +617,7 @@ public class PlanungstoolGUI {
 						results = XmlInputParser.parseXmlFile(file.getPath());
 					} catch (Exception ex) {
 						results = null;
-						JOptionPane.showMessageDialog(frameMain,
+						JOptionPane.showMessageDialog(getFrameMain(),
 								ex.getMessage());
 						return;
 					}
@@ -647,6 +763,13 @@ public class PlanungstoolGUI {
 						}
 					}
 
+					try {
+						productionService = new ProductionService(results);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						return;
+					}
+
 					gui.switchToStep(1);
 					gui.displayPeriod(results.getPeriod());
 					gui.setResults(results);
@@ -654,11 +777,11 @@ public class PlanungstoolGUI {
 			}
 		});
 		mnFile.add(mntmLoadResultXml);
-		frameMain.getContentPane().setLayout(null);
+		getFrameMain().getContentPane().setLayout(null);
 
 		JInternalFrame internalFramePlanning = new JInternalFrame("Planung");
 		internalFramePlanning.setBounds(10, 305, 867, 371);
-		frameMain.getContentPane().add(internalFramePlanning);
+		getFrameMain().getContentPane().add(internalFramePlanning);
 
 		tabbedPanePlanning = new JTabbedPane(JTabbedPane.TOP);
 		internalFramePlanning.getContentPane().add(tabbedPanePlanning,
@@ -791,53 +914,59 @@ public class PlanungstoolGUI {
 
 		JLabel lblStep2P1Title = new JLabel("P1 (Kinderfahrrad)");
 		lblStep2P1Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep2P1Title.setBounds(10, 100, 141, 23);
+		lblStep2P1Title.setBounds(129, 99, 141, 23);
 		panelStep2.add(lblStep2P1Title);
 
 		JLabel lblStep2P2Title = new JLabel("P2 (Damenfahrrad)");
 		lblStep2P2Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep2P2Title.setBounds(10, 160, 141, 23);
+		lblStep2P2Title.setBounds(129, 150, 141, 23);
 		panelStep2.add(lblStep2P2Title);
 
 		JLabel lblStep2P3Title = new JLabel("P3 (Herrenfahrrad)");
 		lblStep2P3Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblStep2P3Title.setBounds(10, 220, 141, 23);
+		lblStep2P3Title.setBounds(129, 201, 141, 23);
 		panelStep2.add(lblStep2P3Title);
 
 		JLabel lblStep2SalesTitle = new JLabel("Vertriebswunsch");
 		lblStep2SalesTitle.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStep2SalesTitle.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep2SalesTitle.setBounds(132, 66, 141, 23);
+		lblStep2SalesTitle.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblStep2SalesTitle.setBounds(261, 56, 120, 23);
 		panelStep2.add(lblStep2SalesTitle);
 
 		JLabel lblStep2DirectSalesTitle = new JLabel("Direktverkauf");
 		lblStep2DirectSalesTitle.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStep2DirectSalesTitle.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep2DirectSalesTitle.setBounds(269, 66, 141, 23);
+		lblStep2DirectSalesTitle.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblStep2DirectSalesTitle.setBounds(394, 56, 120, 23);
 		panelStep2.add(lblStep2DirectSalesTitle);
 
 		spinnerStep2P1Sales = new JSpinner();
-		spinnerStep2P1Sales.setBounds(153, 103, 120, 20);
+		spinnerStep2P1Sales.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep2P1Sales.setBounds(295, 93, 75, 35);
 		panelStep2.add(spinnerStep2P1Sales);
 
 		spinnerStep2P1DirectSales = new JSpinner();
-		spinnerStep2P1DirectSales.setBounds(290, 103, 120, 20);
+		spinnerStep2P1DirectSales.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep2P1DirectSales.setBounds(426, 93, 75, 35);
 		panelStep2.add(spinnerStep2P1DirectSales);
 
 		spinnerStep2P2Sales = new JSpinner();
-		spinnerStep2P2Sales.setBounds(153, 163, 120, 20);
+		spinnerStep2P2Sales.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep2P2Sales.setBounds(295, 146, 75, 35);
 		panelStep2.add(spinnerStep2P2Sales);
 
 		spinnerStep2P3Sales = new JSpinner();
-		spinnerStep2P3Sales.setBounds(153, 223, 120, 20);
+		spinnerStep2P3Sales.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep2P3Sales.setBounds(295, 199, 75, 35);
 		panelStep2.add(spinnerStep2P3Sales);
 
 		spinnerStep2P2DirectSales = new JSpinner();
-		spinnerStep2P2DirectSales.setBounds(290, 163, 120, 20);
+		spinnerStep2P2DirectSales.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep2P2DirectSales.setBounds(426, 146, 75, 35);
 		panelStep2.add(spinnerStep2P2DirectSales);
 
 		spinnerStep2P3DirectSales = new JSpinner();
-		spinnerStep2P3DirectSales.setBounds(290, 223, 120, 20);
+		spinnerStep2P3DirectSales.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		spinnerStep2P3DirectSales.setBounds(426, 199, 75, 35);
 		panelStep2.add(spinnerStep2P3DirectSales);
 
 		JButton btnStep2NextStep = new JButton("Schritt 3: Planbestand >>");
@@ -1420,34 +1549,56 @@ public class PlanungstoolGUI {
 		btnStep4NextStep.setBounds(616, 268, 220, 35);
 		panelStep4.add(btnStep4NextStep);
 
-		JList list = new JList();
-		list.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		list.setModel(new AbstractListModel() {
-			String[] values = new String[] { "E4 -- 50x", "E5 -- 100x" };
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(254, 45, 153, 210);
+		panelStep4.add(scrollPane);
 
-			public int getSize() {
-				return values.length;
-			}
+		listStep4ProductionOrder = new JList();
+		scrollPane.setViewportView(listStep4ProductionOrder);
+		listStep4ProductionOrder
+				.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		listStep4ProductionOrder.setBorder(new EtchedBorder(
+				EtchedBorder.LOWERED, null, null));
+		listStep4ProductionOrder.setModel(new AbstractListModel() {
+			String[] values = new String[] { "E4 -- 50x", "E5 -- 100x" };
 
 			public Object getElementAt(int index) {
 				return values[index];
 			}
+
+			public int getSize() {
+				return values.length;
+			}
 		});
-		list.setBounds(254, 45, 153, 210);
-		panelStep4.add(list);
 
 		JButton btnNewButton = new JButton("");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				moveProductionUp();
+			}
+
+		});
 		btnNewButton.setIcon(new ImageIcon(PlanungstoolGUI.class
 				.getResource("/javax/swing/plaf/metal/icons/sortUp.png")));
 		btnNewButton.setBounds(417, 82, 124, 35);
 		panelStep4.add(btnNewButton);
 
 		JButton btnSplitten = new JButton("Splitten");
+		btnSplitten.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showSplittingDialog();
+			}
+		});
 		btnSplitten.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnSplitten.setBounds(417, 128, 124, 35);
 		panelStep4.add(btnSplitten);
 
 		JButton button_2 = new JButton("");
+		button_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				moveProductionDown();
+			}
+		});
 		button_2.setIcon(new ImageIcon(PlanungstoolGUI.class
 				.getResource("/javax/swing/plaf/metal/icons/sortDown.png")));
 		button_2.setBounds(417, 174, 124, 35);
@@ -2145,7 +2296,6 @@ public class PlanungstoolGUI {
 
 		// PREPARE GUI
 		tabbedPanePlanning.removeAll();
-		stepValid = true;
 
 		// BUILD STEPS MAP FOR ACCESSING STEP PANELS BY INDEX
 		stepsMap.put(1, panelStep1);
@@ -2232,38 +2382,14 @@ public class PlanungstoolGUI {
 		btnStep5NextStep.addActionListener(switchStepsButtonActionListener);
 		btnStep6PrevStep.addActionListener(switchStepsButtonActionListener);
 
-		btnStep1NextStep.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					readInForecasts();
-				} catch (UserInputException e1) {
-
-					e1.printStackTrace();
-					gui.showExceptionDialog(e1);
-				}
-			}
-		});
-
-		btnStep2NextStep.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				readInSales();
-				readInSafetyStock();
-				calculateSafetyStock();
-			}
-		});
-
 		btnStep3Recalculate.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				readInForecasts();
 				readInSales();
 				readInSafetyStock();
 				calculateSafetyStock();
-
 			}
 		});
 
@@ -2271,41 +2397,57 @@ public class PlanungstoolGUI {
 
 	}
 
-	protected void showExceptionDialog(Exception e) {
-		JOptionPane.showMessageDialog(frameMain, e.getMessage(), "Fehler",
-				JOptionPane.ERROR_MESSAGE);
+	protected void showSplittingDialog() {
+		// TODO Auto-generated method stub
+
 	}
 
-	protected void calculateSafetyStock() {
+	protected void moveProductionDown() {
 
-		ProductionService productionService = null;
+		int selectedIndex = listStep4ProductionOrder.getSelectedIndex();
 
-		try {
-			productionService = new ProductionService(results);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (selectedIndex < 0)
+			return;
+
+		List<Production> currentList = productionService.getProductionOrder();
+
+		if (selectedIndex + 1 >= currentList.size()) {
 			return;
 		}
 
-		productionService.setForecast(userInput.getForecast());
-		productionService.setSales(userInput.getSales(),
-				userInput.getDirectSales());
-		Map<String, Integer> safetyStockGui = productionService
-				.calculateSafetyStock(userInput.getSafetyStock());
+		Collections.swap(currentList, selectedIndex, selectedIndex + 1);
 
-		userInput.getSafetyStock().setSafetyStocks(safetyStockGui);
+		displayProductionOrder();
 
-		// DISPLAY ON GUI
-		displaySafetyStock();
+		listStep4ProductionOrder.setSelectedIndex(selectedIndex + 1);
+
+		System.out.println("Selected Index: " + selectedIndex);
 
 	}
 
-	protected void setResults(Results results2) {
-		this.results = results2;
+	protected void moveProductionUp() {
+
+		int selectedIndex = listStep4ProductionOrder.getSelectedIndex();
+
+		if (selectedIndex < 0)
+			return;
+
+		List<Production> currentList = productionService.getProductionOrder();
+
+		if (selectedIndex - 1 < 0) {
+			return;
+		}
+
+		Collections.swap(currentList, selectedIndex, selectedIndex - 1);
+
+		displayProductionOrder();
+
+		listStep4ProductionOrder.setSelectedIndex(selectedIndex - 1);
+		System.out.println("Selected Index: " + selectedIndex);
+
 	}
 
-	protected void readInForecasts() throws UserInputException {
+	private void readInForecasts() {
 
 		Sales salesPeriode1 = new Sales(
 				(int) spinnerStep1P1Periode1.getValue(),
@@ -2328,58 +2470,22 @@ public class PlanungstoolGUI {
 		Forecast forecast = new Forecast(salesPeriode1, salesPeriode2,
 				salesPeriode3, salesPeriode4);
 
-		for (int i = 0; i < forecast.getForecasts().length; i++) {
-			Sales s = forecast.getForecasts()[i];
-
-			// P1 kleiner 0
-			if (s.getChildrenSales() < MIN_FORECAST_AND_SALES) {
-				throw new UserInputException(s.getChildrenSales(),
-						MIN_FORECAST_AND_SALES, false, "P1 (Periode "
-								+ (results.getPeriod() + 1 + i) + ")");
-			}
-
-			// P2 kleiner 0
-			if (s.getWomenSales() < MIN_FORECAST_AND_SALES) {
-				throw new UserInputException(s.getWomenSales(),
-						MIN_FORECAST_AND_SALES, false, "P2 (Periode "
-								+ (results.getPeriod() + 1 + i) + ")");
-			}
-
-			// P3 kleiner 0
-			if (s.getMenSales() < MIN_FORECAST_AND_SALES) {
-				throw new UserInputException(s.getMenSales(),
-						MIN_FORECAST_AND_SALES, false, "P3 (Periode "
-								+ (results.getPeriod() + 1 + i) + ")");
-			}
-
-			// P1 größer als MAX_FORECAST_AND_SALES
-			if (s.getChildrenSales() > MAX_FORECAST_AND_SALES) {
-				throw new UserInputException(s.getChildrenSales(),
-						MAX_FORECAST_AND_SALES, true, "P1 (Periode "
-								+ (results.getPeriod() + 1 + i) + ")");
-			}
-
-			// P2 größer als MAX_FORECAST_AND_SALES
-			if (s.getWomenSales() > MAX_FORECAST_AND_SALES) {
-				throw new UserInputException(s.getWomenSales(),
-						MAX_FORECAST_AND_SALES, true, "P2 (Periode "
-								+ (results.getPeriod() + 1 + i) + ")");
-			}
-
-			// P3 größer als MAX_FORECAST_AND_SALES
-			if (s.getMenSales() > MAX_FORECAST_AND_SALES) {
-				throw new UserInputException(s.getMenSales(),
-						MAX_FORECAST_AND_SALES, true, "P3 (Periode "
-								+ (results.getPeriod() + 1 + i) + ")");
-			}
-		}
-		stepValid = true;
-
 		userInput.setForecast(forecast);
 
 	}
 
-	protected void readInSales() {
+	private void readInSafetyStock() {
+
+		for (String id : safetyStockFormular.keySet()) {
+
+			SafetyStockEntity safetyStockEntity = safetyStockFormular.get(id);
+			userInput.getSafetyStock().getSafetyStocks()
+					.put(id, (Integer) safetyStockEntity.getWish().getValue());
+
+		}
+	}
+
+	private void readInSales() {
 		Sales sales = new Sales((int) spinnerStep2P1Sales.getValue(),
 				(int) spinnerStep2P2Sales.getValue(),
 				(int) spinnerStep2P3Sales.getValue());
@@ -2393,49 +2499,6 @@ public class PlanungstoolGUI {
 		userInput.setDirectSales(directSales);
 	}
 
-	protected void readInSafetyStock() {
-
-		for (String id : safetyStockFormular.keySet()) {
-
-			SafetyStockEntity safetyStockEntity = safetyStockFormular.get(id);
-			userInput.getSafetyStock().getSafetyStocks()
-					.put(id, (Integer) safetyStockEntity.getWish().getValue());
-
-			System.out.println(id + ": "
-					+ userInput.getSafetyStock().getStock(id));
-		}
-	}
-
-	protected void displayDefaultSafetyStock() {
-
-		for (String id : userInput.getSafetyStock().getSafetyStocks().keySet()) {
-
-			safetyStockFormular.get(id).getWish()
-					.setValue(DEFAULT_SAFETY_STOCK);
-		}
-	}
-
-	protected void displaySafetyStock() {
-
-		for (String id : userInput.getSafetyStock().getSafetyStocks().keySet()) {
-
-			safetyStockFormular
-					.get(id)
-					.getCalculated()
-					.setText(
-							userInput.getSafetyStock().getSafetyStocks()
-									.get(id).toString());
-		}
-	}
-
-	protected void displayPeriod(int period) {
-
-		lblStep1Periode1Title.setText("Periode " + (period + 1));
-		lblStep1Periode2Title.setText("Periode " + (period + 2));
-		lblStep1Periode3Title.setText("Periode " + (period + 3));
-		lblStep1Periode4Title.setText("Periode " + (period + 4));
-	}
-
 	private void removeAllRowsFromTable(DefaultTableModel model) {
 		int rowCount = model.getRowCount();
 		for (int i = rowCount - 1; i >= 0; i--) {
@@ -2443,66 +2506,46 @@ public class PlanungstoolGUI {
 		}
 	}
 
-	private String getModeAsString(int modeInt) {
-		/*
-		 * mode 5: normal mode 4: fast mode 3: JIT mode 2: cheap vendor mode 1:
-		 * special order
-		 */
-		String[] modes = new String[] { "?", "special order", "cheap vendor",
-				"JIT", "fast", "normal" };
+	private void setResults(Results results2) {
+		this.results = results2;
+	}
 
-		return modes[modeInt] + " (" + modeInt + ")";
+	private void showErrorDialog(String message) {
+		JOptionPane.showMessageDialog(getFrameMain(), message, "Fehler",
+				JOptionPane.ERROR_MESSAGE);
+
+	}
+
+	private void showExceptionDialog(Exception e) {
+		JOptionPane.showMessageDialog(getFrameMain(), e.getMessage(), "Fehler",
+				JOptionPane.ERROR_MESSAGE);
 	}
 
 	private void switchToStep(int goToStep) {
 
-		if (!stepValid) {
-			System.out.println("Step not valid");
-			return;
-		}
+		readInForecasts();
+		readInSales();
+		readInSafetyStock();
+		calculateSafetyStock();
+		calculateProductionOrder();
+
+		// String validationResult = UserInputValidator.validate(userInput);
+		//
+		// if (validationResult != null) {
+		// showErrorDialog(validationResult);
+		// }
+
 		JPanel stepToShow = stepsMap.get(goToStep);
 		tabbedPanePlanning.removeAll();
 		tabbedPanePlanning.add(stepToShow);
 		tabbedPanePlanning.addTab("Schritt " + goToStep, stepToShow);
 	}
 
-	public class StepButtonsActionDialog implements ActionListener {
+	public JFrame getFrameMain() {
+		return frameMain;
+	}
 
-		PlanungstoolGUI parent;
-
-		public StepButtonsActionDialog(PlanungstoolGUI parent) {
-			super();
-			this.parent = parent;
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-
-			Object src = e.getSource();
-
-			if (src instanceof JButton) {
-				Integer goToStep = getNumberFromString(((JButton) src)
-						.getText());
-				if (goToStep != null) {
-					switchToStep(goToStep);
-				} else {
-					return;
-				}
-			}
-
-			return;
-		}
-
-		private Integer getNumberFromString(String s) {
-
-			String pattern = ".*(\\d+).*";
-			Matcher m = Pattern.compile(pattern).matcher(s);
-
-			if (m.find()) {
-				return Integer.parseInt(m.group(1));
-			}
-
-			return null;
-		}
+	public void setFrameMain(JFrame frameMain) {
+		this.frameMain = frameMain;
 	}
 }

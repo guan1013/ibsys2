@@ -1,5 +1,7 @@
 package de.hska.centurion.domain.gui;
 
+import javax.validation.Valid;
+
 import de.hska.centurion.domain.output.Input;
 
 /**
@@ -17,6 +19,7 @@ public class UserInput {
 	/**
 	 * The Forecast contains the next four periods.
 	 */
+	@Valid
 	private Forecast forecast;
 
 	/**
@@ -37,7 +40,7 @@ public class UserInput {
 	 */
 	private SafetyStock safetyStock;
 
-	// Das Output-Objekt, das während die GUI aufgebaut wird vom User angepasst
+	// Das Output-Objekt, das wï¿½hrend die GUI aufgebaut wird vom User angepasst
 	// werden kann.
 	/**
 	 * The Input-Object contains the suggested values for the scsim-input. The

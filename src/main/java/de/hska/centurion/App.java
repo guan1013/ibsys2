@@ -1,8 +1,12 @@
 package de.hska.centurion;
 
+import java.awt.EventQueue;
 import java.io.File;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -19,22 +23,38 @@ import de.hska.centurion.domain.input.components.Order;
 import de.hska.centurion.domain.input.components.WorkplaceCosts;
 import de.hska.centurion.domain.input.components.WorkplaceOrder;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
+import de.hska.centurion.gui.PlanungstoolGUI;
 import de.hska.centurion.io.XmlInputParser;
 
 /**
  *
  */
 public class App {
-	public static void main2(String[] args) {
 
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+
+		// Set the look and feel to users OS LaF.
 		try {
-
-			Results results = XmlInputParser
-					.parseXmlFile("C:/Users/Amin/Desktop/output2.xml");
-
-		} catch (JAXBException e) {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
 			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Fehler",
+					JOptionPane.ERROR_MESSAGE);
 		}
+
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					PlanungstoolGUI window = new PlanungstoolGUI();
+					window.getFrameMain().setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 }
