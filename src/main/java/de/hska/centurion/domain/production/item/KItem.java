@@ -53,22 +53,22 @@ public class KItem extends Item {
 	/**
 	 * quantity per stack
 	 */
-	private Integer stack;
+	protected Integer stack;
 
 	/**
 	 * costs per order
 	 */
-	private Double orderCosts;
+	protected Double orderCosts;
 
 	/**
 	 * average time (in Periods) for a delivery to get shipped
 	 */
-	private Double deliveryTime;
+	protected Double deliveryTime;
 
 	/**
 	 * to deliveryTime
 	 */
-	private Double diviation;
+	protected Double diviation;
 
 	@Override
 	public String toString() {

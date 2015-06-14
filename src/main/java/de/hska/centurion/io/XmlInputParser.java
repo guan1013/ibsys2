@@ -57,19 +57,13 @@ public class XmlInputParser {
 		try {
 			OrderInwardCalculator calc = new OrderInwardCalculator();
 			results = calc.calculateOutstandingOrders(results);
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
 		// printOnConsolue(results);
 
 		return results;
 	}
-
-	public static void main(String[] args) throws JAXBException {
-		parseXmlFile("C:\\Users\\Simon\\Desktop\\266_6_6result.xml");
-	}
-	
 
 	private static void printOnConsolue(Results results) {
 		// LAGERHAUS ARTIKEL
