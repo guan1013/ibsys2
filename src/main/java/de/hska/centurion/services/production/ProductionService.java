@@ -1,6 +1,9 @@
 package de.hska.centurion.services.production;
 
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +13,8 @@ import de.hska.centurion.domain.gui.SafetyStock;
 import de.hska.centurion.domain.gui.Sales;
 import de.hska.centurion.domain.gui.UserInput;
 import de.hska.centurion.domain.input.Results;
-import de.hska.centurion.domain.output.Input;
 import de.hska.centurion.domain.output.Production;
+import de.hska.centurion.domain.output.WorkingTime;
 import de.hska.centurion.domain.production.ProductionPlan;
 import de.hska.centurion.domain.production.item.PItem;
 import de.hska.centurion.domain.production.workplace.ProductionInput;
@@ -58,6 +61,11 @@ public class ProductionService {
 		this.plans = ppb.createProductionPlans();
 
 		this.userInput = new UserInput();
+
+		this.shiftFormat = new DecimalFormat();
+		this.shiftFormat.setRoundingMode(RoundingMode.DOWN);
+		this.shiftFormat.setMinimumFractionDigits(0);
+		this.shiftFormat.setMaximumIntegerDigits(0);
 	}
 
 	/*
@@ -80,14 +88,11 @@ public class ProductionService {
 	private Map<String, Integer> productions;
 
 	/**
-	 * Object which holds informations for the application output "input.xml"
-	 */
-	private Input suggestedOutput;
-
-	/**
 	 * 
 	 */
 	private Map<String, Workplace> factory;
+
+	private DecimalFormat shiftFormat;
 
 	/*
 	 * ======================== METHODS ========================
@@ -147,23 +152,13 @@ public class ProductionService {
 			}
 		}
 
-		for (Map.Entry<String, Integer> p : productions.entrySet()) {
-
-			System.out.println("#### " + p.getKey() + " = " + p.getValue());
-		}
-
 		this.productions = productions;
 
 		return productions;
 
 	}
 
-	/**
-	 * Calculate the optimal order in which items should be produced
-	 * 
-	 * @return
-	 */
-	public List<Production> calculateProductionOrder() {
+	public List<WorkingTime> calculateCapacity() {
 
 		// Create a new Empty Sheet of Workplaces and their roundtriptimes for
 		// associated output items
@@ -188,21 +183,64 @@ public class ProductionService {
 					roundTripTimes);
 		}
 
-		// Figure uut the bottle neck workplace
-		String bottleNeck = calcBottleNeck(roundTripTimes);
+		List<WorkingTime> capacities = new ArrayList<WorkingTime>();
 
-		// For each production plan
-		for (ProductionPlan plan : plans) {
+		for (Map.Entry<String, Map<String, Integer>> roundTripTime : roundTripTimes
+				.entrySet()) {
 
-			PItem output = (PItem) plan.getProducer().getOutput();
+			try {
+				int workplace = Integer.parseInt(roundTripTime.getKey());
 
-			Double productionOrder = output.getFixCostsCoverage()
-					/ roundTripTimes.get(bottleNeck).get(ACCUMULATED)
-							.doubleValue();
+				Double workingTime = roundTripTime.getValue().get(ACCUMULATED)
+						.doubleValue()
+						/ SHIFT_TIME_MINS;
+				int shift = 1;
+				Double overtime = 0.0;
 
+				if (workingTime > 1) {
+					shift = Integer.parseInt(shiftFormat.format(workingTime));
+
+					overtime = (workingTime - shift) * SHIFT_TIME_MINS;
+				}
+
+				WorkingTime capacity = new WorkingTime(workplace, shift,
+						overtime.intValue());
+				
+				capacities.add(capacity);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		for(WorkingTime c : capacities) {
+			System.out.println(c.toString());
 		}
 
-		return null;
+		return capacities;
+	}
+
+	/**
+	 * Creates a List of Productions
+	 * 
+	 * @return
+	 */
+	public List<Production> getProductionOrder() {
+
+		List<Production> suggestedProduction = new ArrayList<Production>();
+
+		for (Map.Entry<String, Integer> production : productions.entrySet()) {
+
+			try {
+				int item = Integer.parseInt(production.getKey().substring(1));
+				int quantity = production.getValue();
+				suggestedProduction.add(new Production(item, quantity));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		return suggestedProduction;
 	}
 
 	/*
