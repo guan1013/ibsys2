@@ -1,4 +1,7 @@
 package de.hska.centurion.domain.output;
+
+import javax.xml.bind.annotation.XmlAttribute;
+
 /**
  * This class represents a production order in the list of production orders.
  * @author Simon
@@ -12,11 +15,13 @@ public class Production {
 	/**
 	 * The name of the article, between 1 and 56 (with exceptions).
 	 */
+	
 	private int article;
 	
 	/**
 	 * The quantity of the article to be produced.
 	 */
+	
 	private int quantity;
 
 	/*
@@ -40,7 +45,7 @@ public class Production {
 	public int getArticle() {
 		return article;
 	}
-
+	@XmlAttribute(name = "article")
 	public void setArticle(int article) {
 		this.article = article;
 	}
@@ -48,7 +53,7 @@ public class Production {
 	public int getQuantity() {
 		return quantity;
 	}
-
+	@XmlAttribute(name = "quantity")
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}

@@ -3,6 +3,8 @@
  */
 package de.hska.centurion.domain.output;
 
+import javax.xml.bind.annotation.XmlAttribute;
+
 /**
  * This class represents a purchase order for the list of purchase orders.
  * 
@@ -17,17 +19,20 @@ public class Order {
 	/**
 	 * The name of the purchase order, between 21 and 59 (with some exceptions).
 	 */
+	
 	private int article;
 
 	/**
 	 * The amount to be ordered of this article.
 	 */
+	
 	private int quantity;
 
 	/**
 	 * The type of purchase order, either 1(=special order), 2(=cheap vendor),
 	 * 3(=JIT), 4(=fast) or 5(=normal).
 	 */
+	
 	private int modus; // 1 = Sonderbestellung, 2 = Billiganbieter, 3 = JIT, 4 =
 						// Eil, 5 = Normal
 
@@ -59,7 +64,7 @@ public class Order {
 	public int getArticle() {
 		return article;
 	}
-
+	@XmlAttribute(name = "article")
 	public void setArticle(int article) {
 		this.article = article;
 	}
@@ -67,7 +72,7 @@ public class Order {
 	public int getQuantity() {
 		return quantity;
 	}
-
+	@XmlAttribute(name = "quantity")
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
@@ -75,7 +80,7 @@ public class Order {
 	public int getModus() {
 		return modus;
 	}
-
+	@XmlAttribute(name = "modus")
 	public void setModus(int modus) {
 		this.modus = modus;
 	}

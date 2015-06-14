@@ -1,11 +1,15 @@
 package de.hska.centurion.domain.output;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents one sellwish for the list of sales or direct sales.
  * 
  * @author Simon
  *
  */
+@XmlRootElement(name = "item")
 public class Item {
 	
 	/*
@@ -15,11 +19,13 @@ public class Item {
 	 * the name of the article.
 	 * Either 1, 2 or 3.
 	 */
+	
 	private int article;
 	
 	/**
 	 * the quantity of items of this article.
 	 */
+	
 	private int quantity;
 	
 	/**
@@ -27,6 +33,7 @@ public class Item {
 	 * only needed if the sale is a direct sale.
 	 * Else this should be null.
 	 */
+	
 	private Double price;
 	
 	/**
@@ -34,6 +41,7 @@ public class Item {
 	 * Only needed if the sale is a direct sale.
 	 * Else this should be null.
 	 */
+	
 	private Double penalty;
 	
 	/*
@@ -79,7 +87,7 @@ public class Item {
 	public int getArticle() {
 		return article;
 	}
-
+	@XmlAttribute(name = "article")
 	public void setArticle(int article) {
 		this.article = article;
 	}
@@ -87,7 +95,7 @@ public class Item {
 	public int getQuantity() {
 		return quantity;
 	}
-
+	@XmlAttribute(name = "quantity")
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
@@ -95,7 +103,7 @@ public class Item {
 	public double getPrice() {
 		return price;
 	}
-
+	@XmlAttribute(name = "price")
 	public void setPrice(double price) {
 		this.price = price;
 	}
@@ -103,7 +111,7 @@ public class Item {
 	public double getPenalty() {
 		return penalty;
 	}
-
+	@XmlAttribute(name = "penalty")
 	public void setPenalty(double penalty) {
 		this.penalty = penalty;
 	}

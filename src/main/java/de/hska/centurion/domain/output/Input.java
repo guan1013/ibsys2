@@ -3,6 +3,10 @@ package de.hska.centurion.domain.output;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents the XML-Input, which is needed to plan one period 
  * for the scsim.de simulation.
@@ -10,6 +14,8 @@ import java.util.List;
  * @author Simon
  *
  */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "Input")
 public class Input {
 	/*
 	 * ======================== ATTRIBUTES ========================

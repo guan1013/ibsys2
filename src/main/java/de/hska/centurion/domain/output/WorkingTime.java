@@ -1,5 +1,7 @@
 package de.hska.centurion.domain.output;
 
+import javax.xml.bind.annotation.XmlAttribute;
+
 /**
  * This class represents a time configuration for one workspace.
  * 
@@ -13,6 +15,7 @@ public class WorkingTime {
 	/**
 	 * The name of the workspace, between 1 and 15 (except 5).
 	 */
+	
 	private int station;
 	/**
 	 * The number of shifts for this workspace, between 1 and 3.
@@ -47,7 +50,7 @@ public class WorkingTime {
 	public int getStation() {
 		return station;
 	}
-
+	@XmlAttribute(name = "station")
 	public void setStation(int station) {
 		this.station = station;
 	}
@@ -55,7 +58,7 @@ public class WorkingTime {
 	public int getShift() {
 		return shift;
 	}
-
+	@XmlAttribute(name = "shift")
 	public void setShift(int shift) {
 		this.shift = shift;
 	}
@@ -63,7 +66,7 @@ public class WorkingTime {
 	public int getOvertime() {
 		return overtime;
 	}
-
+	@XmlAttribute(name = "overtime")
 	public void setOvertime(int overtime) {
 		this.overtime = overtime;
 	}
