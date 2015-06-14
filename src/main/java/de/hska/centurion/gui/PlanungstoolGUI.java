@@ -57,6 +57,7 @@ import de.hska.centurion.domain.input.components.WorkplaceWaiting;
 import de.hska.centurion.domain.output.Input;
 import de.hska.centurion.domain.output.Production;
 import de.hska.centurion.exceptions.UserInputException;
+import de.hska.centurion.gui.SplittingDialog.DialogResult;
 import de.hska.centurion.io.XmlInputParser;
 import de.hska.centurion.services.production.ProductionService;
 import de.hska.centurion.services.validation.UserInputValidator;
@@ -252,8 +253,7 @@ public class PlanungstoolGUI {
 	 * Object which stores all data which was entered by the user.
 	 */
 	private UserInput userInput;
-	
-	
+
 	private Input output;
 
 	private ProductionService productionService;
@@ -272,6 +272,7 @@ public class PlanungstoolGUI {
 		userInput = new UserInput();
 		safetyStockFormular = new HashMap<String, SafetyStockEntity>();
 		userInput.setSafetyStock(new SafetyStock(DEFAULT_SAFETY_STOCK));
+		output = new Input();
 
 		productionService = null;
 
@@ -304,6 +305,13 @@ public class PlanungstoolGUI {
 	}
 
 	private void calculateProductionOrder() {
+
+		readInForecasts();
+		readInSales();
+		readInSafetyStock();
+		calculateSafetyStock();
+
+		output.setProductionList(productionService.getProductionOrder());
 
 		displayProductionOrder();
 	}
@@ -358,7 +366,7 @@ public class PlanungstoolGUI {
 
 		DefaultListModel<String> model = new DefaultListModel<>();
 
-		for (Production production : productionService.getProductionOrder()) {
+		for (Production production : output.getProductionList()) {
 			model.addElement(production.getArticle() + " --- "
 					+ production.getQuantity());
 		}
@@ -2373,7 +2381,7 @@ public class PlanungstoolGUI {
 		// SET ACTION LISTENERS
 		btnStep1NextStep.addActionListener(switchStepsButtonActionListener);
 		btnStep2PrevStep.addActionListener(switchStepsButtonActionListener);
-		btnStep2NextStep.addActionListener(switchStepsButtonActionListener);
+
 		btnStep3PrevStep.addActionListener(switchStepsButtonActionListener);
 		btnStep3NextStep.addActionListener(switchStepsButtonActionListener);
 		btnStep4PrevStep.addActionListener(switchStepsButtonActionListener);
@@ -2381,6 +2389,7 @@ public class PlanungstoolGUI {
 		btnStep5PrevStep.addActionListener(switchStepsButtonActionListener);
 		btnStep5NextStep.addActionListener(switchStepsButtonActionListener);
 		btnStep6PrevStep.addActionListener(switchStepsButtonActionListener);
+		btnStep2NextStep.addActionListener(switchStepsButtonActionListener);
 
 		btnStep3Recalculate.addActionListener(new ActionListener() {
 
@@ -2390,6 +2399,31 @@ public class PlanungstoolGUI {
 				readInSales();
 				readInSafetyStock();
 				calculateSafetyStock();
+				calculateProductionOrder();
+			}
+		});
+
+		btnStep2NextStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				readInForecasts();
+				readInSales();
+				readInSafetyStock();
+				calculateSafetyStock();
+				calculateProductionOrder();
+			}
+		});
+
+		btnStep3NextStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				readInForecasts();
+				readInSales();
+				readInSafetyStock();
+				calculateSafetyStock();
+				calculateProductionOrder();
 			}
 		});
 
@@ -2398,52 +2432,82 @@ public class PlanungstoolGUI {
 	}
 
 	protected void showSplittingDialog() {
-		// TODO Auto-generated method stub
 
+		// Get the selected list item
+		int selectedIndex = listStep4ProductionOrder.getSelectedIndex();
+
+		// If no item is selected (index = -1), nothing to do => return
+		if (selectedIndex < 0)
+			return;
+
+		Production productionToSplit = output.getProductionList().get(
+				selectedIndex);
+		SplittingDialog splitDialog = new SplittingDialog(productionToSplit);
+		splitDialog.setLocationRelativeTo(frameMain);
+		splitDialog.setVisible(true);
+
+		if (splitDialog.getResult() == DialogResult.OK) {
+			output.splitProduction(selectedIndex, splitDialog.getQuantityA(),
+					splitDialog.getQuantityB());
+		}
+
+		displayProductionOrder();
+		listStep4ProductionOrder.setSelectedIndex(selectedIndex);
 	}
 
 	protected void moveProductionDown() {
 
+		// Get the selected list item
 		int selectedIndex = listStep4ProductionOrder.getSelectedIndex();
 
+		// If no item is selected (index = -1), nothing to do => return
 		if (selectedIndex < 0)
 			return;
 
-		List<Production> currentList = productionService.getProductionOrder();
+		// Get current displayed list
+		List<Production> currentList = output.getProductionList();
 
+		// If item is last item of the list, nothing to do
 		if (selectedIndex + 1 >= currentList.size()) {
 			return;
 		}
 
+		// Move the item down (swap with next item)
 		Collections.swap(currentList, selectedIndex, selectedIndex + 1);
 
+		// Display changed list on gui
 		displayProductionOrder();
 
+		// Set the moved item as selected again
 		listStep4ProductionOrder.setSelectedIndex(selectedIndex + 1);
-
-		System.out.println("Selected Index: " + selectedIndex);
 
 	}
 
 	protected void moveProductionUp() {
 
+		// Get the selected list item
 		int selectedIndex = listStep4ProductionOrder.getSelectedIndex();
 
+		// If no item is selected (index = -1), nothing to do => return
 		if (selectedIndex < 0)
 			return;
 
-		List<Production> currentList = productionService.getProductionOrder();
+		// Get current displayed list
+		List<Production> currentList = output.getProductionList();
 
+		// If item is first item of the list, nothing to do
 		if (selectedIndex - 1 < 0) {
 			return;
 		}
 
+		// Move the item up (swap with prev item)
 		Collections.swap(currentList, selectedIndex, selectedIndex - 1);
 
+		// Display changed list on gui
 		displayProductionOrder();
 
+		// Set the moved item as selected again
 		listStep4ProductionOrder.setSelectedIndex(selectedIndex - 1);
-		System.out.println("Selected Index: " + selectedIndex);
 
 	}
 
@@ -2483,6 +2547,7 @@ public class PlanungstoolGUI {
 					.put(id, (Integer) safetyStockEntity.getWish().getValue());
 
 		}
+
 	}
 
 	private void readInSales() {
@@ -2497,6 +2562,7 @@ public class PlanungstoolGUI {
 
 		userInput.setSales(sales);
 		userInput.setDirectSales(directSales);
+
 	}
 
 	private void removeAllRowsFromTable(DefaultTableModel model) {
@@ -2526,8 +2592,6 @@ public class PlanungstoolGUI {
 		readInForecasts();
 		readInSales();
 		readInSafetyStock();
-		calculateSafetyStock();
-		calculateProductionOrder();
 
 		// String validationResult = UserInputValidator.validate(userInput);
 		//
