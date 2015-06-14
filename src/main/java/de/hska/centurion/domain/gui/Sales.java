@@ -1,7 +1,11 @@
 package de.hska.centurion.domain.gui;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 /**
- * This class contains the salees of children bikes, women bikes  and men bikes.
+ * This class contains the salees of children bikes, women bikes and men bikes.
+ * 
  * @author Simon
  *
  */
@@ -12,27 +16,37 @@ public class Sales {
 	/**
 	 * The planned number of children bike sales.
 	 */
+	@Min(0)
+	@Max(500)
 	private int childrenSales;
+
 	/**
 	 * The planned number of women bike sales.
 	 */
+	@Min(0)
+	@Max(500)
 	private int womenSales;
+
 	/**
 	 * The planned number of men bike sales.
 	 */
+	@Min(0)
+	@Max(500)
 	private int menSales;
 
 	/*
 	 * ======================== CONSTRUCTORS ========================
 	 */
 	/**
-	 * This Constructors creates an Sales-object through the number of sales for each bike.
+	 * This Constructors creates an Sales-object through the number of sales for
+	 * each bike.
+	 * 
 	 * @param childrenSales
-	 * 				The number of children bike sales.
+	 *            The number of children bike sales.
 	 * @param womenSales
-	 * 				The number of women bike sales.
+	 *            The number of women bike sales.
 	 * @param menSales
-	 * 				The number of men bike sales.
+	 *            The number of men bike sales.
 	 */
 	public Sales(int childrenSales, int womenSales, int menSales) {
 		super();
@@ -40,7 +54,7 @@ public class Sales {
 		this.womenSales = womenSales;
 		this.menSales = menSales;
 	}
-	
+
 	/*
 	 * ======================== METHODS ========================
 	 */
