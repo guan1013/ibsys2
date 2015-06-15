@@ -16,7 +16,10 @@ import de.hska.centurion.domain.input.Results;
 import de.hska.centurion.domain.output.Production;
 import de.hska.centurion.domain.output.WorkingTime;
 import de.hska.centurion.domain.production.ProductionPlan;
+import de.hska.centurion.domain.production.item.EItem;
+import de.hska.centurion.domain.production.item.Item;
 import de.hska.centurion.domain.production.item.PItem;
+import de.hska.centurion.domain.production.resources.ItemTypeEnum;
 import de.hska.centurion.domain.production.workplace.ProductionInput;
 import de.hska.centurion.domain.production.workplace.Workplace;
 import de.hska.centurion.util.ProductionPlanBuilder;
@@ -93,7 +96,7 @@ public class ProductionService {
 	/**
 	 * List of item which should be produced
 	 */
-	private Map<String, Integer> productions;
+	private Map<String, Integer> productionsList;
 
 	/**
 	 * Object which holds informations of the workplaces which produce items
@@ -174,9 +177,9 @@ public class ProductionService {
 		}
 
 		// Place calculated productions to global productions type
-		this.productions = productions;
+		this.productionsList = productions;
 
-		return productions;
+		return this.productionsList;
 
 	}
 
@@ -205,7 +208,8 @@ public class ProductionService {
 			}
 
 			// Get the amount of items to produce
-			Integer quantity = productions.get(plan.getName().toUpperCase());
+			Integer quantity = this.productionsList.get(plan.getName()
+					.toUpperCase());
 
 			// Calculate the RoundTripTimes for each item
 			roundTripTimes = calculateRoundTripTime(plan.getProducer(),
@@ -278,7 +282,8 @@ public class ProductionService {
 
 		List<Production> suggestedProduction = new ArrayList<Production>();
 
-		for (Map.Entry<String, Integer> production : productions.entrySet()) {
+		for (Map.Entry<String, Integer> production : this.productionsList
+				.entrySet()) {
 
 			try {
 				int item = Integer.parseInt(production.getKey().substring(1));
@@ -309,8 +314,23 @@ public class ProductionService {
 
 			String factoryKey = plan.getNumber() + itemName;
 			if (factory.get(factoryKey) == null) {
-				workplace = new Workplace(plan.getNumber(), plan.getOutput(),
-						null, plan.getOpenOrders(), plan.getProductionTime(),
+
+				Item output;
+				if (plan.getOutput().getType().toString()
+						.equalsIgnoreCase(ItemTypeEnum.E.toString())) {
+					EItem eOutput = (EItem) plan.getOutput();
+					output = new EItem(eOutput.getNumber(), eOutput.getName(),
+							eOutput.getValue(), eOutput.getStock(),
+							eOutput.getProducer());
+				} else {
+
+					PItem pOutput = (PItem) plan.getOutput();
+					output = new PItem(pOutput.getNumber(), pOutput.getName(),
+							pOutput.getValue(), pOutput.getStock(),
+							pOutput.getRevenue(), pOutput.getProducer());
+				}
+				workplace = new Workplace(plan.getNumber(), output, null,
+						plan.getOpenOrders(), plan.getProductionTime(),
 						plan.getSetupTime());
 				factory.put(factoryKey, workplace);
 			}
@@ -353,7 +373,7 @@ public class ProductionService {
 		for (ProductionInput input : plan.getInputs()) {
 			if (input.getProducer() != null) {
 				productions = putWorkplaceToProductions(input.getProducer(),
-						productions, input.getQuantity() * required);
+						productions, input.getQuantity() * quantity);
 
 			}
 
@@ -402,7 +422,7 @@ public class ProductionService {
 			int waitingList = workplace.getOpenOrders();
 
 			// calculate the actual quantity which should be produced
-			value = productions.get(itemName) + waitingList;
+			value = this.productionsList.get(itemName) + waitingList;
 
 			// Calculate the roundtrip time on this workplace for all produced
 			// items
@@ -424,7 +444,7 @@ public class ProductionService {
 				int waitingList = workplace.getOpenOrders();
 
 				// calculate the actual quantity which should be produced
-				value = productions.get(itemName) + waitingList;
+				value = this.productionsList.get(itemName) + waitingList;
 
 				// Calculate the roundtrip time on this workplace for all
 				// produced items
