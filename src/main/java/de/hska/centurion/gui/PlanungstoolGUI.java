@@ -283,6 +283,11 @@ public class PlanungstoolGUI {
 
 			safetyStockFormular.get(id).getWish()
 					.setValue(DEFAULT_SAFETY_STOCK);
+			
+			if(id.equalsIgnoreCase("e16") || id.equalsIgnoreCase("e18") || id.equalsIgnoreCase("e26")) {
+				safetyStockFormular.get(id).getWish()
+				.setValue(DEFAULT_SAFETY_STOCK * 3);
+			}
 		}
 	}
 
