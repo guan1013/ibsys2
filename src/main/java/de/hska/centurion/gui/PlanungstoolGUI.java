@@ -95,8 +95,8 @@ import javax.swing.event.ChangeEvent;
  *
  */
 public class PlanungstoolGUI {
-
-	private static ResourceBundle BUNDLE;
+	private static final ResourceBundle BUNDLE = ResourceBundle
+			.getBundle("de.hska.centurion.domain.gui.messages"); //$NON-NLS-1$
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ATTRIBUTES
@@ -197,8 +197,8 @@ public class PlanungstoolGUI {
 			locale = args[0];
 		}
 
-		BUNDLE = ResourceBundle.getBundle(
-				"de.hska.centurion.gui.messages", new Locale(locale)); //$NON-NLS-1$
+		// BUNDLE = ResourceBundle.getBundle(
+		//				"de.hska.centurion.domain.gui.messages", new Locale(locale)); //$NON-NLS-1$
 
 		// Initialize attributes
 		stepsMap = new HashMap<>();
@@ -386,18 +386,19 @@ public class PlanungstoolGUI {
 												.getResource("/com/sun/java/swing/plaf/windows/icons/Computer.gif")));
 		getFrameMain().setResizable(false);
 		getFrameMain().setTitle(
-				BUNDLE.getString("PlanungstoolGUI.frameMain.title")); //$NON-NLS-1$
+				BUNDLE.getString("PlanungstoolGUI.frameMain.title")); //$NON-NLS-1$ //$NON-NLS-1$
 		getFrameMain().setBounds(100, 100, 893, 738);
 		getFrameMain().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JMenuBar menuBar = new JMenuBar();
 		getFrameMain().setJMenuBar(menuBar);
 
-		JMenu mnFile = new JMenu("Datei");
+		JMenu mnFile = new JMenu(
+				BUNDLE.getString("PlanungstoolGUI.mnFile.text")); //$NON-NLS-1$
 		menuBar.add(mnFile);
 
 		final JInternalFrame internalFrameResults = new JInternalFrame(
-				"Ergebnisse");
+				BUNDLE.getString("PlanungstoolGUI.internalFrameResults.title")); //$NON-NLS-1$
 		internalFrameResults
 				.setFrameIcon(new ImageIcon(
 						PlanungstoolGUI.class
@@ -427,7 +428,7 @@ public class PlanungstoolGUI {
 						"Menge/Startmenge", "Preis", "Lagerwert" }));
 
 		final JLabel labelTotalStockValue = new JLabel(
-				"Keine Ergebnis-Datei geladen");
+				BUNDLE.getString("PlanungstoolGUI.labelTotalStockValue.text")); //$NON-NLS-1$
 		labelTotalStockValue.setHorizontalAlignment(SwingConstants.RIGHT);
 		labelTotalStockValue.setFont(new Font("Tahoma", Font.BOLD, 11));
 		labelTotalStockValue.setBounds(20, 0, 806, 23);
@@ -596,7 +597,8 @@ public class PlanungstoolGUI {
 
 		final PlanungstoolGUI gui = this;
 
-		JMenuItem mntmLoadResultXml = new JMenuItem("XML-Datei laden");
+		JMenuItem mntmLoadResultXml = new JMenuItem(
+				BUNDLE.getString("PlanungstoolGUI.mntmLoadResultXml.text")); //$NON-NLS-1$
 		mntmLoadResultXml.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -699,12 +701,14 @@ public class PlanungstoolGUI {
 					// Alle ausstehenden Bestellungen auflisten
 					orders = results.getFutureInwardStockMovement().getOrders();
 
-					for (Order order : orders) {
-						model.addRow(new Object[] {
-								new String(order.getOrderPeriod() + "-"
-										+ order.getId()), order.getMode(),
-								order.getArticle(), order.getAmount(), "???",
-								"???" });
+					if (orders != null) {
+						for (Order order : orders) {
+							model.addRow(new Object[] {
+									new String(order.getOrderPeriod() + "-"
+											+ order.getId()), order.getMode(),
+									order.getArticle(), order.getAmount(),
+									"???", "???" });
+						}
 					}
 
 					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -781,33 +785,35 @@ public class PlanungstoolGUI {
 		mnFile.add(mntmLoadResultXml);
 
 		JMenu mnSprache = new JMenu(
-				BUNDLE.getString("PlanungstoolGUI.mnSprache.text")); //$NON-NLS-1$
+				BUNDLE.getString("PlanungstoolGUI.mnSprache.text")); //$NON-NLS-1$ //$NON-NLS-1$
 		menuBar.add(mnSprache);
 
-		JRadioButtonMenuItem rdbtnmntmNewRadioItem = new JRadioButtonMenuItem(
-				BUNDLE.getString("PlanungstoolGUI.rdbtnmntmNewRadioItem.text")); //$NON-NLS-1$
-		rdbtnmntmNewRadioItem.setSelected(true);
-		mnSprache.add(rdbtnmntmNewRadioItem);
-
-		final JRadioButtonMenuItem rdbtnmntmNewRadioItem_1 = new JRadioButtonMenuItem(
-				BUNDLE.getString("PlanungstoolGUI.rdbtnmntmNewRadioItem_1.text")); //$NON-NLS-1$
-		rdbtnmntmNewRadioItem_1.addActionListener(new ActionListener() {
+		JMenuItem mntmDeutsch = new JMenuItem(
+				BUNDLE.getString("PlanungstoolGUI.mntmDeutsch.text")); //$NON-NLS-1$
+		mntmDeutsch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (rdbtnmntmNewRadioItem_1.isSelected() == true) {
-					Locale.setDefault(new Locale("en"));
-					frameMain.setVisible(false);
-					frameMain.dispose();
-					App.main(new String[] { "en" });
-					System.out.println("chang");
-				}
+				switchLanguage("");
 			}
 		});
+		mnSprache.add(mntmDeutsch);
 
-		mnSprache.add(rdbtnmntmNewRadioItem_1);
+		JMenuItem mntmEnglisch = new JMenuItem(
+				BUNDLE.getString("PlanungstoolGUI.mntmEnglisch.text")); //$NON-NLS-1$
+		mntmEnglisch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchLanguage("en");
+			}
+		});
+		mnSprache.add(mntmEnglisch);
 
-		JRadioButtonMenuItem rdbtnmntmRussisch = new JRadioButtonMenuItem(
-				BUNDLE.getString("PlanungstoolGUI.rdbtnmntmRussisch.text")); //$NON-NLS-1$
-		mnSprache.add(rdbtnmntmRussisch);
+		JMenuItem mntmRussisch = new JMenuItem(
+				BUNDLE.getString("PlanungstoolGUI.mntmRussisch.text")); //$NON-NLS-1$
+		mntmRussisch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchLanguage("ru");
+			}
+		});
+		mnSprache.add(mntmRussisch);
 		getFrameMain().getContentPane().setLayout(null);
 
 		JInternalFrame internalFramePlanning = new JInternalFrame("Planung");
@@ -822,23 +828,27 @@ public class PlanungstoolGUI {
 		tabbedPanePlanning.addTab("Schritt 1", null, panelStep1, null);
 		panelStep1.setLayout(null);
 
-		JLabel lblStep1Title = new JLabel("Schritt 1: Prognose");
+		JLabel lblStep1Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 1: " + BUNDLE.getString("PlanungstoolGUI.planning.step1")); //$NON-NLS-1$
 		lblStep1Title.setFont(new Font("Tahoma", Font.BOLD, 18));
 		lblStep1Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep1Title.setBounds(10, 11, 826, 23);
 		panelStep1.add(lblStep1Title);
 
-		JLabel lblStep1P1Title = new JLabel("P1 (Kinderfahrrad)");
+		JLabel lblStep1P1Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep1P1Title.text")); //$NON-NLS-1$
 		lblStep1P1Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblStep1P1Title.setBounds(129, 99, 141, 23);
 		panelStep1.add(lblStep1P1Title);
 
-		JLabel lblStep1P2Title = new JLabel("P2 (Damenfahrrad)");
+		JLabel lblStep1P2Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep1P2Title.text")); //$NON-NLS-1$
 		lblStep1P2Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblStep1P2Title.setBounds(129, 150, 141, 23);
 		panelStep1.add(lblStep1P2Title);
 
-		JLabel lblStep1P3Title = new JLabel("P3 (Herrenfahrrad)");
+		JLabel lblStep1P3Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep1P3Title.text")); //$NON-NLS-1$
 		lblStep1P3Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblStep1P3Title.setBounds(129, 201, 141, 23);
 		panelStep1.add(lblStep1P3Title);
@@ -951,7 +961,8 @@ public class PlanungstoolGUI {
 		spinnerStep1P3Periode4.setBounds(518, 199, 56, 35);
 		panelStep1.add(spinnerStep1P3Periode4);
 
-		JButton btnStep1NextStep = new JButton("Schritt 2: Vertriebswunsch >>");
+		JButton btnStep1NextStep = new JButton(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 2: " + BUNDLE.getString("PlanungstoolGUI.planning.step2") + " >>"); //$NON-NLS-1$
 		btnStep1NextStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep1NextStep.setBounds(616, 268, 220, 35);
 		panelStep1.add(btnStep1NextStep);
@@ -961,34 +972,39 @@ public class PlanungstoolGUI {
 		tabbedPanePlanning.addTab("Schritt 2", null, panelStep2, null);
 
 		JLabel lblStep2Title = new JLabel(
-				"Schritt 2: Vertriebswunsch & Direktverkauf");
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 2: " + BUNDLE.getString("PlanungstoolGUI.planning.step2")); //$NON-NLS-1$
 		lblStep2Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep2Title.setFont(new Font("Tahoma", Font.BOLD, 18));
 		lblStep2Title.setBounds(10, 11, 826, 23);
 		panelStep2.add(lblStep2Title);
 
-		JLabel lblStep2P1Title = new JLabel("P1 (Kinderfahrrad)");
+		JLabel lblStep2P1Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep1P1Title.text")); //$NON-NLS-1$
 		lblStep2P1Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblStep2P1Title.setBounds(129, 99, 141, 23);
 		panelStep2.add(lblStep2P1Title);
 
-		JLabel lblStep2P2Title = new JLabel("P2 (Damenfahrrad)");
+		JLabel lblStep2P2Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep1P2Title.text")); //$NON-NLS-1$
 		lblStep2P2Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblStep2P2Title.setBounds(129, 150, 141, 23);
 		panelStep2.add(lblStep2P2Title);
 
-		JLabel lblStep2P3Title = new JLabel("P3 (Herrenfahrrad)");
+		JLabel lblStep2P3Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep1P3Title.text")); //$NON-NLS-1$
 		lblStep2P3Title.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblStep2P3Title.setBounds(129, 201, 141, 23);
 		panelStep2.add(lblStep2P3Title);
 
-		JLabel lblStep2SalesTitle = new JLabel("Vertriebswunsch");
+		JLabel lblStep2SalesTitle = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep2SalesTitle.text")); //$NON-NLS-1$
 		lblStep2SalesTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep2SalesTitle.setFont(new Font("Tahoma", Font.BOLD, 12));
 		lblStep2SalesTitle.setBounds(261, 56, 120, 23);
 		panelStep2.add(lblStep2SalesTitle);
 
-		JLabel lblStep2DirectSalesTitle = new JLabel("Direktverkauf");
+		JLabel lblStep2DirectSalesTitle = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep2DirectSalesTitle.text")); //$NON-NLS-1$
 		lblStep2DirectSalesTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep2DirectSalesTitle.setFont(new Font("Tahoma", Font.BOLD, 12));
 		lblStep2DirectSalesTitle.setBounds(394, 56, 120, 23);
@@ -1036,12 +1052,14 @@ public class PlanungstoolGUI {
 		spinnerStep2P3DirectSales.setBounds(426, 199, 75, 35);
 		panelStep2.add(spinnerStep2P3DirectSales);
 
-		JButton btnStep2NextStep = new JButton("Schritt 3: Planbestand >>");
+		JButton btnStep2NextStep = new JButton(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 3: " + BUNDLE.getString("PlanungstoolGUI.planning.step3") + " >>"); //$NON-NLS-1$
 		btnStep2NextStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep2NextStep.setBounds(616, 266, 220, 35);
 		panelStep2.add(btnStep2NextStep);
 
-		JButton btnStep2PrevStep = new JButton("<< Schritt 1: Prognose");
+		JButton btnStep2PrevStep = new JButton(
+				"<< "	+ BUNDLE.getString("PlanungstoolGUI.planning.step") + " 1: " + BUNDLE.getString("PlanungstoolGUI.planning.step1")); //$NON-NLS-1$
 		btnStep2PrevStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep2PrevStep.setBounds(10, 266, 220, 35);
 		panelStep2.add(btnStep2PrevStep);
@@ -1050,7 +1068,8 @@ public class PlanungstoolGUI {
 		panelStep3.setLayout(null);
 		tabbedPanePlanning.addTab("Schritt 3", null, panelStep3, null);
 
-		JLabel lblStep3Title = new JLabel("Schritt 3: Planbestand");
+		JLabel lblStep3Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 3: " + BUNDLE.getString("PlanungstoolGUI.planning.step3")); //$NON-NLS-1$
 		lblStep3Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep3Title.setFont(new Font("Tahoma", Font.BOLD, 18));
 		lblStep3Title.setBounds(10, 11, 826, 23);
@@ -1580,17 +1599,19 @@ public class PlanungstoolGUI {
 		panelStep3.add(spinnerStep3E56);
 
 		JButton btnStep3NextStep = new JButton(
-				"Schritt 4: Auftragsreihenfolge >>");
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 4: " + BUNDLE.getString("PlanungstoolGUI.planning.step4") + " >>"); //$NON-NLS-1$
 		btnStep3NextStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep3NextStep.setBounds(616, 266, 220, 35);
 		panelStep3.add(btnStep3NextStep);
 
-		JButton btnStep3PrevStep = new JButton("<< Schritt 2: Vertriebswunsch");
+		JButton btnStep3PrevStep = new JButton(
+				"<< "	+ BUNDLE.getString("PlanungstoolGUI.planning.step") + " 2: " + BUNDLE.getString("PlanungstoolGUI.planning.step2")); //$NON-NLS-1$
 		btnStep3PrevStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep3PrevStep.setBounds(10, 266, 220, 35);
 		panelStep3.add(btnStep3PrevStep);
 
-		JButton btnStep3Recalculate = new JButton("Neu berechnen");
+		JButton btnStep3Recalculate = new JButton(
+				BUNDLE.getString("PlanungstoolGUI.btnStep3Recalculate.text")); //$NON-NLS-1$
 		btnStep3Recalculate.setBounds(328, 266, 182, 35);
 		panelStep3.add(btnStep3Recalculate);
 
@@ -1598,20 +1619,21 @@ public class PlanungstoolGUI {
 		tabbedPanePlanning.addTab("Schritt 4", null, panelStep4, null);
 		panelStep4.setLayout(null);
 
-		JLabel lblSchrittAuftragreihenfolge = new JLabel(
-				"Schritt 4: Auftragsreihenfolge");
-		lblSchrittAuftragreihenfolge
-				.setHorizontalAlignment(SwingConstants.CENTER);
-		lblSchrittAuftragreihenfolge.setFont(new Font("Tahoma", Font.BOLD, 18));
-		lblSchrittAuftragreihenfolge.setBounds(10, 11, 826, 23);
-		panelStep4.add(lblSchrittAuftragreihenfolge);
+		JLabel lblStep4Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 4: " + BUNDLE.getString("PlanungstoolGUI.planning.step4")); //$NON-NLS-1$
+		lblStep4Title.setHorizontalAlignment(SwingConstants.CENTER);
+		lblStep4Title.setFont(new Font("Tahoma", Font.BOLD, 18));
+		lblStep4Title.setBounds(10, 11, 826, 23);
+		panelStep4.add(lblStep4Title);
 
-		JButton btnStep4PrevStep = new JButton("<< Schritt 3: Planbestand");
+		JButton btnStep4PrevStep = new JButton(
+				"<< "	+ BUNDLE.getString("PlanungstoolGUI.planning.step") + " 3: " + BUNDLE.getString("PlanungstoolGUI.planning.step3")); //$NON-NLS-1$
 		btnStep4PrevStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep4PrevStep.setBounds(10, 268, 220, 35);
 		panelStep4.add(btnStep4PrevStep);
 
-		JButton btnStep4NextStep = new JButton("Schritt 5: Kapazitäten >>");
+		JButton btnStep4NextStep = new JButton(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 5: " + BUNDLE.getString("PlanungstoolGUI.planning.step5") + " >>"); //$NON-NLS-1$
 		btnStep4NextStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep4NextStep.setBounds(616, 268, 220, 35);
 		panelStep4.add(btnStep4NextStep);
@@ -1650,7 +1672,8 @@ public class PlanungstoolGUI {
 		btnNewButton.setBounds(417, 82, 124, 35);
 		panelStep4.add(btnNewButton);
 
-		JButton btnSplitten = new JButton("Splitten");
+		JButton btnSplitten = new JButton(
+				BUNDLE.getString("PlanungstoolGUI.btnSplitten.text")); //$NON-NLS-1$
 		btnSplitten.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				showSplittingDialog();
@@ -1675,27 +1698,29 @@ public class PlanungstoolGUI {
 		tabbedPanePlanning.addTab("Schritt 5", null, panelStep5, null);
 		panelStep5.setLayout(null);
 
-		JLabel lblSchrittKapazittsplanung = new JLabel(
-				"Schritt 5: Kapazitätsplanung");
-		lblSchrittKapazittsplanung
-				.setHorizontalAlignment(SwingConstants.CENTER);
-		lblSchrittKapazittsplanung.setFont(new Font("Tahoma", Font.BOLD, 18));
-		lblSchrittKapazittsplanung.setBounds(10, 11, 826, 23);
-		panelStep5.add(lblSchrittKapazittsplanung);
+		JLabel lblStep5Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 5: " + BUNDLE.getString("PlanungstoolGUI.planning.step5")); //$NON-NLS-1$
+		lblStep5Title.setHorizontalAlignment(SwingConstants.CENTER);
+		lblStep5Title.setFont(new Font("Tahoma", Font.BOLD, 18));
+		lblStep5Title.setBounds(10, 11, 826, 23);
+		panelStep5.add(lblStep5Title);
 
-		JLabel lblStep5TitleWorkplace = new JLabel("Arbeitsplatz");
+		JLabel lblStep5TitleWorkplace = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep5TitleWorkplace.text")); //$NON-NLS-1$
 		lblStep5TitleWorkplace.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep5TitleWorkplace.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblStep5TitleWorkplace.setBounds(10, 45, 108, 23);
 		panelStep5.add(lblStep5TitleWorkplace);
 
-		JLabel lblStep5TitleShift = new JLabel("Schichten");
+		JLabel lblStep5TitleShift = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep5TitleShift.text")); //$NON-NLS-1$
 		lblStep5TitleShift.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep5TitleShift.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblStep5TitleShift.setBounds(128, 45, 89, 23);
 		panelStep5.add(lblStep5TitleShift);
 
-		JLabel lblStep5TitleOvertime = new JLabel("Überstunden");
+		JLabel lblStep5TitleOvertime = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep5TitleOvertime.text")); //$NON-NLS-1$
 		lblStep5TitleOvertime.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep5TitleOvertime.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblStep5TitleOvertime.setBounds(213, 45, 108, 23);
@@ -1800,12 +1825,13 @@ public class PlanungstoolGUI {
 		panelStep5.add(spinnerStep5OvertimeWorkplace8);
 
 		JButton btnStep5PrevStep = new JButton(
-				"<< Schritt 4: Auftragsreihenfolge");
+				"<< "	+ BUNDLE.getString("PlanungstoolGUI.planning.step") + " 4: " + BUNDLE.getString("PlanungstoolGUI.planning.step4")); //$NON-NLS-1$
 		btnStep5PrevStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep5PrevStep.setBounds(10, 268, 220, 35);
 		panelStep5.add(btnStep5PrevStep);
 
-		JButton btnStep5NextStep = new JButton("Schritt 6: Bestellungen >>");
+		JButton btnStep5NextStep = new JButton(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 6: " + BUNDLE.getString("PlanungstoolGUI.planning.step6") + " >>"); //$NON-NLS-1$
 		btnStep5NextStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep5NextStep.setBounds(616, 268, 220, 35);
 		panelStep5.add(btnStep5NextStep);
@@ -1884,19 +1910,22 @@ public class PlanungstoolGUI {
 		label_6.setBounds(352, 76, 98, 23);
 		panelStep5.add(label_6);
 
-		JLabel lblStep5TitleWorkplace2 = new JLabel("Arbeitsplatz");
+		JLabel lblStep5TitleWorkplace2 = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep5TitleWorkplace.text")); //$NON-NLS-1$
 		lblStep5TitleWorkplace2.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep5TitleWorkplace2.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblStep5TitleWorkplace2.setBounds(342, 45, 108, 23);
 		panelStep5.add(lblStep5TitleWorkplace2);
 
-		JLabel lblStep5TitleShift2 = new JLabel("Schichten");
+		JLabel lblStep5TitleShift2 = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep5TitleShift.text")); //$NON-NLS-1$
 		lblStep5TitleShift2.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep5TitleShift2.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblStep5TitleShift2.setBounds(460, 45, 89, 23);
 		panelStep5.add(lblStep5TitleShift2);
 
-		JLabel label_9 = new JLabel("Überstunden");
+		JLabel label_9 = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.lblStep5TitleOvertime.text"));
 		label_9.setHorizontalAlignment(SwingConstants.CENTER);
 		label_9.setFont(new Font("Tahoma", Font.BOLD, 14));
 		label_9.setBounds(545, 45, 108, 23);
@@ -1930,11 +1959,12 @@ public class PlanungstoolGUI {
 		tabbedPanePlanning.addTab("Schritt 6", null, panelStep6, null);
 		panelStep6.setLayout(null);
 
-		JLabel lblSchrittBestellungen = new JLabel("Schritt 6: Bestellungen");
-		lblSchrittBestellungen.setHorizontalAlignment(SwingConstants.CENTER);
-		lblSchrittBestellungen.setFont(new Font("Tahoma", Font.BOLD, 18));
-		lblSchrittBestellungen.setBounds(10, 11, 826, 23);
-		panelStep6.add(lblSchrittBestellungen);
+		JLabel lblStep6Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 6: " + BUNDLE.getString("PlanungstoolGUI.planning.step6")); //$NON-NLS-1$
+		lblStep6Title.setHorizontalAlignment(SwingConstants.CENTER);
+		lblStep6Title.setFont(new Font("Tahoma", Font.BOLD, 18));
+		lblStep6Title.setBounds(10, 11, 826, 23);
+		panelStep6.add(lblStep6Title);
 
 		JTextField textFieldStep6ItemIndex1 = new JTextField();
 		textFieldStep6ItemIndex1.setBounds(10, 45, 56, 20);
@@ -2385,7 +2415,7 @@ public class PlanungstoolGUI {
 		panelStep6.add(comboBoxStep6OrderType22);
 
 		JButton btnStep6PrevStep = new JButton(
-				"<< Schritt 5: Kapazitätsplanung");
+				"<< "	+ BUNDLE.getString("PlanungstoolGUI.planning.step") + " 5: " + BUNDLE.getString("PlanungstoolGUI.planning.step5")); //$NON-NLS-1$
 		btnStep6PrevStep.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStep6PrevStep.setBounds(10, 268, 220, 35);
 		panelStep6.add(btnStep6PrevStep);
@@ -2554,7 +2584,8 @@ public class PlanungstoolGUI {
 		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex28,
 				textFieldStep6Quantity28, comboBoxStep6OrderType28));
 
-		JButton btnStep6GenerateXml = new JButton("XML generieren");
+		JButton btnStep6GenerateXml = new JButton(
+				BUNDLE.getString("PlanungstoolGUI.btnStep6GenerateXml.text")); //$NON-NLS-1$
 		btnStep6GenerateXml.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -2693,6 +2724,13 @@ public class PlanungstoolGUI {
 
 		displayDefaultSafetyStock();
 
+	}
+
+	protected void switchLanguage(String string) {
+		Locale.setDefault(new Locale(string));
+		frameMain.setVisible(false);
+		frameMain.dispose();
+		App.main(new String[] { string });
 	}
 
 	protected void moveProductionDown() {
