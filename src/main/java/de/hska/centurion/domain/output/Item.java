@@ -19,7 +19,6 @@ public class Item {
 	 * the name of the article.
 	 * Either 1, 2 or 3.
 	 */
-	
 	private int article;
 	
 	/**
@@ -60,6 +59,10 @@ public class Item {
 		this.quantity = quantity;
 		this.price = null;
 		this.penalty = null;
+	}
+
+	public Item() {
+		super();
 	}
 
 	/**

@@ -1,21 +1,27 @@
 package de.hska.centurion.domain.output;
 
+import javax.xml.bind.annotation.XmlAttribute;
+
 /**
  * This class represents the static qualityControl of a simulation-input.
+ * 
  * @author Simon
  *
  */
 public class QualityControl {
+
 	/*
 	 * ======================== ATTRIBUTES ========================
 	 */
+
 	private String type = "no";
 	private int loseQuantity = 0;
 	private int delay = 0;
-	
+
 	/*
 	 * ======================== METHODS ========================
 	 */
+	@XmlAttribute
 	public String getType() {
 		return type;
 	}
@@ -24,6 +30,7 @@ public class QualityControl {
 		this.type = type;
 	}
 
+	@XmlAttribute
 	public int getLoseQuantity() {
 		return loseQuantity;
 	}
@@ -32,6 +39,7 @@ public class QualityControl {
 		this.loseQuantity = loseQuantity;
 	}
 
+	@XmlAttribute
 	public int getDelay() {
 		return delay;
 	}

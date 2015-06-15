@@ -24,7 +24,7 @@ import de.hska.centurion.domain.input.components.WorkplaceCosts;
 import de.hska.centurion.domain.input.components.WorkplaceOrder;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
 import de.hska.centurion.gui.PlanungstoolGUI;
-import de.hska.centurion.io.XmlInputParser;
+import de.hska.centurion.io.XmlParser;
 
 /**
  *

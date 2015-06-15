@@ -19,7 +19,7 @@ import de.hska.centurion.domain.output.Order;
 import de.hska.centurion.domain.output.Production;
 import de.hska.centurion.domain.output.QualityControl;
 import de.hska.centurion.domain.production.item.KItem;
-import de.hska.centurion.io.XmlInputParser;
+import de.hska.centurion.io.XmlParser;
 import de.hska.centurion.util.KItemBuilder;
 
 /**
@@ -220,7 +220,7 @@ public class OrderService {
 
 			// a variable for a matching order
 			de.hska.centurion.domain.input.components.Order matchingOrder = null;
-			// das ist hässlich aber hier brauche ich eine andere Order-Klasse
+			// das ist hï¿½sslich aber hier brauche ich eine andere Order-Klasse
 			// iterate over all future incoming orders
 			for (de.hska.centurion.domain.input.components.Order order : results
 					.getFutureInwardStockMovement().getOrders()) {

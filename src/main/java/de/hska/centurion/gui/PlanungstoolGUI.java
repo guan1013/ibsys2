@@ -3,6 +3,7 @@ package de.hska.centurion.gui;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -52,7 +53,9 @@ import de.hska.centurion.domain.input.components.Order;
 import de.hska.centurion.domain.input.components.WorkplaceCosts;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
 import de.hska.centurion.domain.output.Input;
+import de.hska.centurion.domain.output.Item;
 import de.hska.centurion.domain.output.Production;
+import de.hska.centurion.domain.output.QualityControl;
 import de.hska.centurion.domain.output.WorkingTime;
 import de.hska.centurion.gui.actionlistener.StepButtonsActionDialog;
 import de.hska.centurion.gui.dialogs.SplittingDialog;
@@ -61,7 +64,7 @@ import de.hska.centurion.gui.util.OrderEntity;
 import de.hska.centurion.gui.util.OrderType;
 import de.hska.centurion.gui.util.SafetyStockEntity;
 import de.hska.centurion.gui.util.WorkplaceEntity;
-import de.hska.centurion.io.XmlInputParser;
+import de.hska.centurion.io.XmlParser;
 import de.hska.centurion.services.production.ProductionService;
 import de.hska.centurion.services.purchase.OrderService;
 
@@ -274,7 +277,7 @@ public class PlanungstoolGUI {
 
 		for (int i = 0; i < calculatePurchaseOrders.size(); i++) {
 
-//			System.out.println(calculatePurchaseOrders.get(i));
+			// System.out.println(calculatePurchaseOrders.get(i));
 
 			if (i >= orderFormular.size()) {
 				System.out
@@ -593,7 +596,7 @@ public class PlanungstoolGUI {
 					try {
 
 						// Datei als Result-Objekt parsen
-						results = XmlInputParser.parseXmlFile(file.getPath());
+						results = XmlParser.parseXmlFile(file.getPath());
 					} catch (Exception ex) {
 						results = null;
 						JOptionPane.showMessageDialog(getFrameMain(),
@@ -2466,6 +2469,73 @@ public class PlanungstoolGUI {
 		orderFormular.add(new OrderEntity(textFieldStep6ItemIndex28,
 				textFieldStep6Quantity28, comboBoxStep6OrderType28));
 
+		JButton btnStep6GenerateXml = new JButton("XML generieren");
+		btnStep6GenerateXml.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				readInOrders();
+
+				final JFileChooser fc = new JFileChooser();
+
+				// Zeige Dialog zum Auswählen einer Datei
+				int returnVal = fc.showSaveDialog(frameMain);
+
+				// Warten bis der Benutzer eine Datei ausgewählt hat
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+
+					// Ausgewählte Datei abfragen
+					File file = fc.getSelectedFile();
+
+					// GENERATE XML OUTPUT (INPUT FOR SCSIM.DE)
+
+					// Step 0: Quality Control
+					QualityControl qc = new QualityControl();
+					qc.setDelay(0);
+					qc.setLoseQuantity(0);
+					output.setQualityControl(qc);
+
+					// Step 1: Forecasts
+					// -- nothing to do --
+
+					// Step 2: Sales & Directsales
+					output.getSellWish().clear();
+					output.getSellDirect().clear();
+
+					output.getSellWish().add(
+							new Item(1,
+									userInput.getSales().getChildrenSales(), 0,
+									0));
+					output.getSellWish().add(
+							new Item(2, userInput.getSales().getWomenSales(),
+									0, 0));
+					output.getSellWish().add(
+							new Item(3, userInput.getSales().getMenSales(), 0,
+									0));
+
+					output.getSellDirect().add(
+							new Item(1, userInput.getDirectSales()
+									.getChildrenSales(), 0, 0));
+					output.getSellDirect().add(
+							new Item(2, userInput.getDirectSales()
+									.getWomenSales(), 0, 0));
+					output.getSellDirect().add(
+							new Item(3, userInput.getDirectSales()
+									.getMenSales(), 0, 0));
+
+					// Generate XML
+					XmlParser.generateOutputXml(output, file.getAbsolutePath());
+
+					JOptionPane.showMessageDialog(frameMain,
+							"XML-Datei wurde erstellt", "Meldung",
+							JOptionPane.INFORMATION_MESSAGE);
+				}
+
+			}
+		});
+		btnStep6GenerateXml.setFont(new Font("Tahoma", Font.BOLD, 11));
+		btnStep6GenerateXml.setBounds(616, 268, 220, 35);
+		panelStep6.add(btnStep6GenerateXml);
+
 		// INITIALIZE ACTION LISTENERS
 		ActionListener switchStepsButtonActionListener = new StepButtonsActionDialog(
 				this);
@@ -2620,6 +2690,23 @@ public class PlanungstoolGUI {
 
 		userInput.setForecast(forecast);
 
+	}
+
+	private void readInOrders() {
+
+		List<de.hska.centurion.domain.output.Order> userOrders = new ArrayList<>();
+
+		for (OrderEntity orderEntity : orderFormular) {
+
+			if (orderEntity.getOrderType().getSelectedIndex() > 0) {
+				userOrders.add(new de.hska.centurion.domain.output.Order(
+						Integer.parseInt(orderEntity.getItemIndex().getText()),
+						Integer.parseInt(orderEntity.getQuantity().getText()),
+						orderEntity.getOrderType().getSelectedIndex()));
+			}
+		}
+
+		output.setOrderList(userOrders);
 	}
 
 	private void readInSafetyStock() {
