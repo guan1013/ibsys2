@@ -125,7 +125,7 @@ public class ProductionService {
 	 * @return items which will be produced under consideration of safetystock,
 	 *         sellwish, current stock and unfinished productions
 	 */
-	public Map<String, Integer> calculateSafetyStock(
+	public Map<String, Integer> calculateProduction(
 			SafetyStock safetyStockInput) {
 
 		// Place safetystock in global UserInput object for further calculation

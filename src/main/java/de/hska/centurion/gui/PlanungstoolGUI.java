@@ -256,7 +256,7 @@ public class PlanungstoolGUI {
 
 		// Calculate safety stock
 		Map<String, Integer> safetyStockGui = productionService
-				.calculateSafetyStock(userInput.getSafetyStock());
+				.calculateProduction(userInput.getSafetyStock());
 
 		// Display calculation result on gui
 		displaySafetyStock(safetyStockGui);
