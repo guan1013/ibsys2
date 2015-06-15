@@ -19,6 +19,9 @@ public class OrderInwardCalculator {
 	}
 
 	public Results calculateOutstandingOrders(Results results) {
+		if (results.getPeriod() == 1) {
+			return null;
+		}
 		for (Order order : results.getFutureInwardStockMovement().getOrders()) {
 			String key = Constants.getItemInitKey() + ".K" + order.getArticle();
 			float time = Float.parseFloat(props.getProperty(key
