@@ -2753,13 +2753,13 @@ public class PlanungstoolGUI {
 				switchToStep(3);
 			}
 		});
-		
+
 		btnStep3PrevStep.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				switchToStep(2);
-				
+
 			}
 		});
 
@@ -2779,6 +2779,15 @@ public class PlanungstoolGUI {
 				readInSafetyStock();
 				calculateSafetyStock();
 				calculateProductionOrder();
+				switchToStep(4);
+			}
+		});
+
+		btnStep4PrevStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				switchToStep(3);
 			}
 		});
 
@@ -2787,6 +2796,16 @@ public class PlanungstoolGUI {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				calculateCapacity();
+				switchToStep(5);
+			}
+		});
+
+		btnStep5PrevStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				switchToStep(4);
+
 			}
 		});
 
@@ -2796,6 +2815,16 @@ public class PlanungstoolGUI {
 			public void actionPerformed(ActionEvent e) {
 				readInCapacity();
 				calculateOrders();
+				switchToStep(6);
+			}
+		});
+
+		btnStep6PrevStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				switchToStep(5);
+
 			}
 		});
 
@@ -3000,7 +3029,6 @@ public class PlanungstoolGUI {
 	}
 
 	public void switchToStep(int goToStep) {
-
 
 		// String validationResult = UserInputValidator.validate(userInput);
 		//
