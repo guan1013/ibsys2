@@ -121,7 +121,7 @@ public class OrderService {
 		}
 
 		kItems = builder.createKItemList();
-//		System.out.println("K-ItemsSize: " + kItems.size());
+		// System.out.println("K-ItemsSize: " + kItems.size());
 	}
 
 	/**
@@ -173,9 +173,9 @@ public class OrderService {
 				productionProgram[0].getMenSales()
 						+ (p4.getMenSales() - p1.getMenSales()));
 
-//		for (Sales production : productionProgram) {
-//			System.out.println("productionProgram: " + production);
-//		}
+		// for (Sales production : productionProgram) {
+		// System.out.println("productionProgram: " + production);
+		// }
 	}
 
 	/**
@@ -197,8 +197,8 @@ public class OrderService {
 				itemConsumption.add(consumption);
 			}
 			// add the consumptions to the consumption-map
-//			System.out.println("Item: " + item.getNumber() + ", Consumption"
-//					+ itemConsumption);
+			// System.out.println("Item: " + item.getNumber() + ", Consumption"
+			// + itemConsumption);
 			consumptions.put(item.getNumber(), itemConsumption);
 		}
 	}
@@ -215,17 +215,52 @@ public class OrderService {
 			List<Integer> itemConsumptions = consumptions.get(item.getNumber());
 
 			boolean nextItem = false;
-			System.out.println("currentItem: " + item.getNumber()); 
+			System.out.println("currentItem: " + item.getNumber());
 			// iterate over the consumptions. p + 1 = currentPeriod
+
+			// a variable for a matching order
+			de.hska.centurion.domain.input.components.Order matchingOrder = null;
+			// das ist hässlich aber hier brauche ich eine andere Order-Klasse
+			// iterate over all future incoming orders
+			for (de.hska.centurion.domain.input.components.Order order : results
+					.getFutureInwardStockMovement().getOrders()) {
+				// check if item is in future incoming orders
+				if (order.getArticle() == item.getNumber()) {
+					matchingOrder = order;
+				}
+			}
+
+			int orderIncomeP = -1;
+			int orderIncomeD = -1;
+			if (matchingOrder != null) {
+				String incomeStr = matchingOrder.getInwardStockMovementAvg();
+				String[] income = incomeStr.split("-", 3);
+
+				orderIncomeP = Integer.parseInt(income[0])
+						- results.getPeriod() - 1;
+				orderIncomeD = Integer.parseInt(income[1]) - 1;
+			}
+			System.out.println("orderIncomeP=" + orderIncomeP
+					+ ", orderIncomeD=" + orderIncomeD);
+
 			for (int p = 0; p < itemConsumptions.size(); p++) {
 				// iterate over the current day in period. d + 1 = current day
-				System.out.println(p + ". Period");
+				System.out.println("\t\t" + (p + 1) + ". Period");
 				for (int d = 0; d < 5; d++) {
 					// stock after current day = current stock -
 					// (itemConsumption of the current period / 5)
 					// because a period has 5 days.
 					stock = stock - itemConsumptions.get(p) / 5;
-					System.out.println(d + ". Day: " + stock + " Stock");
+
+					if (p == orderIncomeP && d == orderIncomeD) {
+						System.out.println("\tOrderIncoming: " + (p + 1) + "/"
+								+ (d + 1) + " Amount: "
+								+ matchingOrder.getAmount());
+						stock = stock + matchingOrder.getAmount();
+					}
+
+					System.out.println("\t\t\t\t" + (d + 1) + ". Day: " + stock
+							+ " Stock");
 
 					// when stock is empty ...
 					if (stock <= 0) {
@@ -235,7 +270,7 @@ public class OrderService {
 						break;
 					}
 				}
-				if  (nextItem == true) {
+				if (nextItem == true) {
 					break;
 				}
 			}
@@ -268,13 +303,13 @@ public class OrderService {
 		// (= one period)
 		if (orderNecessary <= 5.0) {
 			// check if order is already on the way
-			if (!secondAttempt) {
-				boolean ordered = checkIfOrderIsAlreadyOnTheWay(item, p, d);
-
-				if (ordered) {
-					return;
-				}
-			}
+			// if (!secondAttempt) {
+			// boolean ordered = checkIfOrderIsAlreadyOnTheWay(item, p, d);
+			//
+			// if (ordered) {
+			// return;
+			// }
+			// }
 			// create order object
 			Order order = new Order(item.getNumber(), item.getstack(), 5);
 
@@ -298,52 +333,30 @@ public class OrderService {
 
 	}
 
-	private boolean checkIfOrderIsAlreadyOnTheWay(KItem item, int p, int d) {
-
-		// a variable for a matching order
-		de.hska.centurion.domain.input.components.Order matchingOrder = null;
-		// das ist hässlich aber hier brauche ich eine andere Order-Klasse
-		// iterate over all future incoming orders
-		for (de.hska.centurion.domain.input.components.Order order : results
-				.getFutureInwardStockMovement().getOrders()) {
-			// check if item is in future incoming orders
-			if (order.getArticle() == item.getNumber()) {
-				matchingOrder = order;
-			}
-		}
-
-		if (matchingOrder != null) {
-			item.setStock(item.getStock() + matchingOrder.getAmount());
-			checkIfOrderIsNecessary(item, p, d, true);
-			return true;
-		}
-		
-		return false;
-	}
-
-	public static void main(String[] args) throws JAXBException {
-		UserInput ui = new UserInput();
-		ui.setForecast(new Forecast(new Sales(200, 150, 100), new Sales(200,
-				150, 100), new Sales(150, 150, 150), new Sales(100, 100, 150)));
-		ui.setSales(new Sales(200, 150, 100));
-		ui.setSafetyStock(new SafetyStock(100));
-		Results results = XmlInputParser.parseXmlFile("C:\\Users\\Simon\\Desktop\\input.xml");
-		Input output = new Input();
-		output.setQualityControl(new QualityControl());
-		output.addSellWish(new Item(1, 200));
-		output.addSellWish(new Item(2, 150));
-		output.addSellWish(new Item(3, 100));
-		output.addProduction(new Production(1, 200));
-		output.addProduction(new Production(2, 200));
-		output.addProduction(new Production(3, 200));
-		OrderService os = new OrderService(ui, results, output);
-		List<Order> orders = os.calculatePurchaseOrders();
-		
-		System.out.println();
-		System.out.println();
-		
-		for (Order order : orders) {
-			System.out.println("Order: " + order);
-		}
-	}
+//	public static void main(String[] args) throws JAXBException {
+//		UserInput ui = new UserInput();
+//		ui.setForecast(new Forecast(new Sales(200, 150, 100), new Sales(200,
+//				150, 100), new Sales(150, 150, 150), new Sales(100, 100, 150)));
+//		ui.setSales(new Sales(200, 150, 100));
+//		ui.setSafetyStock(new SafetyStock(100));
+//		Results results = XmlInputParser
+//				.parseXmlFile("C:\\Users\\Simon\\Desktop\\input.xml");
+//		Input output = new Input();
+//		output.setQualityControl(new QualityControl());
+//		output.addSellWish(new Item(1, 200));
+//		output.addSellWish(new Item(2, 150));
+//		output.addSellWish(new Item(3, 100));
+//		output.addProduction(new Production(1, 200));
+//		output.addProduction(new Production(2, 200));
+//		output.addProduction(new Production(3, 200));
+//		OrderService os = new OrderService(ui, results, output);
+//		List<Order> orders = os.calculatePurchaseOrders();
+//
+//		System.out.println();
+//		System.out.println();
+//
+//		for (Order order : orders) {
+//			System.out.println("Order: " + order);
+//		}
+//	}
 }
