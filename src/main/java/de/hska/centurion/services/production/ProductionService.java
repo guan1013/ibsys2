@@ -56,17 +56,22 @@ public class ProductionService {
 	 */
 	public ProductionService(Results results) throws IOException {
 
+		// Get an Object of ProductionPlanBuilder
 		ProductionPlanBuilder ppb = new ProductionPlanBuilder(results);
 
+		// Create a new ProductionPlan
 		this.plans = ppb.createProductionPlans();
 
+		// Build a new UserInput Object
 		this.userInput = new UserInput();
 
+		// Define the decimal format for shift values
 		this.shiftFormat = new DecimalFormat("##");
 		this.shiftFormat.setRoundingMode(RoundingMode.DOWN);
 		this.shiftFormat.setMinimumFractionDigits(0);
 		this.shiftFormat.setMaximumFractionDigits(0);
 
+		// Define the decimal format for overtime values
 		this.overtimeFormat = new DecimalFormat("##");
 		this.overtimeFormat.setRoundingMode(RoundingMode.UP);
 		this.overtimeFormat.setMinimumFractionDigits(0);
@@ -94,12 +99,18 @@ public class ProductionService {
 	private Map<String, Integer> productions;
 
 	/**
-	 * 
+	 * Object which holds informations of the workplaces which produce items
 	 */
 	private Map<String, Workplace> factory;
 
+	/**
+	 * Decimal format for shift values
+	 */
 	private DecimalFormat shiftFormat;
 
+	/**
+	 * Decimal format for overtimeFormat;
+	 */
 	private DecimalFormat overtimeFormat;
 
 	/*
@@ -120,6 +131,7 @@ public class ProductionService {
 		// Place safetystock in global UserInput object for further calculation
 		userInput.setSafetyStock(safetyStockInput);
 
+		// Create a new Factory Map
 		factory = new HashMap<String, Workplace>();
 
 		// Create a List of all planed safes
@@ -142,15 +154,20 @@ public class ProductionService {
 					productions, salesMap.get(planName));
 		}
 
+		// for each workplace which end-produces an item, produce items till you
+		// raised the safety stock;
 		for (Map.Entry<String, Workplace> workplace : factory.entrySet()) {
 			String itemName = workplace.getValue().getOutput().getType()
 					.toString()
 					+ workplace.getValue().getOutput().getNumber().toString();
 
+			// get safetyStock amount
 			int planedAmount = userInput.getSafetyStock().getStock(itemName);
 
+			// get amount of not used stock items
 			int actualAmount = workplace.getValue().getOutput().getStock();
 
+			// Check wether stock is under safetystock
 			if (actualAmount < planedAmount) {
 
 				// apply required amount to productions list
@@ -160,22 +177,20 @@ public class ProductionService {
 			}
 		}
 
+		// Place calculated productions to global productions type
 		this.productions = productions;
-
-		for (Map.Entry<String, Integer> p : productions.entrySet()) {
-			System.out.println("method value: " + p.getKey() + "="
-					+ p.getValue());
-			System.out.println("class value: " + p.getKey() + "="
-					+ this.productions.get(p.getKey()));
-
-		}
-		System.out
-				.println("=============================================================================");
 
 		return productions;
 
 	}
 
+	/**
+	 * Calculate the total work time capacity which is required for the
+	 * production
+	 * 
+	 * @return List of WorkingTime objects, which hold shift and overtime per
+	 *         day of each workplace
+	 */
 	public List<WorkingTime> calculateCapacity() {
 
 		// Create a new Empty Sheet of Workplaces and their roundtriptimes for
@@ -197,41 +212,54 @@ public class ProductionService {
 			Integer quantity = productions.get(plan.getName().toUpperCase());
 
 			// Calculate the RoundTripTimes for each item
-			roundTripTimes = calcRoundTripTime(plan.getProducer(), quantity,
-					roundTripTimes);
+			roundTripTimes = calculateRoundTripTime(plan.getProducer(),
+					quantity, roundTripTimes);
 		}
 
+		// Create a new empty list of WorkingTime objects
 		List<WorkingTime> capacities = new ArrayList<WorkingTime>();
 
+		// For each calculated roundTripTime, calculate the needed capacity
 		for (Map.Entry<String, Map<String, Integer>> roundTripTime : roundTripTimes
 				.entrySet()) {
 
+			// Catch possible parsing errors
 			try {
 				int workplace = Integer.parseInt(roundTripTime.getKey());
 
+				// Calculate how many shifts will be needed
 				Double workingTime = roundTripTime.getValue().get(ACCUMULATED)
 						.doubleValue()
 						/ SHIFT_TIME_MINS;
 				int shift = 1;
 				Double overtime = 0.0;
 
+				// Check if there is more than one full shift is needed
 				if (workingTime > 1) {
+
+					// Cut the decimals off of the worktime
 					shift = Integer.parseInt(shiftFormat.format(workingTime));
 
+					// See how much overtime
 					overtime = (workingTime - shift) * SHIFT_TIME_MINS;
 					if (overtime > (SHIFT_TIME_MINS * 0.5)) {
 						overtime = 0.0;
 						shift += 1;
 					}
 
+					// Check wether if more than 3 shifts would be needed for
+					// the production
 					if (shift > 3) {
 						// TODO: production is not possible
 					}
 
 				}
 
+				// Calculate the overtime per day
 				Double overtimePerDay = overtime / 5;
 
+				// Create a new WorkingTime object with all calculated working
+				// time informations and add it to the capacities list
 				WorkingTime capacity = new WorkingTime(workplace, shift,
 						Integer.parseInt(overtimeFormat.format(overtimePerDay)));
 
@@ -240,10 +268,6 @@ public class ProductionService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-
-		for (WorkingTime c : capacities) {
-			System.out.println(c.toString());
 		}
 
 		return capacities;
@@ -278,6 +302,7 @@ public class ProductionService {
 
 	private Map<String, Integer> putWorkplaceToProductions(Workplace plan,
 			Map<String, Integer> productions, Integer quantity) {
+
 		// get name of current workplaces output item
 		String itemName = plan.getOutput().getType().toString()
 				+ plan.getOutput().getNumber().toString();
@@ -355,7 +380,7 @@ public class ProductionService {
 		return waitingList;
 	}
 
-	private Map<String, Map<String, Integer>> calcRoundTripTime(
+	private Map<String, Map<String, Integer>> calculateRoundTripTime(
 			Workplace workplace, Integer quantity,
 			Map<String, Map<String, Integer>> roundTripTimes) {
 
@@ -371,22 +396,21 @@ public class ProductionService {
 
 		// Check wether this workplace already has a List of rrts
 		int value = 0;
-		if (roundTripTimes.get(workplaceNumber) == null) {
 
-			// get current Stock of workplaces output item
-			int currentStock = workplace.getOutput().getStock();
+		int productionTime = workplace.getProductionTime();
+
+		int setupTime = workplace.getSetupTime();
+		if (roundTripTimes.get(workplaceNumber) == null) {
 
 			// get current unfinished items on this workplace
 			int waitingList = workplace.getOpenOrders();
 
 			// calculate the actual quantity which should be produced
-			value = quantity + userInput.getSafetyStock().getStock(itemName)
-					- currentStock - waitingList;
+			value = productions.get(itemName) + waitingList;
 
 			// Calculate the roundtrip time on this workplace for all produced
 			// items
-			Integer roundTripTime = (value * workplace.getProductionTime())
-					+ workplace.getSetupTime();
+			Integer roundTripTime = (value * productionTime) + setupTime;
 
 			// Add item to rrt list
 			outputRRT.put(itemName, roundTripTime);
@@ -400,35 +424,20 @@ public class ProductionService {
 
 			if (outputRRT.get(itemName) == null) {
 
-				// get current Stock of workplaces output item
-				int currentStock = workplace.getOutput().getStock();
-
 				// get current unfinished items on this workplace
 				int waitingList = workplace.getOpenOrders();
 
 				// calculate the actual quantity which should be produced
-				value = quantity
-						+ userInput.getSafetyStock().getStock(itemName)
-						- currentStock - waitingList;
+				value = productions.get(itemName) + waitingList;
 
 				// Calculate the roundtrip time on this workplace for all
 				// produced items
-				roundTripTime = (value * workplace.getProductionTime())
-						+ workplace.getSetupTime();
+				roundTripTime = (value * productionTime) + setupTime;
 
-			} else {
+				// Add item to rrt list
+				outputRRT.put(itemName, roundTripTime);
 
-				// Get already added value of current workplaces output
-				Integer currentValue = outputRRT.get(itemName);
-
-				// Calculate the roundtrip time on this workplace for all
-				// produced items
-				roundTripTime = (quantity * workplace.getProductionTime())
-						+ currentValue + workplace.getSetupTime();
 			}
-
-			// Add item to rrt list
-			outputRRT.put(itemName, roundTripTime);
 
 		}
 
@@ -452,8 +461,9 @@ public class ProductionService {
 
 			// Check wether Input is a E or P Item
 			if (prodInput.getProducer() != null) {
-				roundTripTimes = calcRoundTripTime(prodInput.getProducer(),
-						prodInput.getQuantity(), roundTripTimes);
+				roundTripTimes = calculateRoundTripTime(
+						prodInput.getProducer(), prodInput.getQuantity(),
+						roundTripTimes);
 			}
 
 		}
