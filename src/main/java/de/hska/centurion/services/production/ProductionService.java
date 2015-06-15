@@ -62,10 +62,16 @@ public class ProductionService {
 
 		this.userInput = new UserInput();
 
-		this.shiftFormat = new DecimalFormat();
+		this.shiftFormat = new DecimalFormat("##");
 		this.shiftFormat.setRoundingMode(RoundingMode.DOWN);
 		this.shiftFormat.setMinimumFractionDigits(0);
-		this.shiftFormat.setMaximumIntegerDigits(0);
+		this.shiftFormat.setMaximumFractionDigits(0);
+
+		this.overtimeFormat = new DecimalFormat("##");
+		this.overtimeFormat.setRoundingMode(RoundingMode.UP);
+		this.overtimeFormat.setMinimumFractionDigits(0);
+		this.overtimeFormat.setMaximumFractionDigits(0);
+
 	}
 
 	/*
@@ -93,6 +99,8 @@ public class ProductionService {
 	private Map<String, Workplace> factory;
 
 	private DecimalFormat shiftFormat;
+
+	private DecimalFormat overtimeFormat;
 
 	/*
 	 * ======================== METHODS ========================
@@ -154,6 +162,16 @@ public class ProductionService {
 
 		this.productions = productions;
 
+		for (Map.Entry<String, Integer> p : productions.entrySet()) {
+			System.out.println("method value: " + p.getKey() + "="
+					+ p.getValue());
+			System.out.println("class value: " + p.getKey() + "="
+					+ this.productions.get(p.getKey()));
+
+		}
+		System.out
+				.println("=============================================================================");
+
 		return productions;
 
 	}
@@ -201,19 +219,30 @@ public class ProductionService {
 					shift = Integer.parseInt(shiftFormat.format(workingTime));
 
 					overtime = (workingTime - shift) * SHIFT_TIME_MINS;
+					if (overtime > (SHIFT_TIME_MINS * 0.5)) {
+						overtime = 0.0;
+						shift += 1;
+					}
+
+					if (shift > 3) {
+						// TODO: production is not possible
+					}
+
 				}
 
+				Double overtimePerDay = overtime / 5;
+
 				WorkingTime capacity = new WorkingTime(workplace, shift,
-						overtime.intValue());
-				
+						Integer.parseInt(overtimeFormat.format(overtimePerDay)));
+
 				capacities.add(capacity);
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		
-		for(WorkingTime c : capacities) {
+
+		for (WorkingTime c : capacities) {
 			System.out.println(c.toString());
 		}
 
@@ -407,7 +436,9 @@ public class ProductionService {
 		// workplace
 		Integer accumulatedRTT = 0;
 		for (Map.Entry<String, Integer> set : outputRRT.entrySet()) {
-			accumulatedRTT += set.getValue();
+			if (!set.getKey().equalsIgnoreCase(ACCUMULATED)) {
+				accumulatedRTT += set.getValue();
+			}
 		}
 
 		// Add accumulated value to rrt list
