@@ -224,11 +224,13 @@ public class OrderService {
 			de.hska.centurion.domain.input.components.Order matchingOrder = null;
 			// das ist h�sslich aber hier brauche ich eine andere Order-Klasse
 			// iterate over all future incoming orders
-			for (de.hska.centurion.domain.input.components.Order order : results
-					.getFutureInwardStockMovement().getOrders()) {
-				// check if item is in future incoming orders
-				if (order.getArticle() == item.getNumber()) {
-					matchingOrder = order;
+			if (results.getPeriod() != 1) {
+				for (de.hska.centurion.domain.input.components.Order order : results
+						.getFutureInwardStockMovement().getOrders()) {
+					// check if item is in future incoming orders
+					if (order.getArticle() == item.getNumber()) {
+						matchingOrder = order;
+					}
 				}
 			}
 
@@ -347,30 +349,30 @@ public class OrderService {
 
 	}
 
-//	public static void main(String[] args) throws JAXBException {
-//		UserInput ui = new UserInput();
-//		ui.setForecast(new Forecast(new Sales(200, 150, 100), new Sales(200,
-//				150, 100), new Sales(150, 150, 150), new Sales(100, 100, 150)));
-//		ui.setSales(new Sales(200, 150, 100));
-//		ui.setSafetyStock(new SafetyStock(100));
-//		Results results = XmlInputParser
-//				.parseXmlFile("C:\\Users\\Simon\\Desktop\\input.xml");
-//		Input output = new Input();
-//		output.setQualityControl(new QualityControl());
-//		output.addSellWish(new Item(1, 200));
-//		output.addSellWish(new Item(2, 150));
-//		output.addSellWish(new Item(3, 100));
-//		output.addProduction(new Production(1, 200));
-//		output.addProduction(new Production(2, 200));
-//		output.addProduction(new Production(3, 200));
-//		OrderService os = new OrderService(ui, results, output);
-//		List<Order> orders = os.calculatePurchaseOrders();
-//
-//		System.out.println();
-//		System.out.println();
-//
-//		for (Order order : orders) {
-//			System.out.println("Order: " + order);
-//		}
-//	}
+	// public static void main(String[] args) throws JAXBException {
+	// UserInput ui = new UserInput();
+	// ui.setForecast(new Forecast(new Sales(200, 150, 100), new Sales(200,
+	// 150, 100), new Sales(150, 150, 150), new Sales(100, 100, 150)));
+	// ui.setSales(new Sales(200, 150, 100));
+	// ui.setSafetyStock(new SafetyStock(100));
+	// Results results = XmlInputParser
+	// .parseXmlFile("C:\\Users\\Simon\\Desktop\\input.xml");
+	// Input output = new Input();
+	// output.setQualityControl(new QualityControl());
+	// output.addSellWish(new Item(1, 200));
+	// output.addSellWish(new Item(2, 150));
+	// output.addSellWish(new Item(3, 100));
+	// output.addProduction(new Production(1, 200));
+	// output.addProduction(new Production(2, 200));
+	// output.addProduction(new Production(3, 200));
+	// OrderService os = new OrderService(ui, results, output);
+	// List<Order> orders = os.calculatePurchaseOrders();
+	//
+	// System.out.println();
+	// System.out.println();
+	//
+	// for (Order order : orders) {
+	// System.out.println("Order: " + order);
+	// }
+	// }
 }
