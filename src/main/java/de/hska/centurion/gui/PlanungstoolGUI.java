@@ -102,7 +102,7 @@ public class PlanungstoolGUI {
 	// ATTRIBUTES
 
 	// STATIC ATTRIBUTES
-	private static final int DEFAULT_SAFETY_STOCK = 250;
+	private static final int DEFAULT_SAFETY_STOCK = 100;
 	private static final int MIN_FORECAST_AND_SALES = 0;
 	private static final int MAX_FORECAST_AND_SALES = 500;
 	private static final String[] DELIVERY_MODES = new String[] { "?",
