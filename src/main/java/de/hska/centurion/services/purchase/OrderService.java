@@ -6,13 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXBException;
+
+import de.hska.centurion.domain.gui.Forecast;
+import de.hska.centurion.domain.gui.SafetyStock;
 import de.hska.centurion.domain.gui.Sales;
 import de.hska.centurion.domain.gui.UserInput;
 import de.hska.centurion.domain.input.Results;
 import de.hska.centurion.domain.output.Input;
+import de.hska.centurion.domain.output.Item;
 import de.hska.centurion.domain.output.Order;
 import de.hska.centurion.domain.output.Production;
+import de.hska.centurion.domain.output.QualityControl;
 import de.hska.centurion.domain.production.item.KItem;
+import de.hska.centurion.io.XmlInputParser;
 import de.hska.centurion.util.KItemBuilder;
 
 /**
@@ -114,6 +121,7 @@ public class OrderService {
 		}
 
 		kItems = builder.createKItemList();
+//		System.out.println("K-ItemsSize: " + kItems.size());
 	}
 
 	/**
@@ -164,6 +172,10 @@ public class OrderService {
 						+ (p4.getWomenSales() - p1.getWomenSales()),
 				productionProgram[0].getMenSales()
 						+ (p4.getMenSales() - p1.getMenSales()));
+
+//		for (Sales production : productionProgram) {
+//			System.out.println("productionProgram: " + production);
+//		}
 	}
 
 	/**
@@ -185,6 +197,8 @@ public class OrderService {
 				itemConsumption.add(consumption);
 			}
 			// add the consumptions to the consumption-map
+//			System.out.println("Item: " + item.getNumber() + ", Consumption"
+//					+ itemConsumption);
 			consumptions.put(item.getNumber(), itemConsumption);
 		}
 	}
@@ -200,22 +214,30 @@ public class OrderService {
 			// get consumptions (next four periods) for the current item
 			List<Integer> itemConsumptions = consumptions.get(item.getNumber());
 
+			boolean nextItem = false;
+			System.out.println("currentItem: " + item.getNumber()); 
 			// iterate over the consumptions. p + 1 = currentPeriod
 			for (int p = 0; p < itemConsumptions.size(); p++) {
 				// iterate over the current day in period. d + 1 = current day
+				System.out.println(p + ". Period");
 				for (int d = 0; d < 5; d++) {
 					// stock after current day = current stock -
 					// (itemConsumption of the current period / 5)
 					// because a period has 5 days.
 					stock = stock - itemConsumptions.get(p) / 5;
+					System.out.println(d + ". Day: " + stock + " Stock");
 
 					// when stock is empty ...
 					if (stock <= 0) {
 						// check if Order is necessary
 						checkIfOrderIsNecessary(item, p, d, false);
+						nextItem = true;
+						break;
 					}
 				}
-
+				if  (nextItem == true) {
+					break;
+				}
 			}
 		}
 	}
@@ -293,7 +315,35 @@ public class OrderService {
 		if (matchingOrder != null) {
 			item.setStock(item.getStock() + matchingOrder.getAmount());
 			checkIfOrderIsNecessary(item, p, d, true);
+			return true;
 		}
+		
 		return false;
+	}
+
+	public static void main(String[] args) throws JAXBException {
+		UserInput ui = new UserInput();
+		ui.setForecast(new Forecast(new Sales(200, 150, 100), new Sales(200,
+				150, 100), new Sales(150, 150, 150), new Sales(100, 100, 150)));
+		ui.setSales(new Sales(200, 150, 100));
+		ui.setSafetyStock(new SafetyStock(100));
+		Results results = XmlInputParser.parseXmlFile("C:\\Users\\Simon\\Desktop\\input.xml");
+		Input output = new Input();
+		output.setQualityControl(new QualityControl());
+		output.addSellWish(new Item(1, 200));
+		output.addSellWish(new Item(2, 150));
+		output.addSellWish(new Item(3, 100));
+		output.addProduction(new Production(1, 200));
+		output.addProduction(new Production(2, 200));
+		output.addProduction(new Production(3, 200));
+		OrderService os = new OrderService(ui, results, output);
+		List<Order> orders = os.calculatePurchaseOrders();
+		
+		System.out.println();
+		System.out.println();
+		
+		for (Order order : orders) {
+			System.out.println("Order: " + order);
+		}
 	}
 }

@@ -274,7 +274,7 @@ public class PlanungstoolGUI {
 
 		for (int i = 0; i < calculatePurchaseOrders.size(); i++) {
 
-			System.out.println(calculatePurchaseOrders.get(i));
+//			System.out.println(calculatePurchaseOrders.get(i));
 
 			if (i >= orderFormular.size()) {
 				System.out

@@ -66,7 +66,6 @@ public class KItemBuilder {
 						+ Constants.getProducerKey());
 
 				key = key + Constants.getUsageKey();
-				System.out.println(key + Constants.getP1Key());
 				int usageP1 = Integer.parseInt(props.getProperty(key
 						+ Constants.getP1Key()));
 				int usageP2 = Integer.parseInt(props.getProperty(key
@@ -79,7 +78,6 @@ public class KItemBuilder {
 						orderCosts, deliveryTime, diviation, producer);
 				item.setUsage(usage);
 				items.add(item);
-				System.out.println(item);
 			}
 		}
 
