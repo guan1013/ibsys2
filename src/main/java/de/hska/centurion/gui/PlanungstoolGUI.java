@@ -95,7 +95,7 @@ import javax.swing.event.ChangeEvent;
  *
  */
 public class PlanungstoolGUI {
-	private static final ResourceBundle BUNDLE = ResourceBundle
+	private static  ResourceBundle BUNDLE = ResourceBundle
 			.getBundle("de.hska.centurion.domain.gui.messages"); //$NON-NLS-1$
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,8 +197,8 @@ public class PlanungstoolGUI {
 			locale = args[0];
 		}
 
-		// BUNDLE = ResourceBundle.getBundle(
-		//				"de.hska.centurion.domain.gui.messages", new Locale(locale)); //$NON-NLS-1$
+		BUNDLE = ResourceBundle.getBundle(
+				"de.hska.centurion.domain.gui.messages", new Locale(locale)); //$NON-NLS-1$
 
 		// Initialize attributes
 		stepsMap = new HashMap<>();
