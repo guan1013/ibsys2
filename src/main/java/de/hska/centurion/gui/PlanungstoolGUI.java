@@ -95,14 +95,14 @@ import javax.swing.event.ChangeEvent;
  *
  */
 public class PlanungstoolGUI {
-	private static  ResourceBundle BUNDLE = ResourceBundle
+	private static ResourceBundle BUNDLE = ResourceBundle
 			.getBundle("de.hska.centurion.domain.gui.messages"); //$NON-NLS-1$
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ATTRIBUTES
 
 	// STATIC ATTRIBUTES
-	private static final int DEFAULT_SAFETY_STOCK = 250;
+	private static final int DEFAULT_SAFETY_STOCK = 100;
 	private static final int MIN_FORECAST_AND_SALES = 0;
 	private static final int MAX_FORECAST_AND_SALES = 500;
 	private static final String[] DELIVERY_MODES = new String[] { "?",
@@ -327,10 +327,14 @@ public class PlanungstoolGUI {
 	 */
 	private void displayPeriod(int period) {
 
-		lblStep1Periode1Title.setText("Periode " + (period + 1));
-		lblStep1Periode2Title.setText("Periode " + (period + 2));
-		lblStep1Periode3Title.setText("Periode " + (period + 3));
-		lblStep1Periode4Title.setText("Periode " + (period + 4));
+		lblStep1Periode1Title.setText(BUNDLE
+				.getString("PlanungstoolGUI.common.period") + (period + 1));
+		lblStep1Periode2Title.setText(BUNDLE
+				.getString("PlanungstoolGUI.common.period") + (period + 2));
+		lblStep1Periode3Title.setText(BUNDLE
+				.getString("PlanungstoolGUI.common.period") + (period + 3));
+		lblStep1Periode4Title.setText(BUNDLE
+				.getString("PlanungstoolGUI.common.period") + (period + 4));
 	}
 
 	private void displayProductionOrder() {
@@ -412,7 +416,9 @@ public class PlanungstoolGUI {
 		internalFrameResults.getContentPane().add(tabbedPane);
 
 		JPanel panelWarehouse = new JPanel();
-		tabbedPane.addTab("Akt. Lagerbestand", null, panelWarehouse, null);
+		tabbedPane.addTab(BUNDLE
+				.getString("PlanungstoolGUI.results.tab.warehousestock.title"),
+				null, panelWarehouse, null);
 		panelWarehouse.setLayout(null);
 
 		JScrollPane scrollPaneWarehouse = new JScrollPane();
@@ -423,9 +429,16 @@ public class PlanungstoolGUI {
 		tableWarehouse
 				.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		scrollPaneWarehouse.setViewportView(tableWarehouse);
-		tableWarehouse.setModel(new DefaultTableModel(new Object[][] {},
-				new String[] { "Artikel", "Menge", "Startmenge",
-						"Menge/Startmenge", "Preis", "Lagerwert" }));
+		tableWarehouse
+				.setModel(new DefaultTableModel(
+						new Object[][] {},
+						new String[] {
+								BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.article"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.quantity"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.initialquantity"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.quantitystartquantity"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.price"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.stockvalue") }));
 
 		final JLabel labelTotalStockValue = new JLabel(
 				BUNDLE.getString("PlanungstoolGUI.labelTotalStockValue.text")); //$NON-NLS-1$
@@ -435,8 +448,10 @@ public class PlanungstoolGUI {
 		panelWarehouse.add(labelTotalStockValue);
 
 		JPanel panelInwardStockMovement = new JPanel();
-		tabbedPane.addTab("Akt. Lagerzugang Bestellungen", null,
-				panelInwardStockMovement, null);
+		tabbedPane
+				.addTab(BUNDLE
+						.getString("PlanungstoolGUI.results.tab.inwardstockmovement.title"),
+						null, panelInwardStockMovement, null);
 		panelInwardStockMovement.setLayout(null);
 
 		JScrollPane scrollPaneInwardStockMovement = new JScrollPane();
@@ -445,10 +460,19 @@ public class PlanungstoolGUI {
 
 		tableInwardStockMovement = new JTable();
 		scrollPaneInwardStockMovement.setViewportView(tableInwardStockMovement);
-		tableInwardStockMovement.setModel(new DefaultTableModel(
-				new Object[][] {}, new String[] { "Auftragsnr.", "Modus",
-						"Artikel", "Menge", "Beendet (P-T-S-M)", "Materialk.",
-						"Bestellk.", "Gesamtk.", "St\u00FCckk." }));
+		tableInwardStockMovement
+				.setModel(new DefaultTableModel(
+						new Object[][] {},
+						new String[] {
+								BUNDLE.getString("PlanungstoolGUI.results.tab.inwardstockmovement.orderid"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.inwardstockmovement.ordermode"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.article"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.quantity"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.inwardstockmovement.finished"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.inwardstockmovement.materialcosts"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.inwardstockmovement.ordercosts"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.inwardstockmovement.entirecosts"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.inwardstockmovement.piececosts") }));
 		tableInwardStockMovement.getColumnModel().getColumn(0)
 				.setResizable(false);
 		tableInwardStockMovement.getColumnModel().getColumn(0)
@@ -461,8 +485,10 @@ public class PlanungstoolGUI {
 				.setPreferredWidth(91);
 
 		JPanel panelFutureInwardStockMovement = new JPanel();
-		tabbedPane.addTab("Ausstehende Bestellungen", null,
-				panelFutureInwardStockMovement, null);
+		tabbedPane
+				.addTab(BUNDLE
+						.getString("PlanungstoolGUI.results.tab.futereinwardstockmovement.title"),
+						null, panelFutureInwardStockMovement, null);
 		panelFutureInwardStockMovement.setLayout(null);
 
 		JScrollPane scrollPaneFutureInwardStockMovement = new JScrollPane();
@@ -472,24 +498,32 @@ public class PlanungstoolGUI {
 		tableFutureInwardStockMovement = new JTable();
 		scrollPaneFutureInwardStockMovement
 				.setViewportView(tableFutureInwardStockMovement);
-		tableFutureInwardStockMovement.setModel(new DefaultTableModel(
-				new Object[][] {}, new String[] { "Auftragsnr.", "Modus",
-						"Artikel", "Menge", "Lagerzugang",
-						"Lagerzugang (Abweichung)" }) {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-			boolean[] columnEditables = new boolean[] { true, true, true, true,
-					false, false };
+		tableFutureInwardStockMovement
+				.setModel(new DefaultTableModel(
+						new Object[][] {},
+						new String[] {
+								BUNDLE.getString("PlanungstoolGUI.results.tab.inwardstockmovement.orderid"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.inwardstockmovement.ordermode"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.article"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.quantity"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.futureinwardstockmovement.inward"),
+								BUNDLE.getString("PlanungstoolGUI.results.tab.futureinwardstockmovement.deviation") }) {
+					/**
+					 * PlanungstoolGUI.results.tab.inwardstockmovement.title
+					 */
+					private static final long serialVersionUID = 1L;
+					boolean[] columnEditables = new boolean[] { true, true,
+							true, true, false, false };
 
-			public boolean isCellEditable(int row, int column) {
-				return columnEditables[column];
-			}
-		});
+					public boolean isCellEditable(int row, int column) {
+						return columnEditables[column];
+					}
+				});
 
 		JPanel panelIdleTimeCosts = new JPanel();
-		tabbedPane.addTab("Leerzeitenkosten", null, panelIdleTimeCosts, null);
+		tabbedPane.addTab(BUNDLE
+				.getString("PlanungstoolGUI.results.tab.idletimecosts.title"),
+				null, panelIdleTimeCosts, null);
 		panelIdleTimeCosts.setLayout(null);
 
 		JScrollPane scrollPaneIdleTimeCosts = new JScrollPane();
@@ -515,8 +549,10 @@ public class PlanungstoolGUI {
 		});
 
 		JPanel panelWaitingListWorkstations = new JPanel();
-		tabbedPane.addTab("Warteliste Arbeitsplatz", null,
-				panelWaitingListWorkstations, null);
+		tabbedPane
+				.addTab(BUNDLE
+						.getString("PlanungstoolGUI.results.tab.waitinglist.workstations.title"),
+						null, panelWaitingListWorkstations, null);
 		panelWaitingListWorkstations.setLayout(null);
 
 		JScrollPane scrollPaneWorklingListWorkstations = new JScrollPane();
@@ -543,8 +579,10 @@ public class PlanungstoolGUI {
 		});
 
 		JPanel panelWaitingListStock = new JPanel();
-		tabbedPane.addTab("Warteliste Material", null, panelWaitingListStock,
-				null);
+		tabbedPane
+				.addTab(BUNDLE
+						.getString("PlanungstoolGUI.results.tab.waitinglist.stock.title"),
+						null, panelWaitingListStock, null);
 		panelWaitingListStock.setLayout(null);
 
 		table = new JTable();
@@ -816,7 +854,8 @@ public class PlanungstoolGUI {
 		mnSprache.add(mntmRussisch);
 		getFrameMain().getContentPane().setLayout(null);
 
-		JInternalFrame internalFramePlanning = new JInternalFrame("Planung");
+		JInternalFrame internalFramePlanning = new JInternalFrame(
+				BUNDLE.getString("PlanungstoolGUI.internalFramePlanning.title"));
 		internalFramePlanning.setBounds(10, 305, 867, 371);
 		getFrameMain().getContentPane().add(internalFramePlanning);
 
@@ -825,7 +864,9 @@ public class PlanungstoolGUI {
 				BorderLayout.CENTER);
 
 		JPanel panelStep1 = new JPanel();
-		tabbedPanePlanning.addTab("Schritt 1", null, panelStep1, null);
+		tabbedPanePlanning.addTab(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 1", null,
+				panelStep1, null);
 		panelStep1.setLayout(null);
 
 		JLabel lblStep1Title = new JLabel(
@@ -853,25 +894,29 @@ public class PlanungstoolGUI {
 		lblStep1P3Title.setBounds(129, 201, 141, 23);
 		panelStep1.add(lblStep1P3Title);
 
-		lblStep1Periode1Title = new JLabel("Periode n+1");
+		lblStep1Periode1Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.common.period") + " n+1");
 		lblStep1Periode1Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep1Periode1Title.setFont(new Font("Tahoma", Font.BOLD, 12));
 		lblStep1Periode1Title.setBounds(261, 56, 76, 23);
 		panelStep1.add(lblStep1Periode1Title);
 
-		lblStep1Periode2Title = new JLabel("Periode n+2");
+		lblStep1Periode2Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.common.period") + " n+2");
 		lblStep1Periode2Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep1Periode2Title.setFont(new Font("Tahoma", Font.BOLD, 12));
 		lblStep1Periode2Title.setBounds(344, 56, 76, 23);
 		panelStep1.add(lblStep1Periode2Title);
 
-		lblStep1Periode3Title = new JLabel("Periode n+3");
+		lblStep1Periode3Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.common.period") + " n+3");
 		lblStep1Periode3Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep1Periode3Title.setFont(new Font("Tahoma", Font.BOLD, 12));
 		lblStep1Periode3Title.setBounds(427, 56, 76, 23);
 		panelStep1.add(lblStep1Periode3Title);
 
-		lblStep1Periode4Title = new JLabel("Periode n+4");
+		lblStep1Periode4Title = new JLabel(
+				BUNDLE.getString("PlanungstoolGUI.common.period") + " n+4");
 		lblStep1Periode4Title.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStep1Periode4Title.setFont(new Font("Tahoma", Font.BOLD, 12));
 		lblStep1Periode4Title.setBounds(510, 56, 76, 23);
@@ -969,7 +1014,9 @@ public class PlanungstoolGUI {
 
 		JPanel panelStep2 = new JPanel();
 		panelStep2.setLayout(null);
-		tabbedPanePlanning.addTab("Schritt 2", null, panelStep2, null);
+		tabbedPanePlanning.addTab(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 2", null,
+				panelStep2, null);
 
 		JLabel lblStep2Title = new JLabel(
 				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 2: " + BUNDLE.getString("PlanungstoolGUI.planning.step2")); //$NON-NLS-1$
@@ -1066,7 +1113,9 @@ public class PlanungstoolGUI {
 
 		JPanel panelStep3 = new JPanel();
 		panelStep3.setLayout(null);
-		tabbedPanePlanning.addTab("Schritt 3", null, panelStep3, null);
+		tabbedPanePlanning.addTab(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 3", null,
+				panelStep3, null);
 
 		JLabel lblStep3Title = new JLabel(
 				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 3: " + BUNDLE.getString("PlanungstoolGUI.planning.step3")); //$NON-NLS-1$
@@ -1616,7 +1665,9 @@ public class PlanungstoolGUI {
 		panelStep3.add(btnStep3Recalculate);
 
 		JPanel panelStep4 = new JPanel();
-		tabbedPanePlanning.addTab("Schritt 4", null, panelStep4, null);
+		tabbedPanePlanning.addTab(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 4", null,
+				panelStep4, null);
 		panelStep4.setLayout(null);
 
 		JLabel lblStep4Title = new JLabel(
@@ -1695,7 +1746,9 @@ public class PlanungstoolGUI {
 		panelStep4.add(button_2);
 
 		JPanel panelStep5 = new JPanel();
-		tabbedPanePlanning.addTab("Schritt 5", null, panelStep5, null);
+		tabbedPanePlanning.addTab(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 5", null,
+				panelStep5, null);
 		panelStep5.setLayout(null);
 
 		JLabel lblStep5Title = new JLabel(
@@ -1956,7 +2009,9 @@ public class PlanungstoolGUI {
 		panelStep5.add(spinnerStep5OvertimeWorkplace9);
 
 		JPanel panelStep6 = new JPanel();
-		tabbedPanePlanning.addTab("Schritt 6", null, panelStep6, null);
+		tabbedPanePlanning.addTab(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " 6", null,
+				panelStep6, null);
 		panelStep6.setLayout(null);
 
 		JLabel lblStep6Title = new JLabel(
