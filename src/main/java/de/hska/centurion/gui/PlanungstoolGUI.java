@@ -2712,27 +2712,54 @@ public class PlanungstoolGUI {
 				this);
 
 		// SET ACTION LISTENERS
-		btnStep1NextStep.addActionListener(switchStepsButtonActionListener);
-		btnStep2PrevStep.addActionListener(switchStepsButtonActionListener);
+		// btnStep1NextStep.addActionListener(switchStepsButtonActionListener);
+		// btnStep2PrevStep.addActionListener(switchStepsButtonActionListener);
+		//
+		// btnStep3PrevStep.addActionListener(switchStepsButtonActionListener);
+		// btnStep3NextStep.addActionListener(switchStepsButtonActionListener);
+		// btnStep4PrevStep.addActionListener(switchStepsButtonActionListener);
+		// btnStep4NextStep.addActionListener(switchStepsButtonActionListener);
+		// btnStep5PrevStep.addActionListener(switchStepsButtonActionListener);
+		// btnStep5NextStep.addActionListener(switchStepsButtonActionListener);
+		// btnStep6PrevStep.addActionListener(switchStepsButtonActionListener);
+		// btnStep2NextStep.addActionListener(switchStepsButtonActionListener);
 
-		btnStep3PrevStep.addActionListener(switchStepsButtonActionListener);
-		btnStep3NextStep.addActionListener(switchStepsButtonActionListener);
-		btnStep4PrevStep.addActionListener(switchStepsButtonActionListener);
-		btnStep4NextStep.addActionListener(switchStepsButtonActionListener);
-		btnStep5PrevStep.addActionListener(switchStepsButtonActionListener);
-		btnStep5NextStep.addActionListener(switchStepsButtonActionListener);
-		btnStep6PrevStep.addActionListener(switchStepsButtonActionListener);
-		btnStep2NextStep.addActionListener(switchStepsButtonActionListener);
+		btnStep1NextStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				readInForecasts();
+				switchToStep(2);
+			}
+		});
+
+		btnStep2PrevStep.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				readInSales();
+				switchToStep(1);
+
+			}
+		});
 
 		btnStep2NextStep.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				readInForecasts();
 				readInSales();
 				readInSafetyStock();
 				calculateSafetyStock();
-				calculateProductionOrder();
+				switchToStep(3);
+			}
+		});
+		
+		btnStep3PrevStep.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				switchToStep(2);
+				
 			}
 		});
 
@@ -2740,11 +2767,8 @@ public class PlanungstoolGUI {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				readInForecasts();
-				readInSales();
 				readInSafetyStock();
 				calculateSafetyStock();
-				calculateProductionOrder();
 			}
 		});
 
@@ -2752,8 +2776,6 @@ public class PlanungstoolGUI {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				readInForecasts();
-				readInSales();
 				readInSafetyStock();
 				calculateSafetyStock();
 				calculateProductionOrder();
@@ -2979,9 +3001,6 @@ public class PlanungstoolGUI {
 
 	public void switchToStep(int goToStep) {
 
-		readInForecasts();
-		readInSales();
-		readInSafetyStock();
 
 		// String validationResult = UserInputValidator.validate(userInput);
 		//
