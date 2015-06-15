@@ -37,9 +37,6 @@ public class ProductionService {
 
 	private Integer SHIFT_TIME_MINS = 2400;
 
-	private Integer MAX_CAPACITY = (3 * SHIFT_TIME_MINS)
-			+ (3 * SHIFT_TIME_MINS / 2);
-
 	/*
 	 * ======================== CONSTRUCTOR ========================
 	 */
@@ -125,8 +122,7 @@ public class ProductionService {
 	 * @return items which will be produced under consideration of safetystock,
 	 *         sellwish, current stock and unfinished productions
 	 */
-	public Map<String, Integer> calculateProduction(
-			SafetyStock safetyStockInput) {
+	public Map<String, Integer> calculateProduction(SafetyStock safetyStockInput) {
 
 		// Place safetystock in global UserInput object for further calculation
 		userInput.setSafetyStock(safetyStockInput);
@@ -469,39 +465,6 @@ public class ProductionService {
 		}
 
 		return roundTripTimes;
-	}
-
-	private String calcBottleNeck(
-			Map<String, Map<String, Integer>> roundTripTimes) {
-
-		String bottleNeckWorkplace = null;
-
-		Integer bottleNeckRTT = 0;
-
-		// Determine the Workplace with the lowest remaining capacity
-		for (Map.Entry<String, Map<String, Integer>> rtt : roundTripTimes
-				.entrySet()) {
-
-			// Dertermine remaining capacity
-			Integer capacity = MAX_CAPACITY - rtt.getValue().get(ACCUMULATED);
-
-			// Check wether there is no remaining capacity
-			if (capacity < 0) {
-				// TODO: Order isn't possible within periode
-			}
-
-			// Check wether current workplace has the overall lowest remaining
-			// capacity
-			if (capacity < bottleNeckRTT) {
-				bottleNeckRTT = capacity;
-
-				// Replace latest workplace with current one
-				bottleNeckWorkplace = rtt.getKey();
-			}
-
-		}
-		return bottleNeckWorkplace;
-
 	}
 
 	/*
