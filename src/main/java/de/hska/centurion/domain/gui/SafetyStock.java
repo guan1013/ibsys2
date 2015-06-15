@@ -1,6 +1,7 @@
 package de.hska.centurion.domain.gui;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -23,7 +24,7 @@ public class SafetyStock {
 	 * 			The key for the item E26 should be "E26".
 	 * 			The key for the item P1 should be "P1".
 	 */
-	private Map<String, Integer> safetyStocks = new HashMap<String, Integer>();
+	private Map<String, Integer> safetyStocks;
 
 	/*
 	 * ======================== CONSTRUCTORS ========================
@@ -34,6 +35,7 @@ public class SafetyStock {
 	 * @param standardStock
 	 */
 	public SafetyStock(int standardStock) {
+		safetyStocks = new LinkedHashMap<String, Integer>();
 		safetyStocks.put("P1", standardStock);
 		safetyStocks.put("P2", standardStock);
 		safetyStocks.put("P3", standardStock);
@@ -49,12 +51,12 @@ public class SafetyStock {
 		safetyStocks.put("E13", standardStock);
 		safetyStocks.put("E14", standardStock);
 		safetyStocks.put("E15", standardStock);
-		safetyStocks.put("E16", standardStock);
-		safetyStocks.put("E17", standardStock);
+		safetyStocks.put("E16", 3*standardStock);
+		safetyStocks.put("E17", 3*standardStock);
 		safetyStocks.put("E18", standardStock);
 		safetyStocks.put("E19", standardStock);
 		safetyStocks.put("E20", standardStock);
-		safetyStocks.put("E26", standardStock);
+		safetyStocks.put("E26", 3*standardStock);
 		safetyStocks.put("E29", standardStock);
 		safetyStocks.put("E30", standardStock);
 		safetyStocks.put("E31", standardStock);
