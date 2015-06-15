@@ -215,7 +215,9 @@ public class OrderService {
 			List<Integer> itemConsumptions = consumptions.get(item.getNumber());
 
 			boolean nextItem = false;
-			System.out.println("currentItem: " + item.getNumber());
+			System.out.println("currentItem=" + item.getNumber()
+					+ ", deliveryTime=" + item.getDeliveryTime() * 5
+					+ ", deviation=" + item.getDiviation() * 5);
 			// iterate over the consumptions. p + 1 = currentPeriod
 
 			// a variable for a matching order
@@ -242,6 +244,8 @@ public class OrderService {
 			}
 			System.out.println("orderIncomeP=" + orderIncomeP
 					+ ", orderIncomeD=" + orderIncomeD);
+			// Is the order already arrived?
+			boolean orderIncome = false;
 
 			for (int p = 0; p < itemConsumptions.size(); p++) {
 				// iterate over the current day in period. d + 1 = current day
@@ -253,19 +257,23 @@ public class OrderService {
 					stock = stock - itemConsumptions.get(p) / 5;
 
 					if (p == orderIncomeP && d == orderIncomeD) {
-						System.out.println("\tOrderIncoming: " + (p + 1) + "/"
-								+ (d + 1) + " Amount: "
+						System.out.println("\t\t\t\tOrderIncoming: " + (p + 1)
+								+ "/" + (d + 1) + " Amount: "
 								+ matchingOrder.getAmount());
 						stock = stock + matchingOrder.getAmount();
+						orderIncome = true;
 					}
 
 					System.out.println("\t\t\t\t" + (d + 1) + ". Day: " + stock
 							+ " Stock");
 
 					// when stock is empty ...
-					if (stock <= 0) {
+					if ((stock <= 0 && matchingOrder == null)
+							|| (stock <= 0 && orderIncome)
+							|| (stock <= 0 && p != orderIncomeP
+									&& p != (orderIncomeP + 1) && (d - orderIncomeD) <= 1)) {
 						// check if Order is necessary
-						checkIfOrderIsNecessary(item, p, d, false);
+						checkIfOrderIsNecessary(item, p, d, orderIncome);
 						nextItem = true;
 						break;
 					}
@@ -288,9 +296,9 @@ public class OrderService {
 	 *            the day on which the item will be empty
 	 */
 	private void checkIfOrderIsNecessary(KItem item, int p, int d,
-			boolean secondAttempt) {
+			boolean orderInDelivery) {
 		// calculate in how many days item stock is empty ...
-		int itemIsOut = (p + 1) * 5 + (d + 1);
+		int itemIsOut = p * 5 + (d + 1);
 		// and calculate in the days until the purchase order
 		// arrives ...
 		double maxDeliveryTime = item.getDeliveryTime() * 5
@@ -298,18 +306,14 @@ public class OrderService {
 		// and then calculate when a order is necessary (in
 		// days)
 		double orderNecessary = itemIsOut - maxDeliveryTime;
-
+		System.out.println();
+		System.out.println("\t\t\t\t\t\tOrder Necessary <= 5.0?");
+		System.out.println("\t\t\t\t\t\titemIsOut=" + itemIsOut
+				+ ", maxDeliveryTime=" + maxDeliveryTime + ", orderNecessary="
+				+ orderNecessary);
 		// compare if a order is necessary in less than 5 days
 		// (= one period)
 		if (orderNecessary <= 5.0) {
-			// check if order is already on the way
-			// if (!secondAttempt) {
-			// boolean ordered = checkIfOrderIsAlreadyOnTheWay(item, p, d);
-			//
-			// if (ordered) {
-			// return;
-			// }
-			// }
 			// create order object
 			Order order = new Order(item.getNumber(), item.getstack(), 5);
 
@@ -318,6 +322,12 @@ public class OrderService {
 				// calculate if a fast order let the item arrive
 				// before it is out (just for fun)
 				order.setModus(4);
+
+				if (orderInDelivery) {
+					// If a order is already in delivery and the need for a fast
+					// order is there buy a higher amount. (4 x quantity)
+					order.setQuantity(order.getQuantity() * 4);
+				}
 				double makeFastOrder = itemIsOut - (maxDeliveryTime / 2.0);
 				// check if a fast order arrives before the item
 				// is out
@@ -328,6 +338,10 @@ public class OrderService {
 					// empty before a new fast order arrives
 				}
 			}
+			System.out.println();
+			System.out.println("\t\t\t\t\t\tOrder:");
+			System.out.println("\t\t\t\t\t\t" + order);
+			System.out.println();
 			purchaseOrders.add(order);
 		}
 
