@@ -59,6 +59,8 @@ public class Input {
 	 * A list, that contains the number of shifts and overtime for each
 	 * workspace.
 	 */
+	@XmlElementWrapper(name = "workingtimelist")
+	@XmlElement(name = "workingtime")
 	private List<WorkingTime> workingTimeList = new ArrayList<WorkingTime>();
 
 	/*

@@ -3,6 +3,7 @@ package de.hska.centurion;
 import java.awt.EventQueue;
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -34,7 +35,7 @@ public class App {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 
 		// Set the look and feel to users OS LaF.
 		try {
@@ -48,8 +49,8 @@ public class App {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					PlanungstoolGUI window = new PlanungstoolGUI();
-					window.getFrameMain().setVisible(true);
+					PlanungstoolGUI gui = new PlanungstoolGUI(args);
+					gui.getFrameMain().setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

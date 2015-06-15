@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,6 +43,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.table.DefaultTableModel;
 
+import de.hska.centurion.App;
 import de.hska.centurion.domain.gui.Forecast;
 import de.hska.centurion.domain.gui.SafetyStock;
 import de.hska.centurion.domain.gui.Sales;
@@ -68,6 +70,14 @@ import de.hska.centurion.io.XmlParser;
 import de.hska.centurion.services.production.ProductionService;
 import de.hska.centurion.services.purchase.OrderService;
 
+import javax.swing.SpinnerNumberModel;
+
+import java.util.ResourceBundle;
+
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+
 /**
  * This is the main graphical user interface of the planning tool. It contains
  * the window which contains the result and the planning frame. The main screen
@@ -85,6 +95,8 @@ import de.hska.centurion.services.purchase.OrderService;
  *
  */
 public class PlanungstoolGUI {
+
+	private static ResourceBundle BUNDLE;
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ATTRIBUTES
@@ -178,7 +190,15 @@ public class PlanungstoolGUI {
 	/**
 	 * Create the application.
 	 */
-	public PlanungstoolGUI() {
+	public PlanungstoolGUI(String[] args) {
+
+		String locale = "";
+		if (args != null && args.length > 0) {
+			locale = args[0];
+		}
+
+		BUNDLE = ResourceBundle.getBundle(
+				"de.hska.centurion.gui.messages", new Locale(locale)); //$NON-NLS-1$
 
 		// Initialize attributes
 		stepsMap = new HashMap<>();
@@ -366,7 +386,7 @@ public class PlanungstoolGUI {
 												.getResource("/com/sun/java/swing/plaf/windows/icons/Computer.gif")));
 		getFrameMain().setResizable(false);
 		getFrameMain().setTitle(
-				"IBSYS-II-Planungstool - Gruppe Centurion - SS 2015");
+				BUNDLE.getString("PlanungstoolGUI.frameMain.title")); //$NON-NLS-1$
 		getFrameMain().setBounds(100, 100, 893, 738);
 		getFrameMain().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -759,6 +779,35 @@ public class PlanungstoolGUI {
 			}
 		});
 		mnFile.add(mntmLoadResultXml);
+
+		JMenu mnSprache = new JMenu(
+				BUNDLE.getString("PlanungstoolGUI.mnSprache.text")); //$NON-NLS-1$
+		menuBar.add(mnSprache);
+
+		JRadioButtonMenuItem rdbtnmntmNewRadioItem = new JRadioButtonMenuItem(
+				BUNDLE.getString("PlanungstoolGUI.rdbtnmntmNewRadioItem.text")); //$NON-NLS-1$
+		rdbtnmntmNewRadioItem.setSelected(true);
+		mnSprache.add(rdbtnmntmNewRadioItem);
+
+		final JRadioButtonMenuItem rdbtnmntmNewRadioItem_1 = new JRadioButtonMenuItem(
+				BUNDLE.getString("PlanungstoolGUI.rdbtnmntmNewRadioItem_1.text")); //$NON-NLS-1$
+		rdbtnmntmNewRadioItem_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (rdbtnmntmNewRadioItem_1.isSelected() == true) {
+					Locale.setDefault(new Locale("en"));
+					frameMain.setVisible(false);
+					frameMain.dispose();
+					App.main(new String[] { "en" });
+					System.out.println("chang");
+				}
+			}
+		});
+
+		mnSprache.add(rdbtnmntmNewRadioItem_1);
+
+		JRadioButtonMenuItem rdbtnmntmRussisch = new JRadioButtonMenuItem(
+				BUNDLE.getString("PlanungstoolGUI.rdbtnmntmRussisch.text")); //$NON-NLS-1$
+		mnSprache.add(rdbtnmntmRussisch);
 		getFrameMain().getContentPane().setLayout(null);
 
 		JInternalFrame internalFramePlanning = new JInternalFrame("Planung");
@@ -819,61 +868,85 @@ public class PlanungstoolGUI {
 		panelStep1.add(lblStep1Periode4Title);
 
 		spinnerStep1P1Periode1 = new JSpinner();
+		spinnerStep1P1Periode1
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P1Periode1.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P1Periode1.setBounds(272, 93, 56, 35);
 		panelStep1.add(spinnerStep1P1Periode1);
 
 		spinnerStep1P2Periode1 = new JSpinner();
+		spinnerStep1P2Periode1
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P2Periode1.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P2Periode1.setBounds(272, 146, 56, 35);
 		panelStep1.add(spinnerStep1P2Periode1);
 
 		spinnerStep1P3Periode1 = new JSpinner();
+		spinnerStep1P3Periode1
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P3Periode1.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P3Periode1.setBounds(272, 199, 56, 35);
 		panelStep1.add(spinnerStep1P3Periode1);
 
 		spinnerStep1P1Periode2 = new JSpinner();
+		spinnerStep1P1Periode2
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P1Periode2.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P1Periode2.setBounds(354, 93, 56, 35);
 		panelStep1.add(spinnerStep1P1Periode2);
 
 		spinnerStep1P2Periode2 = new JSpinner();
+		spinnerStep1P2Periode2
+				.setModel(new SpinnerNumberModel(0, 0, 100005, 50));
 		spinnerStep1P2Periode2.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P2Periode2.setBounds(354, 146, 56, 35);
 		panelStep1.add(spinnerStep1P2Periode2);
 
 		spinnerStep1P3Periode2 = new JSpinner();
+		spinnerStep1P3Periode2
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P3Periode2.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P3Periode2.setBounds(354, 199, 56, 35);
 		panelStep1.add(spinnerStep1P3Periode2);
 
 		spinnerStep1P1Periode3 = new JSpinner();
+		spinnerStep1P1Periode3
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P1Periode3.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P1Periode3.setBounds(436, 93, 56, 35);
 		panelStep1.add(spinnerStep1P1Periode3);
 
 		spinnerStep1P2Periode3 = new JSpinner();
+		spinnerStep1P2Periode3
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P2Periode3.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P2Periode3.setBounds(436, 146, 56, 35);
 		panelStep1.add(spinnerStep1P2Periode3);
 
 		spinnerStep1P3Periode3 = new JSpinner();
+		spinnerStep1P3Periode3
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P3Periode3.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P3Periode3.setBounds(436, 199, 56, 35);
 		panelStep1.add(spinnerStep1P3Periode3);
 
 		spinnerStep1P1Periode4 = new JSpinner();
+		spinnerStep1P1Periode4
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P1Periode4.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P1Periode4.setBounds(518, 93, 56, 35);
 		panelStep1.add(spinnerStep1P1Periode4);
 
 		spinnerStep1P2Periode4 = new JSpinner();
+		spinnerStep1P2Periode4
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P2Periode4.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P2Periode4.setBounds(518, 146, 56, 35);
 		panelStep1.add(spinnerStep1P2Periode4);
 
 		spinnerStep1P3Periode4 = new JSpinner();
+		spinnerStep1P3Periode4
+				.setModel(new SpinnerNumberModel(0, 0, 10000, 50));
 		spinnerStep1P3Periode4.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep1P3Periode4.setBounds(518, 199, 56, 35);
 		panelStep1.add(spinnerStep1P3Periode4);
@@ -922,31 +995,43 @@ public class PlanungstoolGUI {
 		panelStep2.add(lblStep2DirectSalesTitle);
 
 		spinnerStep2P1Sales = new JSpinner();
+		spinnerStep2P1Sales.setModel(new SpinnerNumberModel(new Integer(0),
+				new Integer(0), null, new Integer(50)));
 		spinnerStep2P1Sales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P1Sales.setBounds(295, 93, 75, 35);
 		panelStep2.add(spinnerStep2P1Sales);
 
 		spinnerStep2P1DirectSales = new JSpinner();
+		spinnerStep2P1DirectSales.setModel(new SpinnerNumberModel(
+				new Integer(0), new Integer(0), null, new Integer(50)));
 		spinnerStep2P1DirectSales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P1DirectSales.setBounds(426, 93, 75, 35);
 		panelStep2.add(spinnerStep2P1DirectSales);
 
 		spinnerStep2P2Sales = new JSpinner();
+		spinnerStep2P2Sales.setModel(new SpinnerNumberModel(new Integer(0),
+				new Integer(0), null, new Integer(50)));
 		spinnerStep2P2Sales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P2Sales.setBounds(295, 146, 75, 35);
 		panelStep2.add(spinnerStep2P2Sales);
 
 		spinnerStep2P3Sales = new JSpinner();
+		spinnerStep2P3Sales.setModel(new SpinnerNumberModel(new Integer(0),
+				new Integer(0), null, new Integer(50)));
 		spinnerStep2P3Sales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P3Sales.setBounds(295, 199, 75, 35);
 		panelStep2.add(spinnerStep2P3Sales);
 
 		spinnerStep2P2DirectSales = new JSpinner();
+		spinnerStep2P2DirectSales.setModel(new SpinnerNumberModel(
+				new Integer(0), new Integer(0), null, new Integer(50)));
 		spinnerStep2P2DirectSales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P2DirectSales.setBounds(426, 146, 75, 35);
 		panelStep2.add(spinnerStep2P2DirectSales);
 
 		spinnerStep2P3DirectSales = new JSpinner();
+		spinnerStep2P3DirectSales.setModel(new SpinnerNumberModel(
+				new Integer(0), new Integer(0), null, new Integer(50)));
 		spinnerStep2P3DirectSales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P3DirectSales.setBounds(426, 199, 75, 35);
 		panelStep2.add(spinnerStep2P3DirectSales);
@@ -2601,6 +2686,7 @@ public class PlanungstoolGUI {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				readInCapacity();
 				calculateOrders();
 			}
 		});
@@ -2734,6 +2820,18 @@ public class PlanungstoolGUI {
 		userInput.setSales(sales);
 		userInput.setDirectSales(directSales);
 
+	}
+
+	private void readInCapacity() {
+
+		List<WorkingTime> workingTimes = new ArrayList<>();
+		for (int workplaceId : workplaceFormular.keySet()) {
+			workingTimes.add(new WorkingTime(workplaceId,
+					(int) workplaceFormular.get(workplaceId).getShift()
+							.getValue(), (int) workplaceFormular
+							.get(workplaceId).getOvertime().getValue()));
+		}
+		output.setWorkingTimeList(workingTimes);
 	}
 
 	private void removeAllRowsFromTable(DefaultTableModel model) {
