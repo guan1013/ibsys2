@@ -2,6 +2,7 @@ package de.hska.centurion.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
@@ -283,10 +284,11 @@ public class PlanungstoolGUI {
 
 			safetyStockFormular.get(id).getWish()
 					.setValue(DEFAULT_SAFETY_STOCK);
-			
-			if(id.equalsIgnoreCase("e16") || id.equalsIgnoreCase("e17") || id.equalsIgnoreCase("e26")) {
+
+			if (id.equalsIgnoreCase("e16") || id.equalsIgnoreCase("e17")
+					|| id.equalsIgnoreCase("e26")) {
 				safetyStockFormular.get(id).getWish()
-				.setValue(DEFAULT_SAFETY_STOCK * 3);
+						.setValue(DEFAULT_SAFETY_STOCK * 3);
 			}
 		}
 	}
@@ -333,13 +335,21 @@ public class PlanungstoolGUI {
 	private void displayPeriod(int period) {
 
 		lblStep1Periode1Title.setText(BUNDLE
-				.getString("PlanungstoolGUI.common.period") + (period + 1));
+				.getString("PlanungstoolGUI.common.period")
+				+ " "
+				+ (period + 1));
 		lblStep1Periode2Title.setText(BUNDLE
-				.getString("PlanungstoolGUI.common.period") + (period + 2));
+				.getString("PlanungstoolGUI.common.period")
+				+ " "
+				+ (period + 2));
 		lblStep1Periode3Title.setText(BUNDLE
-				.getString("PlanungstoolGUI.common.period") + (period + 3));
+				.getString("PlanungstoolGUI.common.period")
+				+ " "
+				+ (period + 3));
 		lblStep1Periode4Title.setText(BUNDLE
-				.getString("PlanungstoolGUI.common.period") + (period + 4));
+				.getString("PlanungstoolGUI.common.period")
+				+ " "
+				+ (period + 4));
 	}
 
 	private void displayProductionOrder() {
@@ -416,11 +426,11 @@ public class PlanungstoolGUI {
 		getFrameMain().getContentPane().add(internalFrameResults);
 		internalFrameResults.getContentPane().setLayout(null);
 
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBounds(10, 11, 831, 235);
 		internalFrameResults.getContentPane().add(tabbedPane);
 
-		JPanel panelWarehouse = new JPanel();
+		final JPanel panelWarehouse = new JPanel();
 		tabbedPane.addTab(BUNDLE
 				.getString("PlanungstoolGUI.results.tab.warehousestock.title"),
 				null, panelWarehouse, null);
@@ -452,7 +462,7 @@ public class PlanungstoolGUI {
 		labelTotalStockValue.setBounds(20, 0, 806, 23);
 		panelWarehouse.add(labelTotalStockValue);
 
-		JPanel panelInwardStockMovement = new JPanel();
+		final JPanel panelInwardStockMovement = new JPanel();
 		tabbedPane
 				.addTab(BUNDLE
 						.getString("PlanungstoolGUI.results.tab.inwardstockmovement.title"),
@@ -489,7 +499,7 @@ public class PlanungstoolGUI {
 		tableInwardStockMovement.getColumnModel().getColumn(5)
 				.setPreferredWidth(91);
 
-		JPanel panelFutureInwardStockMovement = new JPanel();
+		final JPanel panelFutureInwardStockMovement = new JPanel();
 		tabbedPane
 				.addTab(BUNDLE
 						.getString("PlanungstoolGUI.results.tab.futereinwardstockmovement.title"),
@@ -525,7 +535,7 @@ public class PlanungstoolGUI {
 					}
 				});
 
-		JPanel panelIdleTimeCosts = new JPanel();
+		final JPanel panelIdleTimeCosts = new JPanel();
 		tabbedPane.addTab(BUNDLE
 				.getString("PlanungstoolGUI.results.tab.idletimecosts.title"),
 				null, panelIdleTimeCosts, null);
@@ -553,7 +563,7 @@ public class PlanungstoolGUI {
 			}
 		});
 
-		JPanel panelWaitingListWorkstations = new JPanel();
+		final JPanel panelWaitingListWorkstations = new JPanel();
 		tabbedPane
 				.addTab(BUNDLE
 						.getString("PlanungstoolGUI.results.tab.waitinglist.workstations.title"),
@@ -583,7 +593,7 @@ public class PlanungstoolGUI {
 			}
 		});
 
-		JPanel panelWaitingListStock = new JPanel();
+		final JPanel panelWaitingListStock = new JPanel();
 		tabbedPane
 				.addTab(BUNDLE
 						.getString("PlanungstoolGUI.results.tab.waitinglist.stock.title"),
@@ -593,6 +603,38 @@ public class PlanungstoolGUI {
 		table = new JTable();
 		table.setBounds(0, 0, 826, 196);
 		panelWaitingListStock.add(table);
+
+		JPanel panelIntroduction = new JPanel();
+		tabbedPane.addTab(
+				BUNDLE.getString("PlanungstoolGUI.results.tab.introduction"),
+				null, panelIntroduction, null);
+		panelIntroduction.setLayout(null);
+
+		JLabel lblNewLabel = new JLabel("");
+		Image img = new ImageIcon(this.getClass().getResource("/centurion.png"))
+				.getImage();
+		lblNewLabel.setIcon(new ImageIcon(img));
+		lblNewLabel.setBounds(747, 0, 69, 207);
+		panelIntroduction.add(lblNewLabel);
+
+		JLabel lblIbsysiiplanungstool = new JLabel("IBSYS-II-Planungstool");
+		lblIbsysiiplanungstool.setHorizontalAlignment(SwingConstants.CENTER);
+		lblIbsysiiplanungstool.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblIbsysiiplanungstool.setBounds(20, 44, 806, 32);
+		panelIntroduction.add(lblIbsysiiplanungstool);
+
+		JLabel label_7 = new JLabel("");
+		label_7.setHorizontalAlignment(SwingConstants.CENTER);
+		img = new ImageIcon(this.getClass().getResource("/gbi.png")).getImage();
+		label_7.setIcon(new ImageIcon(img));
+		label_7.setBounds(10, 25, 282, 171);
+		panelIntroduction.add(label_7);
+
+		JLabel lblAsd = new JLabel(
+				"<html><b>Gruppe Centurion</b><ul><li>Alexandra P</li><li>Albian Nitaj</li><li>Simon Findling</li><li>Matthias Schnell</li><li>Andreas Güntzel</li></ul></html>");
+		lblAsd.setVerticalAlignment(SwingConstants.TOP);
+		lblAsd.setBounds(580, 55, 157, 96);
+		panelIntroduction.add(lblAsd);
 		tableWaitingListWorkstations.getColumnModel().getColumn(0)
 				.setResizable(false);
 		tableWaitingListWorkstations.getColumnModel().getColumn(1)
@@ -642,189 +684,7 @@ public class PlanungstoolGUI {
 
 		JMenuItem mntmLoadResultXml = new JMenuItem(
 				BUNDLE.getString("PlanungstoolGUI.mntmLoadResultXml.text")); //$NON-NLS-1$
-		mntmLoadResultXml.addActionListener(new ActionListener() {
 
-			public void actionPerformed(ActionEvent e) {
-				final JFileChooser fc = new JFileChooser();
-
-				// Zeige Dialog zum Auswählen einer Datei
-				int returnVal = fc.showOpenDialog(getFrameMain());
-
-				// Warten bis der Benutzer eine Datei ausgewählt hat
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-
-					// Ausgewählte Datei abfragen
-					File file = fc.getSelectedFile();
-
-					Results results = null;
-
-					try {
-
-						// Datei als Result-Objekt parsen
-						results = XmlParser.parseXmlFile(file.getPath());
-					} catch (Exception ex) {
-						results = null;
-						JOptionPane.showMessageDialog(getFrameMain(),
-								ex.getMessage());
-						return;
-					}
-
-					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
-					// AUSGABE / ANZEIGE ERGEBNISSE
-
-					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
-					// ALLGEMEINES
-
-					// Titel des Ergebnis-Frames setzen
-					internalFrameResults.setTitle("Ergebnisse - Periode "
-							+ results.getPeriod() + " | Gruppe "
-							+ results.getGroup());
-
-					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
-					// LAGERHAUS
-
-					// Gesamtwert in Label anzeigen
-					labelTotalStockValue.setText("Gesamtwert: "
-							+ results.getWarehouseStock()
-									.getTotalStockValueString());
-
-					// Bisherige angezeigte Daten entfernen
-					DefaultTableModel model = (DefaultTableModel) tableWarehouse
-							.getModel();
-					removeAllRowsFromTable(model);
-
-					// Alle Artikel im Lagerhaus auflisten
-					List<Article> articles = results.getWarehouseStock()
-							.getArticles();
-
-					for (Article article : articles) {
-						model.addRow(new Object[] { article.getId(),
-								article.getAmount(), article.getStartAmount(),
-								article.getPctString(),
-								article.getPriceString(),
-								article.getStockValueString() });
-					}
-
-					// Clean up
-					articles = null;
-					model = null;
-
-					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
-					// AKTUELLER LAGERZUGANG BESTELLUNGEN
-
-					// Bisherige angezeigte Daten entfernen
-					model = (DefaultTableModel) tableInwardStockMovement
-							.getModel();
-					removeAllRowsFromTable(model);
-
-					// Alle angekommenen Bestellungen auflisten
-					List<Order> orders = results.getInwardStockMovement()
-							.getOrders();
-
-					for (Order order : orders) {
-						model.addRow(new Object[] {
-								new String(order.getOrderPeriod() + "-"
-										+ order.getId()),
-								getModeAsString(order.getMode()),
-								order.getArticle(), order.getAmount(), "???",
-								order.getMaterialCostsStr(),
-								order.getOrderCostsStr(),
-								order.getEntireCostsStr(),
-								order.getPieceCostsStr() });
-					}
-
-					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
-					// AUSSTEHENDE BESTELLUNGEN
-
-					// Bisherige angezeigte Daten entfernen
-					model = (DefaultTableModel) tableFutureInwardStockMovement
-							.getModel();
-					removeAllRowsFromTable(model);
-
-					// Alle ausstehenden Bestellungen auflisten
-					orders = results.getFutureInwardStockMovement().getOrders();
-
-					if (orders != null) {
-						for (Order order : orders) {
-							model.addRow(new Object[] {
-									new String(order.getOrderPeriod() + "-"
-											+ order.getId()), order.getMode(),
-									order.getArticle(), order.getAmount(),
-									"???", "???" });
-						}
-					}
-
-					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
-					// LEERZEITEN KOSTEN
-
-					// Bisherige angezeigte Daten entfernen
-					model = (DefaultTableModel) tableIdleTimeCosts.getModel();
-					removeAllRowsFromTable(model);
-
-					// Alle Leerzeiten Kosten auflisten
-					List<WorkplaceCosts> workplaceCosts = results
-							.getIdleTimeCosts().getWorkplaces();
-
-					for (WorkplaceCosts wC : workplaceCosts) {
-						model.addRow(new Object[] { wC.getId(),
-								wC.getSetupEvents(), wC.getIdleTime(),
-								wC.getWageIdleTimeCostsStr(),
-								wC.getWageCostsStr(),
-								wC.getMachineIdleTimeCostsStr() });
-					}
-
-					// Summe ausgeben
-					IdleTimeCostsSum sum = results.getIdleTimeCosts().getSum();
-					model.addRow(new Object[] { "SUMME", sum.getSetupEvents(),
-							sum.getIdleTime(), sum.getWageIdleTimeCostsStr(),
-							sum.getWageCostsStr(),
-							sum.getMachineIdleTimeCostsStr() });
-
-					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
-					// WARTELISTE ARBEITSPLATZ
-
-					// Bisherige angezeigte Daten entfernen
-					model = (DefaultTableModel) tableWaitingListWorkstations
-							.getModel();
-					removeAllRowsFromTable(model);
-
-					// Alle Wartelisten anzeigen
-					List<WorkplaceWaiting> workplacesWaiting = results
-							.getWaitingListWorkstations().getWorkplaces();
-					for (WorkplaceWaiting wW : workplacesWaiting) {
-
-						if (wW.getWaitingList() != null) {
-
-							model.addRow(new Object[] {
-									wW.getId(),
-									wW.getWaitingList().getPeriod(),
-									wW.getWaitingList().getOrder(),
-									wW.getWaitingList().getFirstBatch()
-											+ "-"
-											+ wW.getWaitingList()
-													.getLastBatch(),
-									wW.getWaitingList().getItem(),
-									wW.getWaitingList().getAmount(),
-									wW.getTimeNeed() });
-						} else {
-
-							model.addRow(new Object[] { wW.getId() });
-						}
-					}
-
-					try {
-						productionService = new ProductionService(results);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-						return;
-					}
-
-					gui.switchToStep(1);
-					gui.displayPeriod(results.getPeriod());
-					gui.setResults(results);
-				}
-			}
-		});
 		mnFile.add(mntmLoadResultXml);
 
 		JMenu mnSprache = new JMenu(
@@ -859,7 +719,7 @@ public class PlanungstoolGUI {
 		mnSprache.add(mntmRussisch);
 		getFrameMain().getContentPane().setLayout(null);
 
-		JInternalFrame internalFramePlanning = new JInternalFrame(
+		final JInternalFrame internalFramePlanning = new JInternalFrame(
 				BUNDLE.getString("PlanungstoolGUI.internalFramePlanning.title"));
 		internalFramePlanning.setBounds(10, 305, 867, 371);
 		getFrameMain().getContentPane().add(internalFramePlanning);
@@ -2832,6 +2692,228 @@ public class PlanungstoolGUI {
 
 		displayDefaultSafetyStock();
 
+		tabbedPane.removeAll();
+		tabbedPane.add(
+				BUNDLE.getString("PlanungstoolGUI.results.tab.introduction"),
+				panelIntroduction);
+
+		internalFramePlanning.setVisible(false);
+
+		mntmLoadResultXml.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				final JFileChooser fc = new JFileChooser();
+
+				// Zeige Dialog zum Auswählen einer Datei
+				int returnVal = fc.showOpenDialog(getFrameMain());
+
+				// Warten bis der Benutzer eine Datei ausgewählt hat
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+
+					// Ausgewählte Datei abfragen
+					File file = fc.getSelectedFile();
+
+					Results results = null;
+
+					try {
+
+						// Datei als Result-Objekt parsen
+						results = XmlParser.parseXmlFile(file.getPath());
+					} catch (Exception ex) {
+						results = null;
+						JOptionPane.showMessageDialog(getFrameMain(),
+								ex.getMessage());
+						return;
+					}
+
+					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+					// AUSGABE / ANZEIGE ERGEBNISSE
+
+					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+					// ALLGEMEINES
+
+					// Titel des Ergebnis-Frames setzen
+					internalFrameResults.setTitle(BUNDLE
+							.getString("PlanungstoolGUI.internalFrameResults.results")
+							+ " - "
+							+ BUNDLE.getString("PlanungstoolGUI.common.period")
+							+ " "
+							+ results.getPeriod()
+							+ " | "
+							+ BUNDLE.getString("PlanungstoolGUI.internalFrameResults.group")
+							+ " " + results.getGroup());
+
+					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+					// LAGERHAUS
+
+					// Gesamtwert in Label anzeigen
+					labelTotalStockValue.setText("Gesamtwert: "
+							+ results.getWarehouseStock()
+									.getTotalStockValueString());
+
+					// Bisherige angezeigte Daten entfernen
+					DefaultTableModel model = (DefaultTableModel) tableWarehouse
+							.getModel();
+					removeAllRowsFromTable(model);
+
+					// Alle Artikel im Lagerhaus auflisten
+					List<Article> articles = results.getWarehouseStock()
+							.getArticles();
+
+					for (Article article : articles) {
+						model.addRow(new Object[] { article.getId(),
+								article.getAmount(), article.getStartAmount(),
+								article.getPctString(),
+								article.getPriceString(),
+								article.getStockValueString() });
+					}
+
+					// Clean up
+					articles = null;
+					model = null;
+
+					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+					// AKTUELLER LAGERZUGANG BESTELLUNGEN
+
+					// Bisherige angezeigte Daten entfernen
+					model = (DefaultTableModel) tableInwardStockMovement
+							.getModel();
+					removeAllRowsFromTable(model);
+
+					// Alle angekommenen Bestellungen auflisten
+					List<Order> orders = results.getInwardStockMovement()
+							.getOrders();
+
+					for (Order order : orders) {
+						model.addRow(new Object[] {
+								new String(order.getOrderPeriod() + "-"
+										+ order.getId()),
+								getModeAsString(order.getMode()),
+								order.getArticle(), order.getAmount(), "???",
+								order.getMaterialCostsStr(),
+								order.getOrderCostsStr(),
+								order.getEntireCostsStr(),
+								order.getPieceCostsStr() });
+					}
+
+					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+					// AUSSTEHENDE BESTELLUNGEN
+
+					// Bisherige angezeigte Daten entfernen
+					model = (DefaultTableModel) tableFutureInwardStockMovement
+							.getModel();
+					removeAllRowsFromTable(model);
+
+					// Alle ausstehenden Bestellungen auflisten
+					orders = results.getFutureInwardStockMovement().getOrders();
+
+					if (orders != null) {
+						for (Order order : orders) {
+							model.addRow(new Object[] {
+									new String(order.getOrderPeriod() + "-"
+											+ order.getId()), order.getMode(),
+									order.getArticle(), order.getAmount(),
+									"???", "???" });
+						}
+					}
+
+					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+					// LEERZEITEN KOSTEN
+
+					// Bisherige angezeigte Daten entfernen
+					model = (DefaultTableModel) tableIdleTimeCosts.getModel();
+					removeAllRowsFromTable(model);
+
+					// Alle Leerzeiten Kosten auflisten
+					List<WorkplaceCosts> workplaceCosts = results
+							.getIdleTimeCosts().getWorkplaces();
+
+					for (WorkplaceCosts wC : workplaceCosts) {
+						model.addRow(new Object[] { wC.getId(),
+								wC.getSetupEvents(), wC.getIdleTime(),
+								wC.getWageIdleTimeCostsStr(),
+								wC.getWageCostsStr(),
+								wC.getMachineIdleTimeCostsStr() });
+					}
+
+					// Summe ausgeben
+					IdleTimeCostsSum sum = results.getIdleTimeCosts().getSum();
+					model.addRow(new Object[] { "SUMME", sum.getSetupEvents(),
+							sum.getIdleTime(), sum.getWageIdleTimeCostsStr(),
+							sum.getWageCostsStr(),
+							sum.getMachineIdleTimeCostsStr() });
+
+					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+					// WARTELISTE ARBEITSPLATZ
+
+					// Bisherige angezeigte Daten entfernen
+					model = (DefaultTableModel) tableWaitingListWorkstations
+							.getModel();
+					removeAllRowsFromTable(model);
+
+					// Alle Wartelisten anzeigen
+					List<WorkplaceWaiting> workplacesWaiting = results
+							.getWaitingListWorkstations().getWorkplaces();
+					for (WorkplaceWaiting wW : workplacesWaiting) {
+
+						if (wW.getWaitingList() != null) {
+
+							model.addRow(new Object[] {
+									wW.getId(),
+									wW.getWaitingList().getPeriod(),
+									wW.getWaitingList().getOrder(),
+									wW.getWaitingList().getFirstBatch()
+											+ "-"
+											+ wW.getWaitingList()
+													.getLastBatch(),
+									wW.getWaitingList().getItem(),
+									wW.getWaitingList().getAmount(),
+									wW.getTimeNeed() });
+						} else {
+
+							model.addRow(new Object[] { wW.getId() });
+						}
+					}
+
+					try {
+						productionService = new ProductionService(results);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						return;
+					}
+
+					gui.switchToStep(1);
+					gui.displayPeriod(results.getPeriod());
+					gui.setResults(results);
+
+					tabbedPane.removeAll();
+					tabbedPane.addTab(
+							BUNDLE.getString("PlanungstoolGUI.results.tab.warehousestock.title"),
+							null, panelWarehouse, null);
+					tabbedPane.addTab(
+							BUNDLE.getString("PlanungstoolGUI.results.tab.inwardstockmovement.title"),
+							null, panelInwardStockMovement, null);
+					tabbedPane.addTab(
+							BUNDLE.getString("PlanungstoolGUI.results.tab.futereinwardstockmovement.title"),
+							null, panelFutureInwardStockMovement, null);
+					tabbedPane.addTab(
+							BUNDLE.getString("PlanungstoolGUI.results.tab.idletimecosts.title"),
+							null, panelIdleTimeCosts, null);
+					tabbedPane.addTab(
+							BUNDLE.getString("PlanungstoolGUI.results.tab.waitinglist.workstations.title"),
+							null, panelWaitingListWorkstations, null);
+					tabbedPane.addTab(
+							BUNDLE.getString("PlanungstoolGUI.results.tab.waitinglist.stock.title"),
+							null, panelWaitingListStock, null);
+
+					internalFramePlanning.setVisible(true);
+					frameMain.setSize(893, 738);
+				}
+			}
+		});
+
+		frameMain.setSize(893, 375);
+		System.out.println(frameMain.getSize());
 	}
 
 	protected void switchLanguage(String string) {
