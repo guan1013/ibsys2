@@ -102,7 +102,9 @@ public class OrderService {
 
 		loadKItems();
 		loadProductionProgram();
+		System.out.println();
 		calculateAppreciatedKItemConsumption();
+		System.out.println();
 		examinePurchaseOrders();
 
 		return purchaseOrders;
@@ -173,9 +175,18 @@ public class OrderService {
 				productionProgram[0].getMenSales()
 						+ (p4.getMenSales() - p1.getMenSales()));
 
-		// for (Sales production : productionProgram) {
-		// System.out.println("productionProgram: " + production);
-		// }
+		int period = 1;
+		for (Sales production : productionProgram) {
+			System.out.println("productionProgram[p"
+					+ period
+					+ "]="
+					+ production
+					+ ", sum="
+					+ (production.getChildrenSales()
+							+ production.getWomenSales() + production
+								.getMenSales()));
+			period++;
+		}
 	}
 
 	/**
@@ -196,9 +207,13 @@ public class OrderService {
 						* productionProgram[i].getMenSales();
 				itemConsumption.add(consumption);
 			}
+
+			System.out.println("Item=" + item.getNumber() + ", Consumption: "
+					+ "\tp1=" + itemConsumption.get(0) + "\tp2="
+					+ itemConsumption.get(1) + "\tp3=" + itemConsumption.get(2)
+					+ "\tp4=" + itemConsumption.get(3));
+
 			// add the consumptions to the consumption-map
-			// System.out.println("Item: " + item.getNumber() + ", Consumption"
-			// + itemConsumption);
 			consumptions.put(item.getNumber(), itemConsumption);
 		}
 	}
@@ -224,7 +239,7 @@ public class OrderService {
 			de.hska.centurion.domain.input.components.Order matchingOrder = null;
 			// das ist h�sslich aber hier brauche ich eine andere Order-Klasse
 			// iterate over all future incoming orders
-			if (results.getPeriod() != 1) {
+			if (results.getFutureInwardStockMovement()!=null) {
 				for (de.hska.centurion.domain.input.components.Order order : results
 						.getFutureInwardStockMovement().getOrders()) {
 					// check if item is in future incoming orders
@@ -301,23 +316,39 @@ public class OrderService {
 			boolean orderInDelivery) {
 		// calculate in how many days item stock is empty ...
 		int itemIsOut = p * 5 + (d + 1);
-		// and calculate in the days until the purchase order
+		// and calculate the days until the purchase order
 		// arrives ...
-		double maxDeliveryTime = item.getDeliveryTime() * 5
-				+ item.getDiviation() * 5;
+		float deliveryTime = (float) (item.getDeliveryTime() * 5);
 		// and then calculate when a order is necessary (in
 		// days)
-		double orderNecessary = itemIsOut - maxDeliveryTime;
+		double orderNecessary = itemIsOut - deliveryTime;
 		System.out.println();
 		System.out.println("\t\t\t\t\t\tOrder Necessary <= 5.0?");
 		System.out.println("\t\t\t\t\t\titemIsOut=" + itemIsOut
-				+ ", maxDeliveryTime=" + maxDeliveryTime + ", orderNecessary="
+				+ ", maxDeliveryTime=" + deliveryTime + ", orderNecessary="
 				+ orderNecessary);
 		// compare if a order is necessary in less than 5 days
 		// (= one period)
 		if (orderNecessary <= 5.0) {
+			// calculate average consumptions
+			List<Integer> currentConsumptions = consumptions.get(item
+					.getNumber());
+			float avgConsumption = 0.0f;
+			for (Integer consumption : currentConsumptions) {
+				avgConsumption += consumption;
+			}
+			avgConsumption /= currentConsumptions.size();
+			System.out.println("\t\t\t\t\t\tavgConsumption=" + avgConsumption);
+			float stackMultiplicator = ((avgConsumption * (deliveryTime / 5.0f)) / item
+					.getstack());
+			System.out.println("\t\t\t\t\t\tstackMultiplicator=" + stackMultiplicator);
+
+			int roundedMultiplicator = (int)(Math.ceil(stackMultiplicator));
+			System.out.println("\t\t\t\t\t\troundedMultiplicator=" + roundedMultiplicator);
+
 			// create order object
-			Order order = new Order(item.getNumber(), item.getstack(), 5);
+			Order order = new Order(item.getNumber(), item.getstack()
+					* roundedMultiplicator, 5);
 
 			// check if a fast order is necessary
 			if (orderNecessary < 0.0) {
@@ -328,9 +359,9 @@ public class OrderService {
 				if (orderInDelivery) {
 					// If a order is already in delivery and the need for a fast
 					// order is there buy a higher amount. (4 x quantity)
-					order.setQuantity(order.getQuantity() * 4);
+					order.setQuantity(order.getQuantity()*roundedMultiplicator*2); // obsolete
 				}
-				double makeFastOrder = itemIsOut - (maxDeliveryTime / 2.0);
+				double makeFastOrder = itemIsOut - (deliveryTime / 2.0);
 				// check if a fast order arrives before the item
 				// is out
 				if (makeFastOrder < 0.0) {
@@ -348,7 +379,6 @@ public class OrderService {
 		}
 
 	}
-
 	// public static void main(String[] args) throws JAXBException {
 	// UserInput ui = new UserInput();
 	// ui.setForecast(new Forecast(new Sales(200, 150, 100), new Sales(200,

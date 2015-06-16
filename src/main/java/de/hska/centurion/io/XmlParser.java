@@ -58,7 +58,7 @@ public class XmlParser {
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
-		printOnConsolue(results);
+//		printOnConsolue(results);
 
 		return results;
 	}

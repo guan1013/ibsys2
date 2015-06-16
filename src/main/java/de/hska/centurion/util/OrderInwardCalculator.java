@@ -18,7 +18,7 @@ public class OrderInwardCalculator {
 	}
 
 	public Results calculateOutstandingOrders(Results results) {
-		if (results.getPeriod() == 1) {
+		if (results.getFutureInwardStockMovement() == null) {
 			return results;
 		}
 		if (results.getFutureInwardStockMovement().getOrders() != null) {

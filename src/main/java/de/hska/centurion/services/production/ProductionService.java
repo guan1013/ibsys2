@@ -242,9 +242,12 @@ public class ProductionService {
 
 					// See how much overtime
 					overtime = (workingTime - shift) * SHIFT_TIME_MINS;
-					if (workplace == 8 || workplace == 9) {
-						overtime += 480*5;
+					System.out.println("workplace=" + workplace);
+
+					if (workplace == 7 || workplace == 8 || workplace == 9) {
+						shift = 2;
 					}
+
 					if (overtime > (SHIFT_TIME_MINS * 0.5)) {
 						overtime = 0.0;
 						shift += 1;
@@ -429,9 +432,8 @@ public class ProductionService {
 
 			// Calculate the roundtrip time on this workplace for all produced
 			// items
-			Integer roundTripTime = (value * productionTime)
-					+ (setupTime);
-		
+			Integer roundTripTime = (value * productionTime) + (setupTime);
+
 			// Add item to rrt list
 			outputRRT.put(itemName, roundTripTime);
 
@@ -452,8 +454,7 @@ public class ProductionService {
 
 				// Calculate the roundtrip time on this workplace for all
 				// produced items
-				roundTripTime = (value * productionTime)
-						+ (setupTime);
+				roundTripTime = (value * productionTime) + (setupTime);
 				// Add item to rrt list
 				outputRRT.put(itemName, roundTripTime);
 
