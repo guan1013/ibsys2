@@ -3,6 +3,7 @@ package de.hska.centurion.gui;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
@@ -78,6 +79,7 @@ import java.util.ResourceBundle;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * This is the main graphical user interface of the planning tool. It contains
@@ -214,6 +216,14 @@ public class PlanungstoolGUI {
 
 		// Initialize UI Components
 		initialize();
+
+		try {
+			int x = Integer.parseInt(args[1]);
+			int y = Integer.parseInt(args[2]);
+			frameMain.setLocation(new Point(x, y));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -547,21 +557,27 @@ public class PlanungstoolGUI {
 
 		tableIdleTimeCosts = new JTable();
 		scrollPaneIdleTimeCosts.setViewportView(tableIdleTimeCosts);
-		tableIdleTimeCosts.setModel(new DefaultTableModel(new Object[][] {},
-				new String[] { "Arbeitsplatz", "R\u00FCstvorg\u00E4nge",
-						"Leerzeit (min)", "Lohnleerkosten", "Lohnkosten",
-						"Masch.Stillstandskosten" }) {
-			/**
+		tableIdleTimeCosts
+				.setModel(new DefaultTableModel(
+						new Object[][] {},
+						new String[] {
+								BUNDLE.getString("PlanungstoolGUI.lblStep5TitleWorkplace.text"), // ARBEITSPLATZ
+								BUNDLE.getString("PlanungstoolGUI.results.tab.idletimecosts.setupevents"), // RÜSTVORGÄNGE
+								BUNDLE.getString("PlanungstoolGUI.results.tab.idletimecosts.idletime"), // Leerzeiten
+								BUNDLE.getString("PlanungstoolGUI.results.tab.idletimecosts.wageidletimecosts"), // Lohnleerkosten
+								BUNDLE.getString("PlanungstoolGUI.results.tab.idletimecosts.wagecosts"), // Lohnkosten
+								BUNDLE.getString("PlanungstoolGUI.results.tab.idletimecosts.machine") }) {
+					/**
 			 * 
 			 */
-			private static final long serialVersionUID = 1L;
-			boolean[] columnEditables = new boolean[] { false, false, false,
-					false, false, false };
+					private static final long serialVersionUID = 1L;
+					boolean[] columnEditables = new boolean[] { false, false,
+							false, false, false, false };
 
-			public boolean isCellEditable(int row, int column) {
-				return columnEditables[column];
-			}
-		});
+					public boolean isCellEditable(int row, int column) {
+						return columnEditables[column];
+					}
+				});
 
 		final JPanel panelWaitingListWorkstations = new JPanel();
 		tabbedPane
@@ -923,43 +939,37 @@ public class PlanungstoolGUI {
 		panelStep2.add(lblStep2DirectSalesTitle);
 
 		spinnerStep2P1Sales = new JSpinner();
-		spinnerStep2P1Sales.setModel(new SpinnerNumberModel(new Integer(0),
-				new Integer(0), null, new Integer(50)));
+		spinnerStep2P1Sales.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(10)));
 		spinnerStep2P1Sales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P1Sales.setBounds(295, 93, 75, 35);
 		panelStep2.add(spinnerStep2P1Sales);
 
 		spinnerStep2P1DirectSales = new JSpinner();
-		spinnerStep2P1DirectSales.setModel(new SpinnerNumberModel(
-				new Integer(0), new Integer(0), null, new Integer(50)));
+		spinnerStep2P1DirectSales.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(10)));
 		spinnerStep2P1DirectSales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P1DirectSales.setBounds(426, 93, 75, 35);
 		panelStep2.add(spinnerStep2P1DirectSales);
 
 		spinnerStep2P2Sales = new JSpinner();
-		spinnerStep2P2Sales.setModel(new SpinnerNumberModel(new Integer(0),
-				new Integer(0), null, new Integer(50)));
+		spinnerStep2P2Sales.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(10)));
 		spinnerStep2P2Sales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P2Sales.setBounds(295, 146, 75, 35);
 		panelStep2.add(spinnerStep2P2Sales);
 
 		spinnerStep2P3Sales = new JSpinner();
-		spinnerStep2P3Sales.setModel(new SpinnerNumberModel(new Integer(0),
-				new Integer(0), null, new Integer(50)));
+		spinnerStep2P3Sales.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(10)));
 		spinnerStep2P3Sales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P3Sales.setBounds(295, 199, 75, 35);
 		panelStep2.add(spinnerStep2P3Sales);
 
 		spinnerStep2P2DirectSales = new JSpinner();
-		spinnerStep2P2DirectSales.setModel(new SpinnerNumberModel(
-				new Integer(0), new Integer(0), null, new Integer(50)));
+		spinnerStep2P2DirectSales.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(10)));
 		spinnerStep2P2DirectSales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P2DirectSales.setBounds(426, 146, 75, 35);
 		panelStep2.add(spinnerStep2P2DirectSales);
 
 		spinnerStep2P3DirectSales = new JSpinner();
-		spinnerStep2P3DirectSales.setModel(new SpinnerNumberModel(
-				new Integer(0), new Integer(0), null, new Integer(50)));
+		spinnerStep2P3DirectSales.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(10)));
 		spinnerStep2P3DirectSales.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		spinnerStep2P3DirectSales.setBounds(426, 199, 75, 35);
 		panelStep2.add(spinnerStep2P3DirectSales);
@@ -1640,8 +1650,8 @@ public class PlanungstoolGUI {
 		JLabel lblStep5TitleOvertime = new JLabel(
 				BUNDLE.getString("PlanungstoolGUI.lblStep5TitleOvertime.text")); //$NON-NLS-1$
 		lblStep5TitleOvertime.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStep5TitleOvertime.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblStep5TitleOvertime.setBounds(213, 45, 108, 23);
+		lblStep5TitleOvertime.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblStep5TitleOvertime.setBounds(213, 45, 108, 30);
 		panelStep5.add(lblStep5TitleOvertime);
 
 		JLabel lblStep5Workplace1 = new JLabel("1");
@@ -1651,6 +1661,7 @@ public class PlanungstoolGUI {
 		panelStep5.add(lblStep5Workplace1);
 
 		JSpinner spinnerStep5ShiftWorkplace1 = new JSpinner();
+		spinnerStep5ShiftWorkplace1.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace1.setBounds(148, 79, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace1);
 
@@ -1665,6 +1676,7 @@ public class PlanungstoolGUI {
 		panelStep5.add(lblStep5Workplace2);
 
 		JSpinner spinnerStep5ShiftWorkplace2 = new JSpinner();
+		spinnerStep5ShiftWorkplace2.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace2.setBounds(148, 101, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace2);
 
@@ -1679,6 +1691,7 @@ public class PlanungstoolGUI {
 		panelStep5.add(lblStep5Workplace3);
 
 		JSpinner spinnerStep5ShiftWorkplace3 = new JSpinner();
+		spinnerStep5ShiftWorkplace3.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace3.setBounds(148, 124, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace3);
 
@@ -1693,6 +1706,7 @@ public class PlanungstoolGUI {
 		panelStep5.add(lblStep5Workplace4);
 
 		JSpinner spinnerStep5ShiftWorkplace4 = new JSpinner();
+		spinnerStep5ShiftWorkplace4.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace4.setBounds(148, 147, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace4);
 
@@ -1707,6 +1721,7 @@ public class PlanungstoolGUI {
 		panelStep5.add(lblStep5Workplace6);
 
 		JSpinner spinnerStep5ShiftWorkplace6 = new JSpinner();
+		spinnerStep5ShiftWorkplace6.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace6.setBounds(148, 170, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace6);
 
@@ -1721,6 +1736,7 @@ public class PlanungstoolGUI {
 		panelStep5.add(lblStep5Workplace7);
 
 		JSpinner spinnerStep5ShiftWorkplace7 = new JSpinner();
+		spinnerStep5ShiftWorkplace7.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace7.setBounds(148, 194, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace7);
 
@@ -1735,6 +1751,7 @@ public class PlanungstoolGUI {
 		panelStep5.add(lblStep5Workplace8);
 
 		JSpinner spinnerStep5ShiftWorkplace8 = new JSpinner();
+		spinnerStep5ShiftWorkplace8.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace8.setBounds(148, 217, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace8);
 
@@ -1759,30 +1776,37 @@ public class PlanungstoolGUI {
 		panelStep5.add(spinnerStep5OvertimeWorkplace15);
 
 		JSpinner spinnerStep5ShiftWorkplace15 = new JSpinner();
+		spinnerStep5ShiftWorkplace15.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace15.setBounds(480, 217, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace15);
 
 		JSpinner spinnerStep5ShiftWorkplace14 = new JSpinner();
+		spinnerStep5ShiftWorkplace14.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace14.setBounds(480, 194, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace14);
 
 		JSpinner spinnerStep5ShiftWorkplace13 = new JSpinner();
+		spinnerStep5ShiftWorkplace13.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace13.setBounds(480, 170, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace13);
 
 		JSpinner spinnerStep5ShiftWorkplace12 = new JSpinner();
+		spinnerStep5ShiftWorkplace12.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace12.setBounds(480, 147, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace12);
 
 		JSpinner spinnerStep5ShiftWorkplace11 = new JSpinner();
+		spinnerStep5ShiftWorkplace11.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace11.setBounds(480, 124, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace11);
 
 		JSpinner spinnerStep5ShiftWorkplace10 = new JSpinner();
+		spinnerStep5ShiftWorkplace10.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace10.setBounds(480, 101, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace10);
 
 		JSpinner spinnerStep5ShiftWorkplace9 = new JSpinner();
+		spinnerStep5ShiftWorkplace9.setModel(new SpinnerNumberModel(0, 0, 3, 1));
 		spinnerStep5ShiftWorkplace9.setBounds(480, 79, 52, 20);
 		panelStep5.add(spinnerStep5ShiftWorkplace9);
 
@@ -1845,8 +1869,8 @@ public class PlanungstoolGUI {
 		JLabel label_9 = new JLabel(
 				BUNDLE.getString("PlanungstoolGUI.lblStep5TitleOvertime.text"));
 		label_9.setHorizontalAlignment(SwingConstants.CENTER);
-		label_9.setFont(new Font("Tahoma", Font.BOLD, 14));
-		label_9.setBounds(545, 45, 108, 23);
+		label_9.setFont(new Font("Tahoma", Font.BOLD, 12));
+		label_9.setBounds(545, 45, 108, 30);
 		panelStep5.add(label_9);
 
 		JSpinner spinnerStep5OvertimeWorkplace14 = new JSpinner();
@@ -2707,6 +2731,11 @@ public class PlanungstoolGUI {
 			public void actionPerformed(ActionEvent e) {
 				final JFileChooser fc = new JFileChooser();
 
+				FileNameExtensionFilter filter = new FileNameExtensionFilter(
+						"XML-Dateien", "xml", "xml");
+				fc.setFileFilter(filter);
+				fc.setAcceptAllFileFilterUsed(false);
+
 				// Zeige Dialog zum Auswählen einer Datei
 				int returnVal = fc.showOpenDialog(getFrameMain());
 
@@ -2724,8 +2753,16 @@ public class PlanungstoolGUI {
 						results = XmlParser.parseXmlFile(file.getPath());
 					} catch (Exception ex) {
 						results = null;
-						JOptionPane.showMessageDialog(getFrameMain(),
-								ex.getMessage());
+						String msg = "";
+
+						if (ex.getMessage() != null) {
+							msg = ex.getMessage().substring(0,
+									Math.min(ex.getMessage().length(), 100));
+						}
+						JOptionPane.showMessageDialog(frameMain,
+								"XML-Datei konnte nicht geladen werden!\n"
+										+ msg + "...", "Fehler",
+								JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 
@@ -2915,15 +2952,18 @@ public class PlanungstoolGUI {
 			}
 		});
 
-		frameMain.setSize(893, 375);
+		frameMain.setSize(893, 730);
 		System.out.println(frameMain.getSize());
 	}
 
 	protected void switchLanguage(String string) {
+
+		Point location = frameMain.getLocation();
 		Locale.setDefault(new Locale(string));
 		frameMain.setVisible(false);
 		frameMain.dispose();
-		App.main(new String[] { string });
+		App.main(new String[] { string, location.getX() + "",
+				"" + location.getY() });
 	}
 
 	protected void moveProductionDown() {
@@ -3126,6 +3166,8 @@ public class PlanungstoolGUI {
 		JPanel stepToShow = stepsMap.get(goToStep);
 		tabbedPanePlanning.removeAll();
 		tabbedPanePlanning.add(stepToShow);
-		tabbedPanePlanning.addTab("Schritt " + goToStep, stepToShow);
+		tabbedPanePlanning.addTab(
+				BUNDLE.getString("PlanungstoolGUI.planning.step") + " "
+						+ goToStep, stepToShow);
 	}
 }

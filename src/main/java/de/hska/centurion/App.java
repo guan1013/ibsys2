@@ -42,7 +42,8 @@ public class App {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Fehler",
+			JOptionPane.showMessageDialog(null,
+					"Fehler beim Laden des System Look & Feels", "Fehler",
 					JOptionPane.ERROR_MESSAGE);
 		}
 
@@ -53,6 +54,9 @@ public class App {
 					gui.getFrameMain().setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
+					JOptionPane.showMessageDialog(null,
+							"Fehler beim Initialisieren der grafischen Oberfläche",
+							"Fehler", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
