@@ -12,8 +12,7 @@ public class OrderInwardCalculator {
 	private Properties props;
 
 	public OrderInwardCalculator() throws IOException {
-		is = getClass().getResourceAsStream(
-				Constants.getProductionPlanProperties());
+		is = getClass().getResourceAsStream(Constants.getProductionPlanProperties());
 		props = new Properties();
 		props.load(is);
 	}
@@ -22,34 +21,31 @@ public class OrderInwardCalculator {
 		if (results.getPeriod() == 1) {
 			return results;
 		}
-		for (Order order : results.getFutureInwardStockMovement().getOrders()) {
-			String key = Constants.getItemInitKey() + ".K" + order.getArticle();
-			float time = Float.parseFloat(props.getProperty(key
-					+ Constants.getTimeKey()));
-			float dev = Float.parseFloat(props.getProperty(key
-					+ Constants.getDivKey()));
+		if (results.getFutureInwardStockMovement().getOrders() != null) {
+			for (Order order : results.getFutureInwardStockMovement().getOrders()) {
 
-			float inwardDate = Math
-					.round((order.getOrderPeriod() + time + 0.3) * 100) / 100.0f;
-			float inwardDateMax = Math.round((order.getOrderPeriod() + time
-					+ 0.3 + dev) * 100) / 100.0f;
+				String key = Constants.getItemInitKey() + ".K" + order.getArticle();
+				float time = Float.parseFloat(props.getProperty(key + Constants.getTimeKey()));
+				float dev = Float.parseFloat(props.getProperty(key + Constants.getDivKey()));
 
-			int inwardPeriod = (int) inwardDate;
-			if (inwardDate - inwardPeriod == 0) {
-				inwardPeriod--;
+				float inwardDate = Math.round((order.getOrderPeriod() + time + 0.3) * 100) / 100.0f;
+				float inwardDateMax = Math.round((order.getOrderPeriod() + time + 0.3 + dev) * 100) / 100.0f;
+
+				int inwardPeriod = (int) inwardDate;
+				if (inwardDate - inwardPeriod == 0) {
+					inwardPeriod--;
+				}
+				int inwardPeriodMax = (int) inwardDateMax;
+				if (inwardDateMax - inwardPeriodMax == 0) {
+					inwardPeriodMax--;
+				}
+
+				int inwardDay = (int) Math.ceil((inwardDate - inwardPeriod) * 5.0f);
+				int inwardDayMax = (int) Math.ceil((inwardDateMax - inwardPeriodMax) * 5.0f);
+
+				order.setInwardStockMovementAvg(inwardPeriod + "-" + inwardDay + "-0-0");
+				order.setInwardStockMovementMax(inwardPeriodMax + "-" + inwardDayMax + "-0-0");
 			}
-			int inwardPeriodMax = (int) inwardDateMax;
-			if (inwardDateMax - inwardPeriodMax == 0) {
-				inwardPeriodMax--;
-			}
-
-			int inwardDay = (int) Math.ceil((inwardDate - inwardPeriod) * 5.0f);
-			int inwardDayMax = (int) Math
-					.ceil((inwardDateMax - inwardPeriodMax) * 5.0f);
-
-			order.setInwardStockMovementAvg(inwardPeriod + "-" + inwardDay
-					+ "-0-0");
-			order.setInwardStockMovementMax(inwardPeriodMax + "-" + inwardDayMax + "-0-0");
 		}
 		return results;
 	}

@@ -1,5 +1,8 @@
 package de.hska.centurion.domain.input.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -8,8 +11,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class MissingPart {
 
 	private int id;
-	
-	private WaitingList waitingList;
+
+	private List<WaitingList> waitingList;
+
+	public MissingPart() {
+		this.waitingList = new ArrayList<>();
+	}
 
 	@XmlAttribute
 	public int getId() {
@@ -20,12 +27,12 @@ public class MissingPart {
 		this.id = id;
 	}
 
-	@XmlElement(name="waitinglist")
-	public WaitingList getWaitingList() {
+	@XmlElement(name = "waitinglist")
+	public List<WaitingList> getWaitingList() {
 		return waitingList;
 	}
 
-	public void setWaitingList(WaitingList waitingList) {
+	public void setWaitingList(List<WaitingList> waitingList) {
 		this.waitingList = waitingList;
 	}
 
@@ -33,6 +40,5 @@ public class MissingPart {
 	public String toString() {
 		return "MissingPart [id=" + id + ", waitingList=" + waitingList + "]";
 	}
-	
-	
+
 }

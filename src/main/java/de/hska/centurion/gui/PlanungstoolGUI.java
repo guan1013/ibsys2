@@ -54,7 +54,9 @@ import de.hska.centurion.domain.gui.UserInput;
 import de.hska.centurion.domain.input.Results;
 import de.hska.centurion.domain.input.components.Article;
 import de.hska.centurion.domain.input.components.IdleTimeCostsSum;
+import de.hska.centurion.domain.input.components.MissingPart;
 import de.hska.centurion.domain.input.components.Order;
+import de.hska.centurion.domain.input.components.WaitingList;
 import de.hska.centurion.domain.input.components.WorkplaceCosts;
 import de.hska.centurion.domain.input.components.WorkplaceWaiting;
 import de.hska.centurion.domain.output.Input;
@@ -90,7 +92,7 @@ import de.hska.centurion.services.purchase.OrderService;
  *
  */
 public class PlanungstoolGUI {
-	private static ResourceBundle BUNDLE = ResourceBundle.getBundle("de.hska.centurion.domain.gui.messages"); //$NON-NLS-1$
+	private static ResourceBundle BUNDLE = ResourceBundle.getBundle("de.hska.centurion.gui.i18n.messages"); //$NON-NLS-1$
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ATTRIBUTES
@@ -100,19 +102,6 @@ public class PlanungstoolGUI {
 
 	private static final String[] DELIVERY_MODES = new String[] { "?", "special order", "cheap vendor", "JIT", "fast",
 			"normal" };
-
-	public static void showErrorDialog(String message, Exception exception, Component parent) {
-
-		String completeMessage = message;
-
-		if (exception.getMessage() != null) {
-			completeMessage += "\n"
-					+ exception.getMessage().substring(0, Math.min(exception.getMessage().length(), 100));
-		}
-
-		JOptionPane.showMessageDialog(parent, completeMessage, "Fehler", JOptionPane.ERROR_MESSAGE);
-
-	}
 
 	// UI COMPONENTS - MAIN SCREEN
 	private JFrame frameMain;
@@ -156,7 +145,7 @@ public class PlanungstoolGUI {
 
 	// OTHER FIELDS
 
-	private JTable table;
+	private JTable tableWaitingListStock;
 
 	/**
 	 * A map of all planning steps. The panel which holds the ui components for
@@ -194,6 +183,22 @@ public class PlanungstoolGUI {
 	private JList<String> listStep4ProductionOrder;
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
+	// STATIC METHODS
+
+	public static void showErrorDialog(String message, Exception exception, Component parent) {
+
+		String completeMessage = message;
+
+		if (exception.getMessage() != null) {
+			completeMessage += "\n"
+					+ exception.getMessage().substring(0, Math.min(exception.getMessage().length(), 100));
+		}
+
+		JOptionPane.showMessageDialog(parent, completeMessage, "Fehler", JOptionPane.ERROR_MESSAGE);
+
+	}
+
+	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 	// PRIVATE METHODS
 
 	/**
@@ -206,7 +211,7 @@ public class PlanungstoolGUI {
 			locale = args[0];
 		}
 
-		BUNDLE = ResourceBundle.getBundle("de.hska.centurion.domain.gui.messages", new Locale(locale)); //$NON-NLS-1$
+		BUNDLE = ResourceBundle.getBundle("de.hska.centurion.gui.i18n.messages", new Locale(locale)); //$NON-NLS-1$
 
 		// Initialize attributes
 		stepsMap = new HashMap<>();
@@ -223,11 +228,10 @@ public class PlanungstoolGUI {
 		initialize();
 
 		try {
-			int x = Integer.parseInt(args[1]);
-			int y = Integer.parseInt(args[2]);
+			int x = (int) (Double.parseDouble(args[1]));
+			int y = (int) (Double.parseDouble(args[2]));
 			frameMain.setLocation(new Point(x, y));
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -547,9 +551,32 @@ public class PlanungstoolGUI {
 				panelWaitingListStock, null);
 		panelWaitingListStock.setLayout(null);
 
-		table = new JTable();
-		table.setBounds(0, 0, 826, 196);
-		panelWaitingListStock.add(table);
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(0, 0, 826, 196);
+		panelWaitingListStock.add(scrollPane_1);
+
+		tableWaitingListStock = new JTable();
+		scrollPane_1.setViewportView(tableWaitingListStock);
+		tableWaitingListStock.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Missing Part",
+				"Period", "Production Order", "Batch", "Item", "Quantity" }) {
+			Class[] columnTypes = new Class[] { String.class, Object.class, Object.class, Object.class, Object.class,
+					Object.class };
+
+			public Class getColumnClass(int columnIndex) {
+				return columnTypes[columnIndex];
+			}
+
+			boolean[] columnEditables = new boolean[] { false, false, false, true, false, false };
+
+			public boolean isCellEditable(int row, int column) {
+				return columnEditables[column];
+			}
+		});
+		tableWaitingListStock.getColumnModel().getColumn(0).setResizable(false);
+		tableWaitingListStock.getColumnModel().getColumn(1).setResizable(false);
+		tableWaitingListStock.getColumnModel().getColumn(2).setResizable(false);
+		tableWaitingListStock.getColumnModel().getColumn(4).setResizable(false);
+		tableWaitingListStock.getColumnModel().getColumn(5).setResizable(false);
 
 		JPanel panelIntroduction = new JPanel();
 		tabbedPane.addTab(BUNDLE.getString("PlanungstoolGUI.results.tab.introduction"), null, panelIntroduction, null);
@@ -2482,7 +2509,7 @@ public class PlanungstoolGUI {
 						results = XmlParser.parseXmlFile(file.getPath());
 					} catch (Exception ex) {
 						results = null;
-
+						ex.printStackTrace();
 						showErrorDialog("XML-Datei konnte nicht geladen werden!", ex, frameMain);
 						return;
 					}
@@ -2578,6 +2605,7 @@ public class PlanungstoolGUI {
 						model.addRow(new Object[] { "SUMME", sum.getSetupEvents(), sum.getIdleTime(),
 								sum.getWageIdleTimeCostsStr(), sum.getWageCostsStr(), sum.getMachineIdleTimeCostsStr() });
 					}
+
 					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
 					// WARTELISTE ARBEITSPLATZ
 
@@ -2598,6 +2626,32 @@ public class PlanungstoolGUI {
 						} else {
 
 							model.addRow(new Object[] { wW.getId() });
+						}
+					}
+
+					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+					// WARTELISTE MATERIAL
+
+					// Bisherige angezeigte Daten entfernen
+					model = (DefaultTableModel) tableWaitingListStock.getModel();
+					removeAllRowsFromTable(model);
+
+					// Alle Wartelisten anzeigen
+					List<MissingPart> partsWaiting = results.getWaitingListStock().getMissingParts();
+					for (MissingPart mp : partsWaiting) {
+
+						if (mp.getWaitingList() != null) {
+
+							for (WaitingList waitingList : mp.getWaitingList()) {
+
+								model.addRow(new Object[] { mp.getId(), waitingList.getPeriod(),
+										waitingList.getOrder(),
+										waitingList.getFirstBatch() + "-" + waitingList.getLastBatch(),
+										waitingList.getItem(), waitingList.getAmount() });
+							}
+						} else {
+
+							model.addRow(new Object[] { mp.getId() });
 						}
 					}
 
@@ -2633,7 +2687,6 @@ public class PlanungstoolGUI {
 		});
 
 		frameMain.setSize(893, 730);
-		System.out.println(frameMain.getSize());
 	}
 
 	protected void moveProductionDown() {
