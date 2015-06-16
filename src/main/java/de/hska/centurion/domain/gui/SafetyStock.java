@@ -1,6 +1,5 @@
 package de.hska.centurion.domain.gui;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -12,7 +11,7 @@ import java.util.Map;
  *
  */
 public class SafetyStock {
-	// Schlüssel Exx oder Px, z. B. E26 setzt dann den Sicherheitsbestand.
+	// Schlï¿½ssel Exx oder Px, z. B. E26 setzt dann den Sicherheitsbestand.
 	/*
 	 * ======================== ATTRIBUTES ========================
 	 */
