@@ -2537,9 +2537,9 @@ public class PlanungstoolGUI {
 					output.getSellWish().clear();
 					output.getSellDirect().clear();
 
-					output.getSellWish().add(
-							new Item(1,
-									userInput.getSales().getChildrenSales()));
+					output.getSellWish()
+							.add(new Item(1, userInput.getSales()
+									.getChildrenSales()));
 					output.getSellWish().add(
 							new Item(2, userInput.getSales().getWomenSales()));
 					output.getSellWish().add(
@@ -2837,12 +2837,15 @@ public class PlanungstoolGUI {
 					}
 
 					// Summe ausgeben
-					IdleTimeCostsSum sum = results.getIdleTimeCosts().getSum();
-					model.addRow(new Object[] { "SUMME", sum.getSetupEvents(),
-							sum.getIdleTime(), sum.getWageIdleTimeCostsStr(),
-							sum.getWageCostsStr(),
-							sum.getMachineIdleTimeCostsStr() });
-
+					if (results.getIdleTimeCosts().getSum() != null) {
+						IdleTimeCostsSum sum = results.getIdleTimeCosts()
+								.getSum();
+						model.addRow(new Object[] { "SUMME",
+								sum.getSetupEvents(), sum.getIdleTime(),
+								sum.getWageIdleTimeCostsStr(),
+								sum.getWageCostsStr(),
+								sum.getMachineIdleTimeCostsStr() });
+					}
 					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
 					// WARTELISTE ARBEITSPLATZ
 
