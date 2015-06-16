@@ -2,6 +2,7 @@ package de.hska.centurion.domain.output;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * This class represents one sellwish for the list of sales or direct sales.
@@ -10,6 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name = "item")
+@XmlType(propOrder={"article", "quantity", "price", "penalty"})
 public class Item {
 	
 	/*
@@ -33,7 +35,7 @@ public class Item {
 	 * Else this should be null.
 	 */
 	
-	private Double price;
+	private String price;
 	
 	/**
 	 * the contract penalty of the direct sell.
@@ -41,7 +43,7 @@ public class Item {
 	 * Else this should be null.
 	 */
 	
-	private Double penalty;
+	private String penalty;
 	
 	/*
 	 * ======================== CONSTRUCTORS ========================
@@ -76,7 +78,7 @@ public class Item {
 	 * @param penalty
 	 * 				the contract penalty for this article.
 	 */
-	public Item(int article, int quantity, double price, double penalty) {
+	public Item(int article, int quantity, String price, String penalty) {
 		super();
 		this.article = article;
 		this.quantity = quantity;
@@ -103,56 +105,20 @@ public class Item {
 		this.quantity = quantity;
 	}
 
-	public double getPrice() {
+	public String getPrice() {
 		return price;
 	}
 	@XmlAttribute(name = "price")
-	public void setPrice(double price) {
+	public void setPrice(String price) {
 		this.price = price;
 	}
 
-	public double getPenalty() {
+	public String getPenalty() {
 		return penalty;
 	}
 	@XmlAttribute(name = "penalty")
-	public void setPenalty(double penalty) {
+	public void setPenalty(String penalty) {
 		this.penalty = penalty;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + article;
-		long temp;
-		temp = Double.doubleToLongBits(penalty);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(price);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + quantity;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Item other = (Item) obj;
-		if (article != other.article)
-			return false;
-		if (Double.doubleToLongBits(penalty) != Double
-				.doubleToLongBits(other.penalty))
-			return false;
-		if (Double.doubleToLongBits(price) != Double
-				.doubleToLongBits(other.price))
-			return false;
-		if (quantity != other.quantity)
-			return false;
-		return true;
 	}
 
 	@Override

@@ -4,6 +4,7 @@
 package de.hska.centurion.domain.output;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * This class represents a purchase order for the list of purchase orders.
@@ -11,6 +12,7 @@ import javax.xml.bind.annotation.XmlAttribute;
  * @author Simon
  *
  */
+@XmlType(propOrder={"article", "quantity", "modus"})
 public class Order {
 
 	/*

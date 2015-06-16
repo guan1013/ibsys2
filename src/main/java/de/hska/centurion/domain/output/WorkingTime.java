@@ -1,6 +1,7 @@
 package de.hska.centurion.domain.output;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * This class represents a time configuration for one workspace.
@@ -8,6 +9,7 @@ import javax.xml.bind.annotation.XmlAttribute;
  * @author Simon
  *
  */
+@XmlType(propOrder={"station", "shift", "overtime"})
 public class WorkingTime {
 	/*
 	 * ======================== ATTRIBUTES ========================

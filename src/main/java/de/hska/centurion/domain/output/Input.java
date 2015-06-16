@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlElement;
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "Input")
+@XmlRootElement(name = "input")
 public class Input {
 	/*
 	 * ======================== ATTRIBUTES ========================
@@ -25,6 +25,7 @@ public class Input {
 	/**
 	 * Static element of the XML-Input.
 	 */
+	@XmlElement(name="qualitycontrol")
 	private QualityControl qualityControl = new QualityControl();
 
 	/**

@@ -2561,26 +2561,23 @@ public class PlanungstoolGUI {
 					output.getSellWish().clear();
 					output.getSellDirect().clear();
 
+					output.getSellWish()
+							.add(new Item(1, userInput.getSales()
+									.getChildrenSales()));
 					output.getSellWish().add(
-							new Item(1,
-									userInput.getSales().getChildrenSales(), 0,
-									0));
+							new Item(2, userInput.getSales().getWomenSales()));
 					output.getSellWish().add(
-							new Item(2, userInput.getSales().getWomenSales(),
-									0, 0));
-					output.getSellWish().add(
-							new Item(3, userInput.getSales().getMenSales(), 0,
-									0));
+							new Item(3, userInput.getSales().getMenSales()));
 
 					output.getSellDirect().add(
 							new Item(1, userInput.getDirectSales()
-									.getChildrenSales(), 0, 0));
+									.getChildrenSales(), "0.0", "0.0"));
 					output.getSellDirect().add(
 							new Item(2, userInput.getDirectSales()
-									.getWomenSales(), 0, 0));
+									.getWomenSales(), "0.0", "0.0"));
 					output.getSellDirect().add(
 							new Item(3, userInput.getDirectSales()
-									.getMenSales(), 0, 0));
+									.getMenSales(), "0.0", "0.0"));
 
 					// Generate XML
 					XmlParser.generateOutputXml(output, file.getAbsolutePath());
@@ -2877,12 +2874,15 @@ public class PlanungstoolGUI {
 					}
 
 					// Summe ausgeben
-					IdleTimeCostsSum sum = results.getIdleTimeCosts().getSum();
-					model.addRow(new Object[] { "SUMME", sum.getSetupEvents(),
-							sum.getIdleTime(), sum.getWageIdleTimeCostsStr(),
-							sum.getWageCostsStr(),
-							sum.getMachineIdleTimeCostsStr() });
-
+					if (results.getIdleTimeCosts().getSum() != null) {
+						IdleTimeCostsSum sum = results.getIdleTimeCosts()
+								.getSum();
+						model.addRow(new Object[] { "SUMME",
+								sum.getSetupEvents(), sum.getIdleTime(),
+								sum.getWageIdleTimeCostsStr(),
+								sum.getWageCostsStr(),
+								sum.getMachineIdleTimeCostsStr() });
+					}
 					// //////////////////////////////////////////////////////////////////////////////////////////////////////////
 					// WARTELISTE ARBEITSPLATZ
 

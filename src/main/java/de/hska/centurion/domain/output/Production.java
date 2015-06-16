@@ -1,6 +1,7 @@
 package de.hska.centurion.domain.output;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * This class represents a production order in the list of production orders.
