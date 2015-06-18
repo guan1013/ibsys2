@@ -92,7 +92,9 @@ import de.hska.centurion.services.purchase.OrderService;
  *
  */
 public class PlanungstoolGUI {
-	private static ResourceBundle BUNDLE = ResourceBundle.getBundle("de.hska.centurion.gui.i18n.messages"); //$NON-NLS-1$
+	private static ResourceBundle BUNDLE = ResourceBundle.getBundle("de.hska.centurion.gui.i18n.messages",new Locale("de")); //$NON-NLS-1$
+	private static ResourceBundle BUNDLE2 = ResourceBundle.getBundle("de.hska.centurion.gui.i18n.messages",new Locale("en")); //$NON-NLS-1$
+	private static ResourceBundle BUNDLE3 = ResourceBundle.getBundle("de.hska.centurion.gui.i18n.messages",new Locale("ru")); //$NON-NLS-1$
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ATTRIBUTES
@@ -214,11 +216,11 @@ public class PlanungstoolGUI {
 		BUNDLE = ResourceBundle.getBundle("de.hska.centurion.gui.i18n.messages", new Locale(locale)); //$NON-NLS-1$
 
 		// Initialize attributes
-		stepsMap = new HashMap<>();
+		stepsMap = new HashMap<Integer, JPanel>();
 		userInput = new UserInput();
 		safetyStockFormular = new HashMap<String, SafetyStockEntity>();
 		workplaceFormular = new HashMap<Integer, WorkplaceEntity>();
-		orderFormular = new ArrayList<>();
+		orderFormular = new ArrayList<OrderEntity>();
 		userInput.setSafetyStock(new SafetyStock(DEFAULT_SAFETY_STOCK));
 		output = new Input();
 
@@ -348,7 +350,7 @@ public class PlanungstoolGUI {
 		// Clean UI component
 		listStep4ProductionOrder.removeAll();
 
-		DefaultListModel<String> model = new DefaultListModel<>();
+		DefaultListModel<String> model = new DefaultListModel<String>();
 
 		for (Production production : output.getProductionList()) {
 			model.addElement(production.getArticle() + " --- " + production.getQuantity());
@@ -2747,7 +2749,7 @@ public class PlanungstoolGUI {
 
 	private void readInCapacity() {
 
-		List<WorkingTime> workingTimes = new ArrayList<>();
+		List<WorkingTime> workingTimes = new ArrayList<WorkingTime>();
 		for (int workplaceId : workplaceFormular.keySet()) {
 			workingTimes.add(new WorkingTime(workplaceId, (int) workplaceFormular.get(workplaceId).getShift()
 					.getValue(), (int) workplaceFormular.get(workplaceId).getOvertime().getValue()));
@@ -2775,7 +2777,7 @@ public class PlanungstoolGUI {
 
 	private void readInOrders() {
 
-		List<de.hska.centurion.domain.output.Order> userOrders = new ArrayList<>();
+		List<de.hska.centurion.domain.output.Order> userOrders = new ArrayList<de.hska.centurion.domain.output.Order>();
 
 		for (OrderEntity orderEntity : orderFormular) {
 

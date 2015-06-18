@@ -15,7 +15,7 @@ public class MissingPart {
 	private List<WaitingList> waitingList;
 
 	public MissingPart() {
-		this.waitingList = new ArrayList<>();
+		this.waitingList = new ArrayList<WaitingList>();
 	}
 
 	@XmlAttribute
