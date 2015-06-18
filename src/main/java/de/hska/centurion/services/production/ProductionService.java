@@ -155,16 +155,18 @@ public class ProductionService {
 
 			PItem output = (PItem) plan.getProducer().getOutput();
 
+			String planName = plan.getName().toUpperCase();
+
+			Integer quantity = salesMap.get(planName)
+					+ userInput.getSafetyStock().getStock(planName);
 			// Check if Fix Cost Coverage is over 0
-			if (output.getFixCostsCoverage() < 0) {
+			if (quantity > 0 && output.getFixCostsCoverage() < 0) {
 
 				throw new InefficientProductionException(output.getType()
 						.toString() + output.getNumber().toString(),
 						output.getFixCostsCoverage());
 
 			}
-
-			String planName = plan.getName().toUpperCase();
 
 			productions = putWorkplaceToProductions(plan.getProducer(),
 					productions, salesMap.get(planName));
