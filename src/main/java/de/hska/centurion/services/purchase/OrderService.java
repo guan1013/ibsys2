@@ -133,16 +133,14 @@ public class OrderService {
 		// get the production list of P1, P2 and P3 for the current period
 		List<Production> productions = new ArrayList<Production>();
 		for (Production production : suggestedOutput.getProductionList()) {
-			if (production.getArticle() == 1 || production.getArticle() == 2
-					|| production.getArticle() == 3) {
+			if (production.getArticle() == 1 || production.getArticle() == 2 || production.getArticle() == 3) {
 				productions.add(production);
 			}
 		}
 
 		// create a sales-object out of the current production programm
-		productionProgram[0] = new Sales(productions.get(0).getQuantity(),
-				productions.get(1).getQuantity(), productions.get(2)
-						.getQuantity());
+		productionProgram[0] = new Sales(productions.get(0).getQuantity(), productions.get(1).getQuantity(),
+				productions.get(2).getQuantity());
 
 		// get the forecasts
 		Sales p1 = userInput.getForecast().getFirstPeriod();
@@ -153,38 +151,23 @@ public class OrderService {
 		// calculate the production programm for the next three periods
 		// pxProductionProgram = currentProductionProgram + (pxForecast -
 		// currentPeriodForecast)
-		productionProgram[1] = new Sales(
-				productionProgram[0].getChildrenSales()
-						+ (p2.getChildrenSales() - p1.getChildrenSales()),
-				productionProgram[0].getWomenSales()
-						+ (p2.getWomenSales() - p1.getWomenSales()),
-				productionProgram[0].getMenSales()
-						+ (p2.getMenSales() - p1.getMenSales()));
-		productionProgram[2] = new Sales(
-				productionProgram[0].getChildrenSales()
-						+ (p3.getChildrenSales() - p1.getChildrenSales()),
-				productionProgram[0].getWomenSales()
-						+ (p3.getWomenSales() - p1.getWomenSales()),
-				productionProgram[0].getMenSales()
-						+ (p3.getMenSales() - p1.getMenSales()));
-		productionProgram[3] = new Sales(
-				productionProgram[0].getChildrenSales()
-						+ (p4.getChildrenSales() - p1.getChildrenSales()),
-				productionProgram[0].getWomenSales()
-						+ (p4.getWomenSales() - p1.getWomenSales()),
-				productionProgram[0].getMenSales()
-						+ (p4.getMenSales() - p1.getMenSales()));
+		productionProgram[1] = new Sales(productionProgram[0].getChildrenSales()
+				+ (p2.getChildrenSales() - p1.getChildrenSales()), productionProgram[0].getWomenSales()
+				+ (p2.getWomenSales() - p1.getWomenSales()), productionProgram[0].getMenSales()
+				+ (p2.getMenSales() - p1.getMenSales()));
+		productionProgram[2] = new Sales(productionProgram[0].getChildrenSales()
+				+ (p3.getChildrenSales() - p1.getChildrenSales()), productionProgram[0].getWomenSales()
+				+ (p3.getWomenSales() - p1.getWomenSales()), productionProgram[0].getMenSales()
+				+ (p3.getMenSales() - p1.getMenSales()));
+		productionProgram[3] = new Sales(productionProgram[0].getChildrenSales()
+				+ (p4.getChildrenSales() - p1.getChildrenSales()), productionProgram[0].getWomenSales()
+				+ (p4.getWomenSales() - p1.getWomenSales()), productionProgram[0].getMenSales()
+				+ (p4.getMenSales() - p1.getMenSales()));
 
 		int period = 1;
 		for (Sales production : productionProgram) {
-			System.out.println("productionProgram[p"
-					+ period
-					+ "]="
-					+ production
-					+ ", sum="
-					+ (production.getChildrenSales()
-							+ production.getWomenSales() + production
-								.getMenSales()));
+			System.out.println("productionProgram[p" + period + "]=" + production + ", sum="
+					+ (production.getChildrenSales() + production.getWomenSales() + production.getMenSales()));
 			period++;
 		}
 	}
@@ -199,19 +182,15 @@ public class OrderService {
 
 			// calculate the consumption for p1-p4
 			for (int i = 0; i < 4; i++) {
-				int consumption = item.getUsage().getUsageP(1)
-						* productionProgram[i].getChildrenSales()
-						+ item.getUsage().getUsageP(2)
-						* productionProgram[i].getWomenSales()
-						+ item.getUsage().getUsageP(3)
-						* productionProgram[i].getMenSales();
+				int consumption = item.getUsage().getUsageP(1) * productionProgram[i].getChildrenSales()
+						+ item.getUsage().getUsageP(2) * productionProgram[i].getWomenSales()
+						+ item.getUsage().getUsageP(3) * productionProgram[i].getMenSales();
 				itemConsumption.add(consumption);
 			}
 
-			System.out.println("Item=" + item.getNumber() + ", Consumption: "
-					+ "\tp1=" + itemConsumption.get(0) + "\tp2="
-					+ itemConsumption.get(1) + "\tp3=" + itemConsumption.get(2)
-					+ "\tp4=" + itemConsumption.get(3));
+			System.out.println("Item=" + item.getNumber() + ", Consumption: " + "\tp1=" + itemConsumption.get(0)
+					+ "\tp2=" + itemConsumption.get(1) + "\tp3=" + itemConsumption.get(2) + "\tp4="
+					+ itemConsumption.get(3));
 
 			// add the consumptions to the consumption-map
 			consumptions.put(item.getNumber(), itemConsumption);
@@ -230,8 +209,7 @@ public class OrderService {
 			List<Integer> itemConsumptions = consumptions.get(item.getNumber());
 
 			boolean nextItem = false;
-			System.out.println("currentItem=" + item.getNumber()
-					+ ", deliveryTime=" + item.getDeliveryTime() * 5
+			System.out.println("currentItem=" + item.getNumber() + ", deliveryTime=" + item.getDeliveryTime() * 5
 					+ ", deviation=" + item.getDiviation() * 5);
 			// iterate over the consumptions. p + 1 = currentPeriod
 
@@ -239,9 +217,10 @@ public class OrderService {
 			de.hska.centurion.domain.input.components.Order matchingOrder = null;
 			// das ist h�sslich aber hier brauche ich eine andere Order-Klasse
 			// iterate over all future incoming orders
-			if (results.getFutureInwardStockMovement()!=null) {
-				for (de.hska.centurion.domain.input.components.Order order : results
-						.getFutureInwardStockMovement().getOrders()) {
+			if (results.getFutureInwardStockMovement() != null
+					&& results.getFutureInwardStockMovement().getOrders() != null) {
+				for (de.hska.centurion.domain.input.components.Order order : results.getFutureInwardStockMovement()
+						.getOrders()) {
 					// check if item is in future incoming orders
 					if (order.getArticle() == item.getNumber()) {
 						matchingOrder = order;
@@ -255,12 +234,10 @@ public class OrderService {
 				String incomeStr = matchingOrder.getInwardStockMovementAvg();
 				String[] income = incomeStr.split("-", 3);
 
-				orderIncomeP = Integer.parseInt(income[0])
-						- results.getPeriod() - 1;
+				orderIncomeP = Integer.parseInt(income[0]) - results.getPeriod() - 1;
 				orderIncomeD = Integer.parseInt(income[1]) - 1;
 			}
-			System.out.println("orderIncomeP=" + orderIncomeP
-					+ ", orderIncomeD=" + orderIncomeD);
+			System.out.println("orderIncomeP=" + orderIncomeP + ", orderIncomeD=" + orderIncomeD);
 			// Is the order already arrived?
 			boolean orderIncome = false;
 
@@ -274,21 +251,17 @@ public class OrderService {
 					stock = stock - itemConsumptions.get(p) / 5;
 
 					if (p == orderIncomeP && d == orderIncomeD) {
-						System.out.println("\t\t\t\tOrderIncoming: " + (p + 1)
-								+ "/" + (d + 1) + " Amount: "
+						System.out.println("\t\t\t\tOrderIncoming: " + (p + 1) + "/" + (d + 1) + " Amount: "
 								+ matchingOrder.getAmount());
 						stock = stock + matchingOrder.getAmount();
 						orderIncome = true;
 					}
 
-					System.out.println("\t\t\t\t" + (d + 1) + ". Day: " + stock
-							+ " Stock");
+					System.out.println("\t\t\t\t" + (d + 1) + ". Day: " + stock + " Stock");
 
 					// when stock is empty ...
-					if ((stock <= 0 && matchingOrder == null)
-							|| (stock <= 0 && orderIncome)
-							|| (stock <= 0 && p != orderIncomeP
-									&& p != (orderIncomeP + 1) && (d - orderIncomeD) <= 1)) {
+					if ((stock <= 0 && matchingOrder == null) || (stock <= 0 && orderIncome)
+							|| (stock <= 0 && p != orderIncomeP && p != (orderIncomeP + 1) && (d - orderIncomeD) <= 1)) {
 						// check if Order is necessary
 						checkIfOrderIsNecessary(item, p, d, orderIncome);
 						nextItem = true;
@@ -312,8 +285,7 @@ public class OrderService {
 	 * @param d
 	 *            the day on which the item will be empty
 	 */
-	private void checkIfOrderIsNecessary(KItem item, int p, int d,
-			boolean orderInDelivery) {
+	private void checkIfOrderIsNecessary(KItem item, int p, int d, boolean orderInDelivery) {
 		// calculate in how many days item stock is empty ...
 		int itemIsOut = p * 5 + (d + 1);
 		// and calculate the days until the purchase order
@@ -324,31 +296,27 @@ public class OrderService {
 		double orderNecessary = itemIsOut - deliveryTime;
 		System.out.println();
 		System.out.println("\t\t\t\t\t\tOrder Necessary <= 5.0?");
-		System.out.println("\t\t\t\t\t\titemIsOut=" + itemIsOut
-				+ ", maxDeliveryTime=" + deliveryTime + ", orderNecessary="
-				+ orderNecessary);
+		System.out.println("\t\t\t\t\t\titemIsOut=" + itemIsOut + ", maxDeliveryTime=" + deliveryTime
+				+ ", orderNecessary=" + orderNecessary);
 		// compare if a order is necessary in less than 5 days
 		// (= one period)
 		if (orderNecessary <= 5.0) {
 			// calculate average consumptions
-			List<Integer> currentConsumptions = consumptions.get(item
-					.getNumber());
+			List<Integer> currentConsumptions = consumptions.get(item.getNumber());
 			float avgConsumption = 0.0f;
 			for (Integer consumption : currentConsumptions) {
 				avgConsumption += consumption;
 			}
 			avgConsumption /= currentConsumptions.size();
 			System.out.println("\t\t\t\t\t\tavgConsumption=" + avgConsumption);
-			float stackMultiplicator = ((avgConsumption * (deliveryTime / 5.0f)) / item
-					.getstack());
+			float stackMultiplicator = ((avgConsumption * (deliveryTime / 5.0f)) / item.getstack());
 			System.out.println("\t\t\t\t\t\tstackMultiplicator=" + stackMultiplicator);
 
-			int roundedMultiplicator = (int)(Math.ceil(stackMultiplicator));
+			int roundedMultiplicator = (int) (Math.ceil(stackMultiplicator));
 			System.out.println("\t\t\t\t\t\troundedMultiplicator=" + roundedMultiplicator);
 
 			// create order object
-			Order order = new Order(item.getNumber(), item.getstack()
-					* roundedMultiplicator, 5);
+			Order order = new Order(item.getNumber(), item.getstack() * roundedMultiplicator, 5);
 
 			// check if a fast order is necessary
 			if (orderNecessary < 0.0) {
@@ -359,7 +327,7 @@ public class OrderService {
 				if (orderInDelivery) {
 					// If a order is already in delivery and the need for a fast
 					// order is there buy a higher amount. (4 x quantity)
-					order.setQuantity(order.getQuantity()*roundedMultiplicator*2); // obsolete
+					order.setQuantity(order.getQuantity() * roundedMultiplicator * 2); // obsolete
 				}
 				double makeFastOrder = itemIsOut - (deliveryTime / 2.0);
 				// check if a fast order arrives before the item
