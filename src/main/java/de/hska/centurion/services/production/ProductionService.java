@@ -22,6 +22,8 @@ import de.hska.centurion.domain.production.item.PItem;
 import de.hska.centurion.domain.production.resources.ItemTypeEnum;
 import de.hska.centurion.domain.production.workplace.ProductionInput;
 import de.hska.centurion.domain.production.workplace.Workplace;
+import de.hska.centurion.exceptions.InefficientProductionException;
+import de.hska.centurion.exceptions.InsufficientCapacityException;
 import de.hska.centurion.util.ProductionPlanBuilder;
 
 /**
@@ -124,8 +126,11 @@ public class ProductionService {
 	 *            given safetystock for calculation
 	 * @return items which will be produced under consideration of safetystock,
 	 *         sellwish, current stock and unfinished productions
+	 * @throws InefficientProductionException
+	 *             throws this exception if fixcost coverage is 0 or lower
 	 */
-	public Map<String, Integer> calculateProduction(SafetyStock safetyStockInput) {
+	public Map<String, Integer> calculateProduction(SafetyStock safetyStockInput)
+			throws InefficientProductionException {
 
 		// Place safetystock in global UserInput object for further calculation
 		userInput.setSafetyStock(safetyStockInput);
@@ -147,6 +152,18 @@ public class ProductionService {
 
 		// Calculate the produced items
 		for (ProductionPlan plan : plans) {
+
+			PItem output = (PItem) plan.getProducer().getOutput();
+
+			// Check if Fix Cost Coverage is over 0
+			if (output.getFixCostsCoverage() < 0) {
+
+				throw new InefficientProductionException(output.getType()
+						.toString() + output.getNumber().toString(),
+						output.getFixCostsCoverage());
+
+			}
+
 			String planName = plan.getName().toUpperCase();
 
 			productions = putWorkplaceToProductions(plan.getProducer(),
@@ -189,8 +206,12 @@ public class ProductionService {
 	 * 
 	 * @return List of WorkingTime objects, which hold shift and overtime per
 	 *         day of each workplace
+	 * @throws InsufficientCapacityException
+	 *             throws this exception if more than 3 Shifts are needes for
+	 *             the production
 	 */
-	public List<WorkingTime> calculateCapacity() {
+	public List<WorkingTime> calculateCapacity()
+			throws InsufficientCapacityException {
 
 		// Create a new Empty Sheet of Workplaces and their roundtriptimes for
 		// associated output items
@@ -198,14 +219,6 @@ public class ProductionService {
 
 		// For each production plan calculate the roundtriptimes
 		for (ProductionPlan plan : plans) {
-			PItem output = (PItem) plan.getProducer().getOutput();
-
-			// Check if Fix Cost Coverage is over 0
-			if (output.getFixCostsCoverage() > 0) {
-
-				// TODO: Order isn't cost efficient exception
-
-			}
 
 			// Get the amount of items to produce
 			Integer quantity = this.productionsList.get(plan.getName()
@@ -225,7 +238,7 @@ public class ProductionService {
 
 			// Catch possible parsing errors
 			try {
-				int workplace = Integer.parseInt(roundTripTime.getKey());
+				Integer workplace = Integer.parseInt(roundTripTime.getKey());
 
 				// Calculate how many shifts will be needed
 				Double workingTime = roundTripTime.getValue().get(ACCUMULATED)
@@ -245,7 +258,7 @@ public class ProductionService {
 					System.out.println("workplace=" + workplace);
 
 					if (workplace == 7 || workplace == 8 || workplace == 9) {
-						shift = 2;
+						shift += 1;
 					}
 
 					if (overtime > (SHIFT_TIME_MINS * 0.5)) {
@@ -256,7 +269,8 @@ public class ProductionService {
 					// Check wether if more than 3 shifts would be needed for
 					// the production
 					if (shift > 3) {
-						// TODO: production is not possible
+						throw new InsufficientCapacityException(
+								workplace.toString(), shift, overtime);
 					}
 
 				}
@@ -270,6 +284,10 @@ public class ProductionService {
 						Integer.parseInt(overtimeFormat.format(overtimePerDay)));
 
 				capacities.add(capacity);
+
+			} catch (InsufficientCapacityException e) {
+
+				throw e;
 
 			} catch (Exception e) {
 				e.printStackTrace();
